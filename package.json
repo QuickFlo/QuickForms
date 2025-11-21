@@ -11,8 +11,8 @@
     "lint": "pnpm -r run lint",
     "typecheck": "pnpm -r run typecheck",
     "prepublish": "pnpm run build && pnpm run typecheck",
-    "publish:core": "cd packages/core && npm publish --access public",
-    "publish:vue": "cd packages/vue && npm publish --access public",
+    "publish:core": "cd packages/core && npm publish --access public --registry=https://registry.npmjs.org/ --@quickflo:registry=https://registry.npmjs.org/",
+    "publish:vue": "cd packages/vue && npm publish --access public --registry=https://registry.npmjs.org/ --@quickflo:registry=https://registry.npmjs.org/",
     "publish:all": "pnpm run prepublish && pnpm run publish:core && pnpm run publish:vue"
   },
   "keywords": [
