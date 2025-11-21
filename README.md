@@ -242,6 +242,64 @@ const handleValidation = (result: { valid: boolean; errors: Record<string, strin
 </template>
 ```
 
+#### Required Fields
+
+Fields are marked as required using the `required` array in the parent object schema:
+
+```typescript
+const schema: JSONSchema = {
+  type: 'object',
+  properties: {
+    name: { type: 'string', title: 'Name' },
+    email: { type: 'string', format: 'email', title: 'Email' },
+    age: { type: 'number', title: 'Age' }
+  },
+  required: ['name', 'email']  // name and email are required, age is optional
+};
+```
+
+**Visual indicators:**
+- Required fields display an asterisk (`*`) next to the label
+- Attempting to submit with missing required fields shows validation errors
+- With `ValidateAndShow` mode, errors appear as you type
+- With `ValidateAndHide` mode, errors are suppressed until form submission
+
+#### Form Submission
+
+QuickForms prevents invalid form submission based on:
+1. **Required fields** - All fields in the `required` array must have values
+2. **Format validation** - Fields with `format` (e.g., `email`, `url`, `date`) must match the expected format
+3. **Constraint validation** - Fields must satisfy constraints like `minLength`, `maxLength`, `minimum`, `maximum`, `pattern`, etc.
+4. **Custom validators** - Any custom validators defined in `options.validators` must pass
+
+```vue
+<script setup lang="ts">
+const formData = ref({});
+
+const handleSubmit = (data: any) => {
+  // This only fires if validation passes
+  console.log('Valid data:', data);
+  // Make API call, navigate, etc.
+};
+</script>
+
+<template>
+  <DynamicForm
+    :schema="schema"
+    v-model="formData"
+    @submit="handleSubmit"
+  />
+  <!-- DynamicForm includes a submit button by default -->
+</template>
+```
+
+**Submission behavior:**
+- **`ValidateAndShow`** mode: Submit button is always enabled, clicking shows all validation errors if invalid
+- **`ValidateAndHide`** mode: Submit button is always enabled, but submission is blocked if invalid (no errors shown)
+- **`NoValidation`** mode: Submit always succeeds, no validation performed
+- The `@submit` event only fires when the form is valid (or validation is disabled)
+- You can disable the default submit button and handle submission programmatically using the validation events
+
 ### Complex Types
 
 #### Nested Objects
@@ -825,13 +883,58 @@ The project is structured as a monorepo:
 
 - **`@quickflo/quickforms`**: Framework-agnostic logic (validation, schema utils, registry). Can be used to build bindings for React, Angular, etc.
 - **`@quickflo/quickforms-vue`**: Vue 3 bindings using Composition API and VeeValidate.
-- **`@quickflo/forms-quasar`** *(Coming Soon)*: Pre-configured bindings for Quasar framework.
+- **`@quickflo/forms-quasar`**: Pre-configured bindings for Quasar framework.
 
 ## Supported JSON Schema Features
 
 ### Types
 - `string`, `number`, `integer`, `boolean`, `object`, `array`, `null`
-- All string formats: `email`, `url`, `uri`, `date`, `time`, `date-time`, `password`, `textarea`
+
+### String Formats
+
+QuickForms supports both standard JSON Schema formats and custom format extensions for better UI rendering:
+
+#### Standard JSON Schema Formats (with validation)
+- **`email`** - Renders email input, validates email format (RFC 5321)
+- **`url`** / **`uri`** - Renders URL input, validates URI format (RFC 3986)
+- **`date`** - Renders date picker, validates ISO 8601 date (YYYY-MM-DD)
+- **`time`** - Renders time picker, validates ISO 8601 time (HH:mm:ss or HH:mm:ss.sss)
+- **`date-time`** - Renders date+time picker, validates ISO 8601 datetime
+
+#### Custom Format Extensions (UI hints only, no validation)
+- **`password`** - Renders password input with show/hide toggle
+- **`textarea`** - Renders multi-line textarea instead of single-line input
+
+**Note**: The `password` and `textarea` formats are UI hints only and do not perform any validation. They always pass validation regardless of content. Fields with `maxLength > 200` automatically render as textareas.
+
+**Example**:
+```typescript
+const schema: JSONSchema = {
+  type: 'object',
+  properties: {
+    email: {
+      type: 'string',
+      format: 'email',  // Validates email format
+      title: 'Email Address'
+    },
+    website: {
+      type: 'string',
+      format: 'url',  // Validates URL format
+      title: 'Website'
+    },
+    password: {
+      type: 'string',
+      format: 'password',  // UI hint only - shows password field with toggle
+      minLength: 8  // Validation still works via other keywords
+    },
+    bio: {
+      type: 'string',
+      format: 'textarea',  // UI hint only - shows multi-line textarea
+      maxLength: 500
+    }
+  }
+};
+```
 
 ### Validation Keywords
 - **String**: `minLength`, `maxLength`, `pattern`, `format`
@@ -991,9 +1094,9 @@ Use `"none"` or `false` to hide labels entirely.
 - [x] Phase 4: Complex Types (Nested Objects, Arrays, OneOf/AnyOf/AllOf)
 - [x] Phase 5: Validation System (Modes, Custom Messages, Events)
 - [x] Phase 6: Role-Based Access Control
-- [ ] Phase 7: UI Schema Support (Layouts, Rules)
-- [ ] Phase 8: i18n/Localization
-- [ ] Phase 9: Quasar Support
+- [ ] Phase 7: i18n/Localization
+- [ ] Phase 8: Quasar Support
+- [ ] Phase 9: UI Schema Support (Layouts, Rules)
 
 ## FAQ
 

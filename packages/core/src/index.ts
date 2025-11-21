@@ -24,6 +24,7 @@ export {
   isArrayType,
   isNullType,
   isEnumType,
+  hasConst,
   hasFormat,
   isEmailFormat,
   isDateFormat,

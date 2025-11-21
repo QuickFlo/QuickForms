@@ -16,6 +16,10 @@ export class SchemaUtils {
       validateFormats: true
     });
     addFormats(this.ajv);
+    
+    // Add custom formats commonly used as UI hints (always valid, no validation)
+    this.ajv.addFormat('textarea', () => true);
+    this.ajv.addFormat('password', () => true);
   }
 
   /**
