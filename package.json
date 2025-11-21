@@ -11,9 +11,9 @@
     "lint": "pnpm -r run lint",
     "typecheck": "pnpm -r run typecheck",
     "prepublish": "pnpm run build",
-    "publish:core": "cd packages/core && npm publish --access public --registry=https://registry.npmjs.org/ --@quickflo:registry=https://registry.npmjs.org/",
-    "publish:vue": "cd packages/vue && npm publish --access public --registry=https://registry.npmjs.org/ --@quickflo:registry=https://registry.npmjs.org/",
-    "publish:quasar": "cd packages/quasar && npm publish --access public --registry=https://registry.npmjs.org/ --@quickflo:registry=https://registry.npmjs.org/",
+    "publish:core": "cd packages/core && pnpm publish --access public --no-git-checks",
+    "publish:vue": "cd packages/vue && pnpm publish --access public --no-git-checks",
+    "publish:quasar": "cd packages/quasar && pnpm publish --access public --no-git-checks",
     "publish:all": "pnpm run prepublish && pnpm run publish:core && pnpm run publish:vue && pnpm run publish:quasar"
   },
   "keywords": [
@@ -30,5 +30,10 @@
     "@types/node": "^20.0.0",
     "typescript": "^5.3.0",
     "vitest": "^1.0.0"
+  },
+  "dependencies": {
+    "@quickflo/quickforms": "^0.3.0",
+    "@quickflo/quickforms-quasar": "^0.3.0",
+    "@quickflo/quickforms-vue": "^0.3.0"
   }
 }
