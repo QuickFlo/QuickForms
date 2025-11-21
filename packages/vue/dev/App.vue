@@ -3,7 +3,8 @@ import { ref, shallowRef, computed } from "vue";
 import DynamicForm from "../src/components/DynamicForm.vue";
 import CustomRegistryExample from "./CustomRegistryExample.vue";
 import ThemeExample from "./ThemeExample.vue";
-import type { JSONSchema } from "@quickflo/forms-core";
+import WorkflowsTheme from "./WorkflowsTheme.vue";
+import type { JSONSchema } from "@quickflo/quickforms";
 
 const currentView = ref("default");
 
@@ -456,9 +457,23 @@ const handleSubmit = (data: any) => {
       >
         Theme Example
       </button>
+      <button
+        @click="currentView = 'workflows'"
+        :style="{
+          opacity: currentView === 'workflows' ? 1 : 0.5,
+          cursor: 'pointer',
+          padding: '0.5rem 1rem',
+          border: '1px solid #d1d5db',
+          background: 'white',
+          borderRadius: '0.25rem',
+        }"
+      >
+        Workflows Theme
+      </button>
     </div>
     <CustomRegistryExample v-if="currentView === 'custom'" />
     <ThemeExample v-if="currentView === 'theme'" />
+    <WorkflowsTheme v-if="currentView === 'workflows'" />
   </div>
 
   <div v-else style="max-width: 1400px; margin: 0 auto; padding: 2rem">
@@ -500,6 +515,18 @@ const handleSubmit = (data: any) => {
           "
         >
           View Theme Demo
+        </button>
+        <button
+          @click="currentView = 'workflows'"
+          style="
+            padding: 0.5rem 1rem;
+            background: white;
+            border: 1px solid #d1d5db;
+            border-radius: 0.25rem;
+            cursor: pointer;
+          "
+        >
+          View Workflows Theme
         </button>
       </div>
     </div>

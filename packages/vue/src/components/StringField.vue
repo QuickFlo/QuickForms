@@ -11,9 +11,9 @@ const props = withDefaults(defineProps<FieldProps>(), {
 });
 
 const formContext = useFormContext();
-const validationMode = formContext?.validationMode || 'ValidateAndShow';
+const validationMode = formContext?.validationMode || "ValidateAndShow";
 
-const { value, errorMessage, label, hint } = useFormField(
+const { value, errorMessage, label, hint, hintMode } = useFormField(
   props.path,
   props.schema,
   { label: props.label }
@@ -21,6 +21,8 @@ const { value, errorMessage, label, hint } = useFormField(
 
 const fieldId = generateFieldId(props.path);
 const showPassword = ref(false);
+const isFocused = ref(false);
+const isHovered = ref(false);
 
 const isPassword = computed(() => props.schema.format === "password");
 
@@ -46,6 +48,15 @@ const isTextarea = computed(() => {
 const togglePasswordVisibility = () => {
   showPassword.value = !showPassword.value;
 };
+
+// Determine if hint should be shown based on mode
+const showHint = computed(() => {
+  if (!hint.value || errorMessage.value) return false;
+  if (hintMode.value === "always") return true;
+  if (hintMode.value === "focus") return isFocused.value;
+  if (hintMode.value === "hover") return isHovered.value;
+  return true;
+});
 </script>
 
 <template>
@@ -63,10 +74,18 @@ const togglePasswordVisibility = () => {
       :disabled="disabled"
       :readonly="readonly"
       :placeholder="hint"
-      :minlength="validationMode !== 'NoValidation' ? schema.minLength : undefined"
-      :maxlength="validationMode !== 'NoValidation' ? schema.maxLength : undefined"
+      :minlength="
+        validationMode !== 'NoValidation' ? schema.minLength : undefined
+      "
+      :maxlength="
+        validationMode !== 'NoValidation' ? schema.maxLength : undefined
+      "
       :aria-describedby="hint ? `${fieldId}-hint` : undefined"
       :aria-invalid="!!errorMessage"
+      @focus="isFocused = true"
+      @blur="isFocused = false"
+      @mouseenter="isHovered = true"
+      @mouseleave="isHovered = false"
     />
 
     <div v-else class="quickform-input-wrapper">
@@ -79,17 +98,31 @@ const togglePasswordVisibility = () => {
         :disabled="disabled"
         :readonly="readonly"
         :placeholder="hint"
-        :minlength="validationMode !== 'NoValidation' ? schema.minLength : undefined"
-        :maxlength="validationMode !== 'NoValidation' ? schema.maxLength : undefined"
-        :pattern="validationMode !== 'NoValidation' ? schema.pattern : undefined"
+        :minlength="
+          validationMode !== 'NoValidation' ? schema.minLength : undefined
+        "
+        :maxlength="
+          validationMode !== 'NoValidation' ? schema.maxLength : undefined
+        "
+        :pattern="
+          validationMode !== 'NoValidation' ? schema.pattern : undefined
+        "
         :aria-describedby="hint ? `${fieldId}-hint` : undefined"
         :aria-invalid="!!errorMessage"
+        @focus="isFocused = true"
+        @blur="isFocused = false"
+        @mouseenter="isHovered = true"
+        @mouseleave="isHovered = false"
       />
       <button
         v-if="isPassword"
         type="button"
         class="quickform-password-toggle"
-        :aria-label="showPassword ? 'Hide password' : 'Show password'"
+        :aria-label="
+          showPassword
+            ? formContext?.labels.hidePassword
+            : formContext?.labels.showPassword
+        "
         @click="togglePasswordVisibility"
       >
         <svg
@@ -127,12 +160,8 @@ const togglePasswordVisibility = () => {
       </button>
     </div>
 
-    <div
-      v-if="hint && !errorMessage"
-      :id="`${fieldId}-hint`"
-      class="quickform-hint"
-    >
-      {{ hint }}
+    <div v-if="showHint" :id="`${fieldId}-hint`" class="quickform-hint">
+      <span v-html="hint"></span>
     </div>
 
     <div v-if="errorMessage" class="quickform-error">

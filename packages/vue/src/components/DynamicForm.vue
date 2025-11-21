@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { computed, watch, reactive, markRaw, toRaw } from "vue";
 import { useForm } from "vee-validate";
-import { SchemaUtils } from "@quickflo/forms-core";
-import type { JSONSchema } from "@quickflo/forms-core";
+import { SchemaUtils } from "@quickflo/quickforms";
+import type { JSONSchema } from "@quickflo/quickforms";
 import { provideFormContext } from "../composables/useFormContext.js";
 import type { FormOptions } from "../types/index.js";
 import { createDefaultRegistry } from "../registry.js";
@@ -38,6 +38,32 @@ const { handleSubmit, values, setValues, errors, meta } = useForm({
       : props.modelValue,
 });
 
+// Default labels for i18n
+const defaultLabels = {
+  selectPlaceholder: 'Select an option...',
+  addItem: 'Add item',
+  removeItem: 'Remove',
+  submit: 'Submit',
+  showPassword: 'Show password',
+  hidePassword: 'Hide password',
+};
+
+// Default component configurations
+const defaultComponentDefaults = {
+  select: {
+    autocomplete: false,
+    autocompleteThreshold: 5,
+  },
+  array: {
+    collapsible: false,
+    defaultCollapsed: false,
+  },
+  number: {},
+  hints: {
+    showMode: 'always' as const,
+  },
+};
+
 // Provide form context to children
 // Use reactive to ensure updates propagate
 const formContext = reactive({
@@ -51,7 +77,15 @@ const formContext = reactive({
   errorMessages: props.options.errorMessages,
   validators: props.options.validators,
   validatorDebounce: props.options.validatorDebounce,
-  formValues: () => toRaw(values)
+  formValues: () => toRaw(values),
+  labels: { ...defaultLabels, ...props.options.labels },
+  componentDefaults: {
+    select: { ...defaultComponentDefaults.select, ...props.options.componentDefaults?.select },
+    array: { ...defaultComponentDefaults.array, ...props.options.componentDefaults?.array },
+    number: { ...defaultComponentDefaults.number, ...props.options.componentDefaults?.number },
+    hints: { ...defaultComponentDefaults.hints, ...props.options.componentDefaults?.hints },
+  },
+  hintRenderer: props.options.hintRenderer,
 });
 
 provideFormContext(formContext as any);

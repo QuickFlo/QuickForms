@@ -41,21 +41,24 @@ Unlike other form generators like JSONForms, QuickForms prioritizes **developer 
 ### Field Types & Complex Schemas
 - **📝 Basic Types**: String (text, email, password, url, textarea), Number, Integer, Boolean, Date, Time, DateTime
 - **🗂 Complex Types**: Nested Objects, Arrays with dynamic labels, oneOf/anyOf/allOf
-- **📋 Enums**: Dropdown select with custom options
+- **📋 Enums**: Dropdown select with custom labels and autocomplete support
 - **🎯 Conditional Logic**: oneOf schemas with type selection
-- **🏷 Array Labels**: Custom item labels with template interpolation (`x-item-label`)
+- **🏷 Custom Labels**: Array item labels (`x-item-label`) and enum option labels (`x-enum-labels`)
+- **🔍 Autocomplete**: Built-in datalist support for enum fields with many options
 
 ### Advanced Features
 - **🔐 Role-Based Access Control**: Show/hide/disable fields based on user roles (`x-roles`, `x-hidden`)
 - **🎭 Dynamic Schema Switching**: React to schema changes on the fly
 - **⚙️ Default Values**: Auto-populate forms from schema defaults
 - **🎨 Custom Components**: Full control over field rendering
+- **🌐 Internationalization**: Customizable labels for all UI text
+- **🔧 Component Defaults**: Global configuration for component behavior
 
 ## 📦 Installation
 
 ```bash
 # Install core and vue package
-pnpm add @quickflo/forms-core @quickflo/forms-vue
+pnpm add @quickflo/quickforms @quickflo/quickforms-vue
 
 # Peer dependencies
 pnpm add vue vee-validate
@@ -68,8 +71,8 @@ pnpm add vue vee-validate
 ```vue
 <script setup lang="ts">
 import { ref } from 'vue';
-import { DynamicForm } from '@quickflo/forms-vue';
-import type { JSONSchema } from '@quickflo/forms-core';
+import { DynamicForm } from '@quickflo/quickforms-vue';
+import type { JSONSchema } from '@quickflo/quickforms';
 
 const schema: JSONSchema = {
   type: 'object',
@@ -275,6 +278,71 @@ const schema: JSONSchema = {
 
 Set to `"none"` or `false` to hide labels entirely.
 
+#### Enum Fields with Custom Labels
+
+Use `x-enum-labels` to provide custom display text for enum options while keeping the underlying value:
+
+```typescript
+const schema: JSONSchema = {
+  type: 'object',
+  properties: {
+    status: {
+      type: 'string',
+      enum: ['draft', 'active', 'paused', 'archived'],
+      title: 'Status',
+      // Custom display labels (value -> label mapping)
+      'x-enum-labels': {
+        'draft': '📝 Draft',
+        'active': '✅ Active',
+        'paused': '⏸️ Paused',
+        'archived': '📦 Archived'
+      }
+    },
+    httpMethod: {
+      type: 'string',
+      enum: ['GET', 'POST', 'PUT', 'DELETE'],
+      title: 'HTTP Method',
+      'x-enum-labels': {
+        'GET': 'GET - Retrieve data',
+        'POST': 'POST - Create resource',
+        'PUT': 'PUT - Update resource',
+        'DELETE': 'DELETE - Remove resource'
+      }
+    }
+  }
+};
+```
+
+#### Enum Autocomplete
+
+For enum fields with many options, enable autocomplete using HTML5 datalist:
+
+```typescript
+// Option 1: Enable for a specific field
+const schema: JSONSchema = {
+  type: 'object',
+  properties: {
+    country: {
+      type: 'string',
+      enum: ['US', 'CA', 'UK', 'FR', /* ...100 countries */],
+      'x-component-props': {
+        autocomplete: true  // Enable datalist for this field
+      }
+    }
+  }
+};
+
+// Option 2: Enable globally with threshold
+const options = {
+  componentDefaults: {
+    select: {
+      autocomplete: false,
+      autocompleteThreshold: 5  // Auto-enable for 5+ options
+    }
+  }
+};
+```
+
 #### Conditional Schemas (oneOf)
 
 ```typescript
@@ -440,6 +508,88 @@ validatorDebounce: {
 }
 ```
 
+### Internationalization & Customization
+
+#### Customizable Labels
+
+Customize all UI text for internationalization or branding:
+
+```vue
+<script setup lang="ts">
+const spanishLabels = {
+  selectPlaceholder: 'Seleccionar una opción...',
+  addItem: 'Agregar elemento',
+  removeItem: 'Eliminar',
+  submit: 'Enviar',
+  showPassword: 'Mostrar contraseña',
+  hidePassword: 'Ocultar contraseña'
+};
+</script>
+
+<template>
+  <DynamicForm
+    :schema="schema"
+    v-model="formData"
+    :options="{ labels: spanishLabels }"
+  />
+</template>
+```
+
+**Available Labels:**
+
+```typescript
+interface FormLabels {
+  selectPlaceholder?: string;  // Default: "Select an option..."
+  addItem?: string;            // Default: "Add item"
+  removeItem?: string;         // Default: "Remove"
+  submit?: string;             // Default: "Submit"
+  showPassword?: string;       // Default: "Show password"
+  hidePassword?: string;       // Default: "Hide password"
+}
+```
+
+#### Component Defaults
+
+Configure default behavior for all components of a given type:
+
+```typescript
+const options = {
+  componentDefaults: {
+    select: {
+      autocomplete: true,           // Enable autocomplete for all selects
+      autocompleteThreshold: 10     // Or only when 10+ options
+    },
+    array: {
+      collapsible: true,            // Allow collapsing array items
+      defaultCollapsed: false       // Start expanded
+    },
+    number: {
+      prefix: '$',                  // Prefix for number display
+      suffix: '%'                   // Suffix for number display
+    }
+  }
+};
+```
+
+**Field-Level Overrides:**
+
+Use `x-component-props` in schema to override component defaults for specific fields:
+
+```typescript
+const schema: JSONSchema = {
+  type: 'object',
+  properties: {
+    country: {
+      type: 'string',
+      enum: ['US', 'CA', 'UK', /* ...many options */],
+      'x-component-props': {
+        autocomplete: true  // Override for this field only
+      }
+    }
+  }
+};
+```
+
 ### Role-Based Access Control
 
 Control field visibility and editability based on user roles:
@@ -492,7 +642,7 @@ const schema: JSONSchema = {
 QuickForms allows you to register your own components for specific fields using a powerful "tester" system.
 
 ```typescript
-import { createDefaultRegistry, rankWith, isStringType, and, hasFormat } from '@quickflo/forms-vue';
+import { createDefaultRegistry, rankWith, isStringType, and, hasFormat } from '@quickflo/quickforms-vue';
 import MyCustomPhoneInput from './MyCustomPhoneInput.vue';
 
 // 1. Create a registry (start with defaults)
@@ -514,7 +664,7 @@ Custom components receive standard props:
 
 ```vue
 <script setup lang="ts">
-import { useFormField } from '@quickflo/forms-vue';
+import { useFormField } from '@quickflo/quickforms-vue';
 
 const props = defineProps<{
   schema: JSONSchema;
@@ -596,6 +746,36 @@ interface FormOptions {
   
   /** Custom component registry */
   registry?: ComponentRegistry;
+  
+  /** Customizable labels for i18n or branding */
+  labels?: FormLabels;
+  
+  /** Component-specific default configurations */
+  componentDefaults?: ComponentDefaults;
+}
+
+interface FormLabels {
+  selectPlaceholder?: string;  // Default: "Select an option..."
+  addItem?: string;            // Default: "Add item"
+  removeItem?: string;         // Default: "Remove"
+  submit?: string;             // Default: "Submit"
+  showPassword?: string;       // Default: "Show password"
+  hidePassword?: string;       // Default: "Hide password"
+}
+
+interface ComponentDefaults {
+  select?: {
+    autocomplete?: boolean;           // Default: false
+    autocompleteThreshold?: number;   // Default: 5
+  };
+  array?: {
+    collapsible?: boolean;            // Default: false
+    defaultCollapsed?: boolean;       // Default: false
+  };
+  number?: {
+    prefix?: string;                  // Default: undefined
+    suffix?: string;                  // Default: undefined
+  };
 }
 
 type ValidatorFunction = (
@@ -609,8 +789,8 @@ type ValidatorFunction = (
 
 The project is structured as a monorepo:
 
-- **`@quickflo/forms-core`**: Framework-agnostic logic (validation, schema utils, registry). Can be used to build bindings for React, Angular, etc.
-- **`@quickflo/forms-vue`**: Vue 3 bindings using Composition API and VeeValidate.
+- **`@quickflo/quickforms`**: Framework-agnostic logic (validation, schema utils, registry). Can be used to build bindings for React, Angular, etc.
+- **`@quickflo/quickforms-vue`**: Vue 3 bindings using Composition API and VeeValidate.
 - **`@quickflo/forms-quasar`** *(Coming Soon)*: Pre-configured bindings for Quasar framework.
 
 ## 🎓 Supported JSON Schema Features
@@ -634,8 +814,10 @@ The project is structured as a monorepo:
 ### Custom Extensions
 - `x-hidden` - Hide field completely
 - `x-roles` - Role-based visibility and permissions
-- `x-item-label` - Custom array item labels
+- `x-item-label` - Custom array item labels with template interpolation
+- `x-enum-labels` - Custom display labels for enum options
 - `x-error-messages` - Custom validation messages
+- `x-component-props` - Override component-specific settings per field
 
 ## 🛣 Roadmap
 
@@ -664,10 +846,6 @@ A: QuickForms focuses on modern architecture (Vue 3 Composition API, framework-a
 
 A: The core is framework-agnostic. Vue bindings are production-ready. React/Angular bindings can be built using the same core.
 
-**Q: Does it support async validation?**
-
-A: Not yet, but it's on the roadmap. You can work around it by using form-level validation in the `@submit` handler.
-
 **Q: Can I use custom components?**
 
 A: Yes! See the "Custom Components" section above. The tester system gives you full control over component selection.
@@ -678,8 +856,8 @@ Contributions are welcome! Please read our contributing guidelines and submit PR
 
 ## 📦 Packages
 
-- **[@quickflo/forms-core](./packages/core)** - Framework-agnostic core
-- **[@quickflo/forms-vue](./packages/vue)** - Vue 3 bindings
+- **[@quickflo/quickforms](./packages/core)** - Framework-agnostic core
+- **[@quickflo/quickforms-vue](./packages/vue)** - Vue 3 bindings
 
 ## 📄 License
 

@@ -1,4 +1,4 @@
-import type { JSONSchema } from '@quickflo/forms-core';
+import type { JSONSchema } from '@quickflo/quickforms';
 
 /**
  * Generate a field ID for accessibility
@@ -16,8 +16,14 @@ export function getLabel(schema: JSONSchema, path: string): string {
 
 /**
  * Get hint/description from schema
+ * Priority: x-hint (HTML) > description (plain text)
  */
 export function getHint(schema: JSONSchema): string | undefined {
+  // Check for x-hint extension first (supports HTML)
+  const xHint = (schema as any)['x-hint'];
+  if (xHint) return xHint;
+  
+  // Fall back to description
   return schema.description;
 }
 
