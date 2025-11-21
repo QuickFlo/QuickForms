@@ -22,6 +22,7 @@ const props = withDefaults(defineProps<Props>(), {
 const emit = defineEmits<{
   "update:modelValue": [value: Record<string, any>];
   submit: [value: Record<string, any>];
+  validation: [result: { valid: boolean; errors: Record<string, string> }];
 }>();
 
 const schemaUtils = new SchemaUtils();
@@ -44,7 +45,9 @@ const formContext = reactive({
   schema: props.schema, // Schema usually doesn't change, but if it does, we might need computed
   rootPath: "",
   registry: markRaw(registry), // markRaw prevents Vue from making components reactive
-  context: computed(() => props.options.context || {})
+  context: computed(() => props.options.context || {}),
+  validationMode: props.options.validationMode || 'ValidateAndShow',
+  errorMessages: props.options.errorMessages
 });
 
 provideFormContext(formContext as any);
@@ -67,6 +70,18 @@ watch(
     emit("update:modelValue", newValues);
   },
   { deep: true }
+);
+
+// Emit validation state changes
+watch(
+  [errors, meta],
+  ([currentErrors, currentMeta]) => {
+    emit("validation", {
+      valid: currentMeta.valid,
+      errors: currentErrors
+    });
+  },
+  { deep: true, immediate: true }
 );
 
 // Handle form submission

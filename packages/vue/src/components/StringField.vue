@@ -1,13 +1,17 @@
 <script setup lang="ts">
-import { computed, ref } from "vue";
+import { computed, ref, inject } from "vue";
 import { useFormField } from "../composables/useFormField.js";
 import { generateFieldId, getLabel, getHint } from "../composables/utils.js";
 import type { FieldProps } from "../types/index.js";
+import type { FormContext } from "../types/index.js";
 
 const props = withDefaults(defineProps<FieldProps>(), {
   disabled: false,
   readonly: false,
 });
+
+const formContext = inject<FormContext>('formContext');
+const validationMode = formContext?.validationMode || 'ValidateAndShow';
 
 const { value, errorMessage, label, hint } = useFormField(
   props.path,
@@ -59,8 +63,8 @@ const togglePasswordVisibility = () => {
       :disabled="disabled"
       :readonly="readonly"
       :placeholder="hint"
-      :minlength="schema.minLength"
-      :maxlength="schema.maxLength"
+      :minlength="validationMode !== 'NoValidation' ? schema.minLength : undefined"
+      :maxlength="validationMode !== 'NoValidation' ? schema.maxLength : undefined"
       :aria-describedby="hint ? `${fieldId}-hint` : undefined"
       :aria-invalid="!!errorMessage"
     />
@@ -75,9 +79,9 @@ const togglePasswordVisibility = () => {
         :disabled="disabled"
         :readonly="readonly"
         :placeholder="hint"
-        :minlength="schema.minLength"
-        :maxlength="schema.maxLength"
-        :pattern="schema.pattern"
+        :minlength="validationMode !== 'NoValidation' ? schema.minLength : undefined"
+        :maxlength="validationMode !== 'NoValidation' ? schema.maxLength : undefined"
+        :pattern="validationMode !== 'NoValidation' ? schema.pattern : undefined"
         :aria-describedby="hint ? `${fieldId}-hint` : undefined"
         :aria-invalid="!!errorMessage"
       />

@@ -1,13 +1,17 @@
 <script setup lang="ts">
-import { computed } from 'vue';
+import { computed, inject } from 'vue';
 import { useFormField } from '../composables/useFormField.js';
 import { generateFieldId } from '../composables/utils.js';
 import type { FieldProps } from '../types/index.js';
+import type { FormContext } from '../types/index.js';
 
 const props = withDefaults(defineProps<FieldProps>(), {
   disabled: false,
   readonly: false
 });
+
+const formContext = inject<FormContext>('formContext');
+const validationMode = formContext?.validationMode || 'ValidateAndShow';
 
 const { value, errorMessage, label, hint } = useFormField(props.path, props.schema, { label: props.label });
 const fieldId = generateFieldId(props.path);
@@ -37,9 +41,9 @@ const step = computed(() => {
       :disabled="disabled"
       :readonly="readonly"
       :placeholder="hint"
-      :min="schema.minimum ?? schema.exclusiveMinimum"
-      :max="schema.maximum ?? schema.exclusiveMaximum"
-      :step="step"
+      :min="validationMode !== 'NoValidation' ? (schema.minimum ?? schema.exclusiveMinimum) : undefined"
+      :max="validationMode !== 'NoValidation' ? (schema.maximum ?? schema.exclusiveMaximum) : undefined"
+      :step="validationMode !== 'NoValidation' ? step : undefined"
       :aria-describedby="hint ? `${fieldId}-hint` : undefined"
       :aria-invalid="!!errorMessage"
     />

@@ -96,6 +96,10 @@ const fullTestSchema: JSONSchema = {
       title: "Password",
       description: "Choose a secure password (min 8 characters)",
       minLength: 8,
+      "x-error-messages": {
+        required: "Password is required for security",
+        minLength: "Password must be at least 8 characters for your security"
+      }
     },
     website: {
       type: "string",
@@ -109,6 +113,11 @@ const fullTestSchema: JSONSchema = {
       description: "Must be 18 or older",
       minimum: 18,
       maximum: 120,
+      "x-error-messages": {
+        required: "We need to know your age",
+        minimum: "You must be at least 18 years old to use this service",
+        maximum: "Please enter a valid age"
+      }
     },
     score: {
       type: "integer",
@@ -170,6 +179,9 @@ const fullTestSchema: JSONSchema = {
           type: "string",
           title: "Zip Code",
           pattern: "^\\d{5}$",
+          "x-error-messages": {
+            pattern: "Zip code must be exactly 5 digits (e.g., 94102)"
+          }
         },
         state: {
           type: "string",
@@ -285,6 +297,7 @@ const fullTestSchema: JSONSchema = {
 };
 
 const formData = ref({});
+const validationState = ref<{ valid: boolean; errors: Record<string, string> }>({ valid: true, errors: {} });
 
 // Schema switcher for reactivity testing
 const currentSchema = ref<"simple" | "conditional" | "full">("full");
@@ -300,6 +313,9 @@ const activeSchema = computed(() => {
   }
 });
 
+// Validation mode for testing
+const validationMode = ref<'ValidateAndShow' | 'ValidateAndHide' | 'NoValidation'>('ValidateAndShow');
+
 // Role switcher for testing x-roles
 const currentRole = ref<"admin" | "user" | "guest">("user");
 
@@ -307,7 +323,23 @@ const formOptions = computed(() => ({
   context: {
     roles: [currentRole.value],
   },
+  validationMode: validationMode.value,
+  errorMessages: {
+    name: {
+      required: 'Hey! We really need your name here.',
+      minLength: 'Come on, your name is longer than that!'
+    },
+    email: {
+      required: 'Email is mandatory, friend.',
+      format: 'That doesn\'t look like a real email address.'
+    }
+  }
 }));
+
+const handleValidation = (result: { valid: boolean; errors: Record<string, string> }) => {
+  validationState.value = result;
+  console.log('Validation state:', result);
+};
 
 const handleSubmit = (data: any) => {
   console.log("✅ Form submitted successfully!", data);
@@ -461,6 +493,24 @@ const handleSubmit = (data: any) => {
           </select>
 
           <label style="font-weight: 500; display: block; margin-bottom: 0.5rem"
+            >Validation Mode</label
+          >
+          <select
+            v-model="validationMode"
+            style="
+              padding: 0.5rem;
+              border: 1px solid #d1d5db;
+              border-radius: 0.25rem;
+              width: 100%;
+              margin-bottom: 1rem;
+            "
+          >
+            <option value="ValidateAndShow">ValidateAndShow (default)</option>
+            <option value="ValidateAndHide">ValidateAndHide (silent)</option>
+            <option value="NoValidation">NoValidation (off)</option>
+          </select>
+
+          <label style="font-weight: 500; display: block; margin-bottom: 0.5rem"
             >Current Role (Test Access Control)</label
           >
           <select
@@ -483,6 +533,7 @@ const handleSubmit = (data: any) => {
           v-model="formData"
           :options="{ ...formOptions, useDefaults: true }"
           @submit="handleSubmit"
+          @validation="handleValidation"
         >
           <template #actions="{ isValid }">
             <div style="display: flex; gap: 0.5rem">
@@ -527,6 +578,34 @@ const handleSubmit = (data: any) => {
 
       <!-- Data Panel -->
       <div>
+        <div
+          v-if="Object.keys(validationState.errors).length > 0 && validationMode === 'ValidateAndShow'"
+          style="
+            background: white;
+            padding: 2rem;
+            border-radius: 0.5rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+            border-left: 4px solid #ef4444;
+          "
+        >
+          <h2
+            style="
+              margin: 0 0 1rem 0;
+              padding-bottom: 0.5rem;
+              border-bottom: 2px solid #ef4444;
+              color: #ef4444;
+            "
+          >
+            ⚠️ Validation Errors
+          </h2>
+          <ul style="margin: 0; padding-left: 1.5rem; line-height: 1.8">
+            <li v-for="(error, field) in validationState.errors" :key="field" style="color: #dc2626">
+              <strong>{{ field }}:</strong> {{ error }}
+            </li>
+          </ul>
+        </div>
+
         <div
           style="
             background: white;
@@ -590,8 +669,10 @@ const handleSubmit = (data: any) => {
             <li>✅ Time</li>
             <li>✅ Date-time</li>
             <li>✅ Required fields</li>
-            <li>✅ Field validation</li>
-            <li>✅ Error messages</li>
+            <li>✅ Field validation (minLength, maxLength, pattern, etc.)</li>
+            <li>✅ Custom error messages (x-error-messages)</li>
+            <li>✅ Validation modes (ValidateAndShow, ValidateAndHide, NoValidation)</li>
+            <li>✅ Validation events</li>
             <li>✅ Help text (descriptions)</li>
           </ul>
         </div>
