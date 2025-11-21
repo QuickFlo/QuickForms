@@ -19,6 +19,7 @@ export interface FieldProps {
   modelValue?: any;
   disabled?: boolean;
   readonly?: boolean;
+  label?: string;
 }
 
 /**
@@ -33,6 +34,12 @@ export interface FormOptions {
   useDefaults?: boolean;
   /** Custom component registry. If not provided, default registry will be used. */
   registry?: ComponentRegistry<Component>;
+  /** Application context (user, roles, etc) for field visibility logic */
+  context?: Record<string, any>;
+  /** Validation mode. Defaults to 'ValidateAndShow' */
+  validationMode?: 'ValidateAndShow' | 'ValidateAndHide' | 'NoValidation';
+  /** Custom error messages by path and rule type */
+  errorMessages?: Record<string, Record<string, string>>;
 }
 
 /**
@@ -44,4 +51,7 @@ export interface FormContext {
   schema: JSONSchema;
   rootPath: string;
   registry: ComponentRegistry<Component>;
+  context: Record<string, any>;
+  validationMode: 'ValidateAndShow' | 'ValidateAndHide' | 'NoValidation';
+  errorMessages?: Record<string, Record<string, string>>;
 }

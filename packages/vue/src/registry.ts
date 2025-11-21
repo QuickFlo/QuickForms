@@ -1,10 +1,14 @@
 import type { Component } from 'vue';
-import { ComponentRegistry, isStringType, isNumberType, isBooleanType, isEnumType, isDateFormat, rankWith } from '@quickforms/core';
+import { ComponentRegistry, isStringType, isNumberType, isBooleanType, isEnumType, isDateFormat, isObjectType, isArrayType, hasOneOf, hasAnyOf, hasAllOf, rankWith } from '@quickforms/core';
 import StringField from './components/StringField.vue';
 import NumberField from './components/NumberField.vue';
 import BooleanField from './components/BooleanField.vue';
 import EnumField from './components/EnumField.vue';
 import DateField from './components/DateField.vue';
+import ObjectField from './components/ObjectField.vue';
+import ArrayField from './components/ArrayField.vue';
+import OneOfField from './components/OneOfField.vue';
+import AllOfField from './components/AllOfField.vue';
 
 /**
  * Create a default component registry with all built-in field components
@@ -55,6 +59,31 @@ export function createDefaultRegistry(): ComponentRegistry<Component> {
   // Register date field (priority: 2, higher than string since dates use string format)
   registry.register('date', DateField, (schema) =>
     rankWith(2, isDateFormat(schema))
+  );
+
+  // Register object field (priority: 1)
+  registry.register('object', ObjectField, (schema) =>
+    rankWith(1, isObjectType(schema))
+  );
+
+  // Register array field (priority: 1)
+  registry.register('array', ArrayField, (schema) =>
+    rankWith(1, isArrayType(schema))
+  );
+
+  // Register oneOf field (priority: 10)
+  registry.register('oneOf', OneOfField, (schema) =>
+    rankWith(10, hasOneOf(schema))
+  );
+
+  // Register anyOf field (priority: 10) - reusing OneOfField for now
+  registry.register('anyOf', OneOfField, (schema) =>
+    rankWith(10, hasAnyOf(schema))
+  );
+
+  // Register allOf field (priority: 10)
+  registry.register('allOf', AllOfField, (schema) =>
+    rankWith(10, hasAllOf(schema))
   );
 
   return registry;

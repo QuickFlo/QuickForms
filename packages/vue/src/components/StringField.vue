@@ -11,7 +11,8 @@ const props = withDefaults(defineProps<FieldProps>(), {
 
 const { value, errorMessage, label, hint } = useFormField(
   props.path,
-  props.schema
+  props.schema,
+  { label: props.label }
 );
 
 const fieldId = generateFieldId(props.path);

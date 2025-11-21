@@ -1,14 +1,81 @@
 <script setup lang="ts">
-import { ref, shallowRef } from 'vue';
-import DynamicForm from '../src/components/DynamicForm.vue';
-import CustomRegistryExample from './CustomRegistryExample.vue';
-import ThemeExample from './ThemeExample.vue';
-import type { JSONSchema } from '@quickforms/core';
+import { ref, shallowRef, computed } from "vue";
+import DynamicForm from "../src/components/DynamicForm.vue";
+import CustomRegistryExample from "./CustomRegistryExample.vue";
+import ThemeExample from "./ThemeExample.vue";
+import type { JSONSchema } from "@quickforms/core";
 
-const currentView = ref('default');
+const currentView = ref("default");
 
-// Test schema with all field types
-const testSchema: JSONSchema = {
+// Simple schema for basic testing
+const simpleSchema: JSONSchema = {
+  type: "object",
+  properties: {
+    firstName: {
+      type: "string",
+      title: "First Name",
+      minLength: 2,
+    },
+    lastName: {
+      type: "string",
+      title: "Last Name",
+      minLength: 2,
+    },
+    email: {
+      type: "string",
+      format: "email",
+      title: "Email",
+    },
+    age: {
+      type: "number",
+      title: "Age",
+      minimum: 18,
+    },
+  },
+  required: ["firstName", "lastName", "email"],
+};
+
+// Conditional schema for testing oneOf switching
+const conditionalSchema: JSONSchema = {
+  type: "object",
+  properties: {
+    accountType: {
+      type: "object",
+      title: "Account Type",
+      oneOf: [
+        {
+          title: "Individual",
+          properties: {
+            type: { const: "individual" },
+            firstName: { type: "string", title: "First Name" },
+            lastName: { type: "string", title: "Last Name" },
+            ssn: { type: "string", title: "SSN", pattern: "^\\d{3}-\\d{2}-\\d{4}$" },
+          },
+          required: ["firstName", "lastName", "ssn"],
+        },
+        {
+          title: "Business",
+          properties: {
+            type: { const: "business" },
+            companyName: { type: "string", title: "Company Name" },
+            ein: { type: "string", title: "EIN", pattern: "^\\d{2}-\\d{7}$" },
+            numberOfEmployees: { type: "number", title: "Number of Employees" },
+          },
+          required: ["companyName", "ein"],
+        },
+      ],
+    },
+    contactEmail: {
+      type: "string",
+      format: "email",
+      title: "Contact Email",
+    },
+  },
+  required: ["accountType", "contactEmail"],
+};
+
+// Full test schema with all field types
+const fullTestSchema: JSONSchema = {
   type: "object",
   properties: {
     name: {
@@ -58,17 +125,17 @@ const testSchema: JSONSchema = {
       maxLength: 500,
     },
     role: {
-      type: 'string',
-      enum: ['user', 'admin', 'moderator', 'guest'],
-      title: 'Role',
-      description: 'Select your role',
-      default: 'user'
+      type: "string",
+      enum: ["user", "admin", "moderator", "guest"],
+      title: "Role",
+      description: "Select your role",
+      default: "user",
     },
     subscribe: {
-      type: 'boolean',
-      title: 'Subscribe to newsletter',
-      description: 'Receive updates and news',
-      default: true
+      type: "boolean",
+      title: "Subscribe to newsletter",
+      description: "Receive updates and news",
+      default: true,
     },
     acceptTerms: {
       type: "boolean",
@@ -85,6 +152,129 @@ const testSchema: JSONSchema = {
       format: "time",
       title: "Preferred Meeting Time",
     },
+    address: {
+      type: "object",
+      title: "Address",
+      description: "Where do you live?",
+      properties: {
+        street: {
+          type: "string",
+          title: "Street Address",
+          minLength: 5,
+        },
+        city: {
+          type: "string",
+          title: "City",
+        },
+        zip: {
+          type: "string",
+          title: "Zip Code",
+          pattern: "^\\d{5}$",
+        },
+        state: {
+          type: "string",
+          enum: ["CA", "NY", "TX", "FL", "WA", "OR"],
+          title: "State",
+        },
+      },
+      required: ["street", "city", "zip", "state"],
+    },
+    hobbies: {
+      type: "array",
+      title: "Hobbies",
+      description: "List your hobbies (min 2)",
+      "x-item-label": "none",
+      items: {
+        type: "string",
+        title: "Hobby",
+      },
+      minItems: 2,
+    },
+    workHistory: {
+      type: "array",
+      title: "Work History",
+      description: "Add your previous jobs",
+      "x-item-label": "{{company}} - {{position}}",
+      items: {
+        type: "object",
+        title: "Job Entry",
+        properties: {
+          company: { type: "string", title: "Company" },
+          position: { type: "string", title: "Position" },
+          years: { type: "number", title: "Years", minimum: 0 },
+        },
+        required: ["company", "position"],
+      },
+    },
+    paymentMethod: {
+      type: "object",
+      title: "Payment Method",
+      oneOf: [
+        {
+          title: "Credit Card",
+          properties: {
+            type: { const: "credit_card" },
+            cardNumber: {
+              type: "string",
+              title: "Card Number",
+              pattern: "^\\d{16}$",
+            },
+            expiry: {
+              type: "string",
+              title: "Expiry Date",
+              placeholder: "MM/YY",
+            },
+            cvv: { type: "string", title: "CVV", pattern: "^\\d{3}$" },
+          },
+          required: ["cardNumber", "expiry", "cvv"],
+        },
+        {
+          title: "PayPal",
+          properties: {
+            type: { const: "paypal" },
+            email: { type: "string", format: "email", title: "PayPal Email" },
+          },
+          required: ["email"],
+        },
+        {
+          title: "Bank Transfer",
+          properties: {
+            type: { const: "bank_transfer" },
+            accountNumber: { type: "string", title: "Account Number" },
+            routingNumber: { type: "string", title: "Routing Number" },
+          },
+          required: ["accountNumber", "routingNumber"],
+        },
+      ],
+    },
+    systemId: {
+      type: "string",
+      title: "System ID",
+      description: "Hidden system field",
+      "x-hidden": true,
+      default: "SYS-12345",
+    },
+    adminOnlyField: {
+      type: "string",
+      title: "Admin Only Field",
+      description: "Only visible to admins",
+      "x-roles": {
+        admin: ["view", "edit"],
+        user: [],
+        guest: [],
+      },
+    },
+    readOnlyForUsers: {
+      type: "string",
+      title: "Read-Only for Users",
+      description: "Admins can edit, users can view, guests cannot see",
+      default: "Editable by admin only",
+      "x-roles": {
+        admin: ["view", "edit"],
+        user: ["view"],
+        guest: [],
+      },
+    },
     appointmentDateTime: {
       type: "string",
       format: "date-time",
@@ -96,6 +286,29 @@ const testSchema: JSONSchema = {
 
 const formData = ref({});
 
+// Schema switcher for reactivity testing
+const currentSchema = ref<"simple" | "conditional" | "full">("full");
+
+const activeSchema = computed(() => {
+  switch (currentSchema.value) {
+    case "simple":
+      return simpleSchema;
+    case "conditional":
+      return conditionalSchema;
+    case "full":
+      return fullTestSchema;
+  }
+});
+
+// Role switcher for testing x-roles
+const currentRole = ref<"admin" | "user" | "guest">("user");
+
+const formOptions = computed(() => ({
+  context: {
+    roles: [currentRole.value],
+  },
+}));
+
 const handleSubmit = (data: any) => {
   console.log("✅ Form submitted successfully!", data);
   alert("Form submitted! Check console for data.");
@@ -104,28 +317,104 @@ const handleSubmit = (data: any) => {
 
 <template>
   <div v-if="currentView !== 'default'">
-    <div style="padding: 1rem; background: #fff; border-bottom: 1px solid #e5e7eb; display: flex; gap: 1rem; justify-content: center;">
-      <button @click="currentView = 'default'" style="padding: 0.5rem 1rem; background: #3b82f6; color: white; border: none; border-radius: 0.25rem; cursor: pointer;">Back to Main Test</button>
-      <button @click="currentView = 'custom'" :style="{ opacity: currentView === 'custom' ? 1 : 0.5, cursor: 'pointer', padding: '0.5rem 1rem', border: '1px solid #d1d5db', background: 'white', borderRadius: '0.25rem' }">Custom Registry</button>
-      <button @click="currentView = 'theme'" :style="{ opacity: currentView === 'theme' ? 1 : 0.5, cursor: 'pointer', padding: '0.5rem 1rem', border: '1px solid #d1d5db', background: 'white', borderRadius: '0.25rem' }">Theme Example</button>
+    <div
+      style="
+        padding: 1rem;
+        background: #fff;
+        border-bottom: 1px solid #e5e7eb;
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+      "
+    >
+      <button
+        @click="currentView = 'default'"
+        style="
+          padding: 0.5rem 1rem;
+          background: #3b82f6;
+          color: white;
+          border: none;
+          border-radius: 0.25rem;
+          cursor: pointer;
+        "
+      >
+        Back to Main Test
+      </button>
+      <button
+        @click="currentView = 'custom'"
+        :style="{
+          opacity: currentView === 'custom' ? 1 : 0.5,
+          cursor: 'pointer',
+          padding: '0.5rem 1rem',
+          border: '1px solid #d1d5db',
+          background: 'white',
+          borderRadius: '0.25rem',
+        }"
+      >
+        Custom Registry
+      </button>
+      <button
+        @click="currentView = 'theme'"
+        :style="{
+          opacity: currentView === 'theme' ? 1 : 0.5,
+          cursor: 'pointer',
+          padding: '0.5rem 1rem',
+          border: '1px solid #d1d5db',
+          background: 'white',
+          borderRadius: '0.25rem',
+        }"
+      >
+        Theme Example
+      </button>
     </div>
     <CustomRegistryExample v-if="currentView === 'custom'" />
     <ThemeExample v-if="currentView === 'theme'" />
   </div>
 
-  <div v-else style="max-width: 1400px; margin: 0 auto; padding: 2rem;">
-    <div style="margin-bottom: 2rem; display: flex; justify-content: space-between; align-items: center;">
+  <div v-else style="max-width: 1400px; margin: 0 auto; padding: 2rem">
+    <div
+      style="
+        margin-bottom: 2rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      "
+    >
       <div>
-        <h1 style="margin-bottom: 0.5rem;">🚀 QuickForms Vue - Development Test</h1>
-        <p style="color: #6b7280;">Testing all field types with validation</p>
+        <h1 style="margin-bottom: 0.5rem">
+          🚀 QuickForms Vue - Development Test
+        </h1>
+        <p style="color: #6b7280">Testing all field types with validation</p>
       </div>
-      <div style="display: flex; gap: 1rem;">
-        <button @click="currentView = 'custom'" style="padding: 0.5rem 1rem; background: white; border: 1px solid #d1d5db; border-radius: 0.25rem; cursor: pointer;">View Custom Registry Demo</button>
-        <button @click="currentView = 'theme'" style="padding: 0.5rem 1rem; background: white; border: 1px solid #d1d5db; border-radius: 0.25rem; cursor: pointer;">View Theme Demo</button>
+      <div style="display: flex; gap: 1rem">
+        <button
+          @click="currentView = 'custom'"
+          style="
+            padding: 0.5rem 1rem;
+            background: white;
+            border: 1px solid #d1d5db;
+            border-radius: 0.25rem;
+            cursor: pointer;
+          "
+        >
+          View Custom Registry Demo
+        </button>
+        <button
+          @click="currentView = 'theme'"
+          style="
+            padding: 0.5rem 1rem;
+            background: white;
+            border: 1px solid #d1d5db;
+            border-radius: 0.25rem;
+            cursor: pointer;
+          "
+        >
+          View Theme Demo
+        </button>
       </div>
     </div>
 
-    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem">
       <!-- Form Panel -->
       <div
         style="
@@ -145,10 +434,54 @@ const handleSubmit = (data: any) => {
           Form
         </h2>
 
+        <div
+          style="
+            margin-bottom: 1.5rem;
+            padding: 1rem;
+            background: #f3f4f6;
+            border-radius: 0.375rem;
+          "
+        >
+          <label style="font-weight: 500; display: block; margin-bottom: 0.5rem"
+            >Active Schema (Test Reactivity)</label
+          >
+          <select
+            v-model="currentSchema"
+            style="
+              padding: 0.5rem;
+              border: 1px solid #d1d5db;
+              border-radius: 0.25rem;
+              width: 100%;
+              margin-bottom: 1rem;
+            "
+          >
+            <option value="simple">Simple (4 fields)</option>
+            <option value="conditional">Conditional (oneOf testing)</option>
+            <option value="full">Full (All features)</option>
+          </select>
+
+          <label style="font-weight: 500; display: block; margin-bottom: 0.5rem"
+            >Current Role (Test Access Control)</label
+          >
+          <select
+            v-model="currentRole"
+            style="
+              padding: 0.5rem;
+              border: 1px solid #d1d5db;
+              border-radius: 0.25rem;
+              width: 100%;
+            "
+          >
+            <option value="admin">Admin (See all, Edit all)</option>
+            <option value="user">User (Limited view, Limited edit)</option>
+            <option value="guest">Guest (No access)</option>
+          </select>
+        </div>
+
         <DynamicForm
-          :schema="testSchema"
+          :schema="activeSchema"
           v-model="formData"
-          :options="{ useDefaults: true }"
+          :options="{ ...formOptions, useDefaults: true }"
           @submit="handleSubmit"
         >
           <template #actions="{ isValid }">

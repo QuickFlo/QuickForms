@@ -8,7 +8,7 @@ const props = withDefaults(defineProps<FieldProps>(), {
   readonly: false
 });
 
-const { value, errorMessage, label, hint } = useFormField(props.path, props.schema);
+const { value, errorMessage, label, hint } = useFormField(props.path, props.schema, { label: props.label });
 const fieldId = generateFieldId(props.path);
 </script>
 

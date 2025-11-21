@@ -5,7 +5,11 @@ import type { JSONSchema } from '@quickforms/core';
 /**
  * Composable for individual form field with VeeValidate integration
  */
-export function useFormField(path: string, schema: JSONSchema) {
+export function useFormField(
+  path: string, 
+  schema: JSONSchema,
+  options: { label?: string } = {}
+) {
   const {
     value,
     errorMessage,
@@ -17,8 +21,11 @@ export function useFormField(path: string, schema: JSONSchema) {
     validateOnValueUpdate: true
   });
 
-  // Computed label from schema
-  const label = computed(() => schema.title || path);
+  // Computed label from override or schema
+  const label = computed(() => {
+    if (options.label !== undefined) return options.label;
+    return schema.title || path;
+  });
 
   // Computed hint from schema
   const hint = computed(() => schema.description);

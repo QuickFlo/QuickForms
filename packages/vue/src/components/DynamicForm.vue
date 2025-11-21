@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, watch } from "vue";
+import { computed, watch, reactive, markRaw } from "vue";
 import { useForm } from "vee-validate";
 import { SchemaUtils } from "@quickforms/core";
 import type { JSONSchema } from "@quickforms/core";
@@ -37,13 +37,17 @@ const { handleSubmit, values, setValues, errors, meta } = useForm({
 });
 
 // Provide form context to children
-provideFormContext({
-  readonly: props.options.readonly || false,
-  disabled: props.options.disabled || false,
-  schema: props.schema,
+// Use reactive to ensure updates propagate
+const formContext = reactive({
+  readonly: computed(() => props.options.readonly || false),
+  disabled: computed(() => props.options.disabled || false),
+  schema: props.schema, // Schema usually doesn't change, but if it does, we might need computed
   rootPath: "",
-  registry,
+  registry: markRaw(registry), // markRaw prevents Vue from making components reactive
+  context: computed(() => props.options.context || {})
 });
+
+provideFormContext(formContext as any);
 
 // Watch for external model value changes
 watch(

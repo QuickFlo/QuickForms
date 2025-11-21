@@ -13,11 +13,15 @@ export const rankWith = (rank: number, predicate: boolean): number => {
  */
 
 export const isStringType = (schema: JSONSchema): boolean => {
-  return schema.type === 'string';
+  if (schema.type === 'string') return true;
+  if (schema.const !== undefined && typeof schema.const === 'string') return true;
+  return false;
 };
 
 export const isNumberType = (schema: JSONSchema): boolean => {
-  return schema.type === 'number' || schema.type === 'integer';
+  if (schema.type === 'number' || schema.type === 'integer') return true;
+  if (schema.const !== undefined && typeof schema.const === 'number') return true;
+  return false;
 };
 
 export const isIntegerType = (schema: JSONSchema): boolean => {
@@ -25,11 +29,13 @@ export const isIntegerType = (schema: JSONSchema): boolean => {
 };
 
 export const isBooleanType = (schema: JSONSchema): boolean => {
-  return schema.type === 'boolean';
+  if (schema.type === 'boolean') return true;
+  if (schema.const !== undefined && typeof schema.const === 'boolean') return true;
+  return false;
 };
 
 export const isObjectType = (schema: JSONSchema): boolean => {
-  return schema.type === 'object';
+  return schema.type === 'object' || (schema.type === undefined && schema.properties !== undefined);
 };
 
 export const isArrayType = (schema: JSONSchema): boolean => {
