@@ -101,6 +101,12 @@ const fullTestSchema: JSONSchema = {
         minLength: "Password must be at least 8 characters for your security"
       }
     },
+    confirmPassword: {
+      type: "string",
+      format: "password",
+      title: "Confirm Password",
+      description: "Re-enter your password (validated with custom validator)"
+    },
     website: {
       type: "string",
       format: "url",
@@ -313,6 +319,14 @@ const activeSchema = computed(() => {
   }
 });
 
+// Mock API for async validation
+const checkUsernameAvailable = async (username: string): Promise<boolean> => {
+  // Simulate API call
+  await new Promise(resolve => setTimeout(resolve, 800));
+  const takenUsernames = ['admin', 'test', 'user', 'demo'];
+  return !takenUsernames.includes(username.toLowerCase());
+};
+
 // Validation mode for testing
 const validationMode = ref<'ValidateAndShow' | 'ValidateAndHide' | 'NoValidation'>('ValidateAndShow');
 
@@ -333,6 +347,33 @@ const formOptions = computed(() => ({
       required: 'Email is mandatory, friend.',
       format: 'That doesn\'t look like a real email address.'
     }
+  },
+  validators: {
+    // Sync validator - password confirmation
+    password: (value, allValues) => {
+      if (allValues.confirmPassword && value !== allValues.confirmPassword) {
+        return 'Passwords must match';
+      }
+      return true;
+    },
+    confirmPassword: (value, allValues) => {
+      if (value !== allValues.password) {
+        return 'Passwords must match';
+      }
+      return true;
+    },
+    // Async validator - username availability (only for simple schema)
+    ...(currentSchema.value === 'simple' ? {
+      firstName: async (value) => {
+        if (!value || value.length < 3) return true; // Let JSON Schema handle this
+        const available = await checkUsernameAvailable(value);
+        return available || 'This username is already taken (try something other than: admin, test, user, demo)';
+      }
+    } : {})
+  },
+  // Debounce async validators
+  validatorDebounce: {
+    firstName: 500 // Wait 500ms after user stops typing
   }
 }));
 
@@ -673,6 +714,9 @@ const handleSubmit = (data: any) => {
             <li>✅ Custom error messages (x-error-messages)</li>
             <li>✅ Validation modes (ValidateAndShow, ValidateAndHide, NoValidation)</li>
             <li>✅ Validation events</li>
+            <li>✅ Custom validators (sync & async)</li>
+            <li>✅ Validator debouncing</li>
+            <li>✅ Cross-field validation (e.g., password confirmation)</li>
             <li>✅ Help text (descriptions)</li>
           </ul>
         </div>

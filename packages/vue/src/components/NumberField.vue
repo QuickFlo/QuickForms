@@ -1,16 +1,16 @@
 <script setup lang="ts">
-import { computed, inject } from 'vue';
+import { computed } from 'vue';
 import { useFormField } from '../composables/useFormField.js';
 import { generateFieldId } from '../composables/utils.js';
 import type { FieldProps } from '../types/index.js';
-import type { FormContext } from '../types/index.js';
+import { useFormContext } from '../composables/useFormContext.js';
 
 const props = withDefaults(defineProps<FieldProps>(), {
   disabled: false,
   readonly: false
 });
 
-const formContext = inject<FormContext>('formContext');
+const formContext = useFormContext();
 const validationMode = formContext?.validationMode || 'ValidateAndShow';
 
 const { value, errorMessage, label, hint } = useFormField(props.path, props.schema, { label: props.label });

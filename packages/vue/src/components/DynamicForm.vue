@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, watch, reactive, markRaw } from "vue";
+import { computed, watch, reactive, markRaw, toRaw } from "vue";
 import { useForm } from "vee-validate";
 import { SchemaUtils } from "@quickforms/core";
 import type { JSONSchema } from "@quickforms/core";
@@ -32,9 +32,10 @@ const registry = props.options.registry || createDefaultRegistry();
 
 // Initialize form with VeeValidate
 const { handleSubmit, values, setValues, errors, meta } = useForm({
-  initialValues: props.options.useDefaults !== false
-    ? { ...schemaUtils.getDefaultValue(props.schema), ...props.modelValue }
-    : props.modelValue,
+  initialValues:
+    props.options.useDefaults !== false
+      ? { ...schemaUtils.getDefaultValue(props.schema), ...props.modelValue }
+      : props.modelValue,
 });
 
 // Provide form context to children
@@ -47,7 +48,10 @@ const formContext = reactive({
   registry: markRaw(registry), // markRaw prevents Vue from making components reactive
   context: computed(() => props.options.context || {}),
   validationMode: props.options.validationMode || 'ValidateAndShow',
-  errorMessages: props.options.errorMessages
+  errorMessages: props.options.errorMessages,
+  validators: props.options.validators,
+  validatorDebounce: props.options.validatorDebounce,
+  formValues: () => toRaw(values)
 });
 
 provideFormContext(formContext as any);
@@ -78,7 +82,7 @@ watch(
   ([currentErrors, currentMeta]) => {
     emit("validation", {
       valid: currentMeta.valid,
-      errors: currentErrors
+      errors: currentErrors,
     });
   },
   { deep: true, immediate: true }
@@ -136,7 +140,7 @@ const properties = computed(() => {
 </template>
 
 <style scoped>
-@import '../styles/variables.css';
+@import "../styles/variables.css";
 
 .quickform {
   max-width: 100%;
@@ -158,8 +162,10 @@ const properties = computed(() => {
   font-weight: var(--quickform-submit-font-weight);
   font-family: var(--quickform-font-family);
   cursor: pointer;
-  transition: background-color var(--quickform-transition-base) var(--quickform-transition-timing),
-              transform var(--quickform-transition-fast) var(--quickform-transition-timing);
+  transition: background-color var(--quickform-transition-base)
+      var(--quickform-transition-timing),
+    transform var(--quickform-transition-fast)
+      var(--quickform-transition-timing);
 }
 
 .quickform-submit:hover:not(:disabled) {

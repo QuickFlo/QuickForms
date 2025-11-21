@@ -23,6 +23,20 @@ export interface FieldProps {
 }
 
 /**
+ * Validation result - can be boolean, error string, or object
+ */
+export type ValidationResult = boolean | string | { valid: boolean; message?: string };
+
+/**
+ * Custom validator function - supports both sync and async
+ */
+export type ValidatorFunction = (
+  value: any,
+  allValues: Record<string, any>,
+  context?: Record<string, any>
+) => ValidationResult | Promise<ValidationResult>;
+
+/**
  * Options for form configuration
  */
 export interface FormOptions {
@@ -40,6 +54,10 @@ export interface FormOptions {
   validationMode?: 'ValidateAndShow' | 'ValidateAndHide' | 'NoValidation';
   /** Custom error messages by path and rule type */
   errorMessages?: Record<string, Record<string, string>>;
+  /** Custom field validators (sync or async) */
+  validators?: Record<string, ValidatorFunction>;
+  /** Debounce delay for async validators in milliseconds */
+  validatorDebounce?: number | Record<string, number>;
 }
 
 /**
@@ -54,4 +72,7 @@ export interface FormContext {
   context: Record<string, any>;
   validationMode: 'ValidateAndShow' | 'ValidateAndHide' | 'NoValidation';
   errorMessages?: Record<string, Record<string, string>>;
+  validators?: Record<string, ValidatorFunction>;
+  validatorDebounce?: number | Record<string, number>;
+  formValues: () => Record<string, any>;
 }
