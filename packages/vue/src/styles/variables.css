@@ -1,0 +1,127 @@
+/**
+ * QuickForms CSS Custom Properties
+ * Override these in your app to customize the theme
+ */
+
+:root {
+  /* Colors - Primary */
+  --quickform-color-primary: #3b82f6;
+  --quickform-color-primary-hover: #2563eb;
+  --quickform-color-primary-light: rgba(59, 130, 246, 0.1);
+  
+  /* Colors - Text */
+  --quickform-color-text: #1f2937;
+  --quickform-color-text-secondary: #6b7280;
+  --quickform-color-text-disabled: #9ca3af;
+  
+  /* Colors - Background */
+  --quickform-color-bg: #ffffff;
+  --quickform-color-bg-disabled: #f3f4f6;
+  --quickform-color-bg-hover: #f9fafb;
+  
+  /* Colors - Borders */
+  --quickform-color-border: #d1d5db;
+  --quickform-color-border-hover: #9ca3af;
+  --quickform-color-border-focus: #3b82f6;
+  
+  /* Colors - States */
+  --quickform-color-error: #dc2626;
+  --quickform-color-error-bg: #fef2f2;
+  --quickform-color-success: #10b981;
+  --quickform-color-warning: #f59e0b;
+  
+  /* Spacing */
+  --quickform-spacing-xs: 0.125rem;
+  --quickform-spacing-sm: 0.25rem;
+  --quickform-spacing-md: 0.5rem;
+  --quickform-spacing-lg: 1rem;
+  --quickform-spacing-xl: 1.5rem;
+  
+  /* Border Radius */
+  --quickform-radius-sm: 0.25rem;
+  --quickform-radius-md: 0.375rem;
+  --quickform-radius-lg: 0.5rem;
+  
+  /* Typography */
+  --quickform-font-family: inherit;
+  --quickform-font-size-base: 1rem;
+  --quickform-font-size-sm: 0.875rem;
+  --quickform-font-size-xs: 0.75rem;
+  --quickform-font-weight-normal: 400;
+  --quickform-font-weight-medium: 500;
+  --quickform-font-weight-semibold: 600;
+  --quickform-line-height: 1.5;
+  
+  /* Input Fields */
+  --quickform-input-padding-x: 0.5rem;
+  --quickform-input-padding-y: 0.5rem;
+  --quickform-input-border-width: 1px;
+  --quickform-input-border-style: solid;
+  --quickform-input-font-size: var(--quickform-font-size-base);
+  --quickform-input-line-height: var(--quickform-line-height);
+  
+  /* Labels */
+  --quickform-label-font-size: var(--quickform-font-size-base);
+  --quickform-label-font-weight: var(--quickform-font-weight-medium);
+  --quickform-label-margin-bottom: var(--quickform-spacing-sm);
+  --quickform-label-color: var(--quickform-color-text);
+  
+  /* Hints */
+  --quickform-hint-font-size: var(--quickform-font-size-sm);
+  --quickform-hint-color: var(--quickform-color-text-secondary);
+  --quickform-hint-margin-top: var(--quickform-spacing-sm);
+  
+  /* Errors */
+  --quickform-error-font-size: var(--quickform-font-size-sm);
+  --quickform-error-color: var(--quickform-color-error);
+  --quickform-error-margin-top: var(--quickform-spacing-sm);
+  
+  /* Field Spacing */
+  --quickform-field-margin-bottom: 1rem;
+  
+  /* Focus Ring */
+  --quickform-focus-ring-width: 3px;
+  --quickform-focus-ring-color: var(--quickform-color-primary-light);
+  --quickform-focus-ring-offset: 0;
+  
+  /* Shadows */
+  --quickform-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --quickform-shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+  --quickform-shadow-focus: 0 0 0 var(--quickform-focus-ring-width) var(--quickform-focus-ring-color);
+  
+  /* Transitions */
+  --quickform-transition-fast: 150ms;
+  --quickform-transition-base: 200ms;
+  --quickform-transition-slow: 300ms;
+  --quickform-transition-timing: cubic-bezier(0.4, 0, 0.2, 1);
+  
+  /* Checkboxes */
+  --quickform-checkbox-size: 1.25rem;
+  --quickform-checkbox-margin-right: 0.5rem;
+  
+  /* Select Dropdowns */
+  --quickform-select-padding-right: 2.5rem;
+  --quickform-select-bg-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+  
+  /* Textarea */
+  --quickform-textarea-min-height: 6rem;
+  --quickform-textarea-resize: vertical;
+  
+  /* Password Toggle */
+  --quickform-password-toggle-size: 2.5rem;
+  --quickform-password-toggle-color: var(--quickform-color-text-secondary);
+  --quickform-password-toggle-hover-color: var(--quickform-color-text);
+  
+  /* Submit Button */
+  --quickform-submit-bg: var(--quickform-color-primary);
+  --quickform-submit-bg-hover: var(--quickform-color-primary-hover);
+  --quickform-submit-color: #ffffff;
+  --quickform-submit-padding-x: 1.5rem;
+  --quickform-submit-padding-y: 0.5rem;
+  --quickform-submit-font-weight: var(--quickform-font-weight-medium);
+  --quickform-submit-border-radius: var(--quickform-radius-md);
+  
+  /* Required Indicator */
+  --quickform-required-color: var(--quickform-color-error);
+  --quickform-required-margin-left: var(--quickform-spacing-xs);
+}

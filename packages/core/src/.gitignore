@@ -1,0 +1,5 @@
+# Prevent compiled files in src directory
+*.js
+*.d.ts
+*.d.ts.map
+*.js.map
