@@ -1,3 +1,5 @@
+![QuickForms Banner](./docs/assets/banner.readme.1280x320.png)
+
 # QuickForms
 
 **A Vue 3 form generator built from JSON Schema, with reasonable escape hatches.**
