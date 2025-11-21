@@ -303,7 +303,7 @@ const fullTestSchema: JSONSchema = {
 };
 
 const formData = ref({});
-const validationState = ref<{ valid: boolean; errors: Record<string, string> }>({ valid: true, errors: {} });
+const validationState = ref<{ valid: boolean; errors: Record<string, string | undefined> }>({ valid: true, errors: {} });
 
 // Schema switcher for reactivity testing
 const currentSchema = ref<"simple" | "conditional" | "full">("full");
@@ -377,7 +377,7 @@ const formOptions = computed(() => ({
   }
 }));
 
-const handleValidation = (result: { valid: boolean; errors: Record<string, string> }) => {
+const handleValidation = (result: { valid: boolean; errors: Record<string, string | undefined> }) => {
   validationState.value = result;
   console.log('Validation state:', result);
 };

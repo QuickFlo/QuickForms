@@ -1,9 +1,9 @@
-import { computed } from 'vue';
-import { useField } from 'vee-validate';
-import type { JSONSchema } from '@quickforms/core';
-import { SchemaUtils } from '@quickforms/core';
-import type { FormContext } from '../types/index.js';
-import { useFormContext } from './useFormContext.js';
+import { computed } from "vue";
+import { useField } from "vee-validate";
+import type { JSONSchema } from "@quickforms/core";
+import { SchemaUtils } from "@quickforms/core";
+import type { FormContext } from "../types/index.js";
+import { useFormContext } from "./useFormContext.js";
 
 const schemaUtils = new SchemaUtils();
 
@@ -25,14 +25,15 @@ function isValidUrl(value: string): boolean {
 function debounce<T extends (...args: any[]) => any>(
   func: T,
   wait: number
-): (...args: Parameters<T>) => Promise<ReturnType<T>> {
+): (...args: Parameters<T>) => Promise<Awaited<ReturnType<T>>> {
   let timeout: ReturnType<typeof setTimeout> | null = null;
 
-  return (...args: Parameters<T>): Promise<ReturnType<T>> => {
+  return (...args: Parameters<T>): Promise<Awaited<ReturnType<T>>> => {
     return new Promise((resolve) => {
       if (timeout) clearTimeout(timeout);
-      timeout = setTimeout(() => {
-        resolve(func(...args));
+      timeout = setTimeout(async () => {
+        const res = await func(...args);
+        resolve(res as Awaited<ReturnType<T>>);
       }, wait);
     });
   };

@@ -22,7 +22,7 @@ const props = withDefaults(defineProps<Props>(), {
 const emit = defineEmits<{
   "update:modelValue": [value: Record<string, any>];
   submit: [value: Record<string, any>];
-  validation: [result: { valid: boolean; errors: Record<string, string> }];
+  validation: [result: { valid: boolean; errors: Record<string, string | undefined> }];
 }>();
 
 const schemaUtils = new SchemaUtils();
@@ -82,7 +82,7 @@ watch(
   ([currentErrors, currentMeta]) => {
     emit("validation", {
       valid: currentMeta.valid,
-      errors: currentErrors,
+      errors: currentErrors as Record<string, string | undefined>,
     });
   },
   { deep: true, immediate: true }
