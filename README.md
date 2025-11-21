@@ -1,60 +1,90 @@
-# 🚀 QuickForms
+# QuickForms
 
-**The Framework-Agnostic JSON Schema Form Generator for Modern Apps**
+**A Vue 3 form generator built from JSON Schema, with escape hatches everywhere.**
 
-QuickForms is a powerful, type-safe library that generates fully functional forms from JSON Schema. Designed with a framework-agnostic core, it currently provides first-class bindings for **Vue 3** (with Quasar support coming soon).
+QuickForms generates forms from JSON Schema with sensible defaults and clear customization paths. Built for Vue 3 with a framework-agnostic core.
 
-Unlike other form generators like JSONForms, QuickForms prioritizes **developer experience**, **customization**, and **modern architecture** while keeping the API simple and intuitive.
+## Table of Contents
 
-## ⚡ Quick Comparison
+- [Why QuickForms?](#why-quickforms)
+- [Comparison with JSONForms](#comparison-with-jsonforms)
+- [Features](#features)
+- [Installation](#installation)
+- [Quick Start](#quick-start)
+- [Usage Guide](#usage-guide)
+  - [Validation](#validation)
+  - [Complex Types](#complex-types)
+  - [Custom Validators](#custom-validators)
+  - [Internationalization & Customization](#internationalization--customization)
+  - [Role-Based Access Control](#role-based-access-control)
+- [Custom Components](#custom-components)
+- [Theming](#theming)
+- [Form Options API](#form-options-api)
+- [Architecture](#architecture)
+- [Supported JSON Schema Features](#supported-json-schema-features)
+  - [Custom Extensions (x-* attributes)](#custom-extensions-x--attributes)
+- [Roadmap](#roadmap)
+- [FAQ](#faq)
+- [Contributing](#contributing)
+- [Packages](#packages)
+- [License](#license)
+
+## Why QuickForms?
+
+JSON Schema form libraries are powerful but often rigid. QuickForms provides escape hatches at common pain points:
+
+- Don't like the default placeholder? Override it globally or per-field
+- Need custom validation? Add sync/async validators alongside JSON Schema rules  
+- Enum values too technical? Map them to friendly labels with `x-enum-labels`
+- Want dynamic hints? Use `hintRenderer` for full control
+
+Sensible defaults, clear customization paths. No rebuilding components.
+
+## Comparison with JSONForms
 
 | Feature | QuickForms | JSONForms |
 |---------|------------|------------|
-| 🎯 **Simple API** | No UI schema needed for basic forms | Requires separate UI schema |
-| 🎨 **Theming** | CSS variables (60+ customizable) | Material-UI/Vuetify dependency |
-| ✅ **Validation Modes** | 3 modes with custom messages | Single mode |
-| 🔐 **RBAC Built-in** | `x-roles` and `x-hidden` | Custom implementation needed |
-| 📦 **Bundle Size** | ~50KB (Vue + Core) | ~200KB+ (with renderer set) |
-| 🧑‍💻 **Modern Stack** | Vue 3 Composition API | Vue 2/3 Options API |
-| 🛠 **TypeScript** | First-class support | Good support |
-| 🎓 **Learning Curve** | Low - just JSON Schema | Medium - JSON Schema + UI Schema |
+| **UI Schema** | Optional | Required for layouts |
+| **Theming** | CSS variables | Framework-dependent |
+| **Custom Validators** | Built-in (sync + async) | Not built-in |
+| **Vue Version** | Vue 3 Composition API | Vue 2/3 |
+| **Bundle Size** | ~56KB gzipped | Varies by renderers |
+| **Status** | Early Stage | Mature |
 
-## ✨ Features
+**Note**: This comparison reflects JSONForms as of late 2024. QuickForms is newer and less battle-tested.
 
-### Core Features
-- **🏗 Framework Agnostic Core**: Logic is separated from UI, allowing consistent behavior across frameworks
-- **🔌 Fully Extensible**: Register your own components, override defaults, or create custom testers
-- **🎨 CSS Variable Theming**: Customize every aspect of the form (colors, spacing, radius) with CSS variables
-- **🛠 Developer Friendly**: Written in TypeScript with full type definitions
-- **🧩 Component Registry**: Smart component selection based on schema type, format, or custom logic
+## Features
 
-### Validation System
-- **✅ Comprehensive JSON Schema Validation**: All standard validation keywords (minLength, maxLength, pattern, minimum, maximum, etc.)
-- **🔍 Three Validation Modes**: ValidateAndShow (default), ValidateAndHide (silent), NoValidation
-- **💬 Custom Error Messages**: Via `x-error-messages` in schema or form options
-- **📡 Validation Events**: React to validation state changes in parent components
-- **⚡ Real-time Validation**: Validate as you type or on blur
-- **🧑‍💻 Custom Validators**: Sync and async validators with unified API
-- **⏱️ Debouncing**: Configurable debounce for async validators
-- **🔀 Cross-Field Validation**: Validators have access to all form values
+### Core
+- Framework-agnostic core with Vue 3 bindings
+- Full TypeScript support
+- CSS variable theming (60+ variables)
+- Extensible component registry
 
-### Field Types & Complex Schemas
-- **📝 Basic Types**: String (text, email, password, url, textarea), Number, Integer, Boolean, Date, Time, DateTime
-- **🗂 Complex Types**: Nested Objects, Arrays with dynamic labels, oneOf/anyOf/allOf
-- **📋 Enums**: Dropdown select with custom labels and autocomplete support
-- **🎯 Conditional Logic**: oneOf schemas with type selection
-- **🏷 Custom Labels**: Array item labels (`x-item-label`) and enum option labels (`x-enum-labels`)
-- **🔍 Autocomplete**: Built-in datalist support for enum fields with many options
+### Validation
+- JSON Schema validation (via Ajv)
+- Three validation modes: show errors, hide errors, no validation
+- Custom sync and async validators
+- Configurable debouncing for async validation
+- Cross-field validation support
+- Custom error messages (per-field or global)
 
-### Advanced Features
-- **🔐 Role-Based Access Control**: Show/hide/disable fields based on user roles (`x-roles`, `x-hidden`)
-- **🎭 Dynamic Schema Switching**: React to schema changes on the fly
-- **⚙️ Default Values**: Auto-populate forms from schema defaults
-- **🎨 Custom Components**: Full control over field rendering
-- **🌐 Internationalization**: Customizable labels for all UI text
-- **🔧 Component Defaults**: Global configuration for component behavior
+### Field Types
+- Primitives: string, number, integer, boolean
+- Formats: email, url, password, textarea, date, time, date-time
+- Complex: nested objects, arrays, enums
+- Conditional: oneOf, anyOf, allOf
 
-## 📦 Installation
+### Customization
+- Custom display labels for enum values (`x-enum-labels`)
+- Custom array item labels with templates (`x-item-label`)
+- Role-based field visibility (`x-roles`)
+- HTML hints with dynamic rendering (`x-hint`, `hintRenderer`)
+- Hint visibility control (always/focus/hover)
+- Autocomplete for large enum lists
+- Internationalization support
+
+## Installation
 
 ```bash
 # Install core and vue package
@@ -64,7 +94,7 @@ pnpm add @quickflo/quickforms @quickflo/quickforms-vue
 pnpm add vue vee-validate
 ```
 
-## 🚦 Quick Start
+## Quick Start
 
 ### Basic Example
 
@@ -121,7 +151,7 @@ const handleSubmit = (data) => {
 </template>
 ```
 
-## 📚 Usage Guide
+## Usage Guide
 
 ### Validation
 
@@ -637,7 +667,7 @@ const schema: JSONSchema = {
 />
 ```
 
-## 🧩 Custom Components
+## Custom Components
 
 QuickForms allows you to register your own components for specific fields using a powerful "tester" system.
 
@@ -685,7 +715,7 @@ const { value, errorMessage, label } = useFormField(props.path, props.schema);
 </template>
 ```
 
-## 🎨 Theming
+## Theming
 
 QuickForms uses CSS custom properties (variables) for styling. You can override these globally or for specific forms.
 
@@ -714,7 +744,9 @@ QuickForms uses CSS custom properties (variables) for styling. You can override 
 
 See `packages/vue/src/styles/variables.css` for the full list of 60+ customizable variables.
 
-## 🧑‍💻 Form Options API
+See **[STYLING_GUIDE.MD](./STYLING_GUIDE.MD)** for a full guide on styling.
+
+## Form Options API
 
 Complete reference for the `options` prop:
 
@@ -785,7 +817,7 @@ type ValidatorFunction = (
 ) => boolean | string | Promise<boolean | string>;
 ```
 
-## 📚 Architecture
+## Architecture
 
 The project is structured as a monorepo:
 
@@ -793,7 +825,7 @@ The project is structured as a monorepo:
 - **`@quickflo/quickforms-vue`**: Vue 3 bindings using Composition API and VeeValidate.
 - **`@quickflo/forms-quasar`** *(Coming Soon)*: Pre-configured bindings for Quasar framework.
 
-## 🎓 Supported JSON Schema Features
+## Supported JSON Schema Features
 
 ### Types
 - `string`, `number`, `integer`, `boolean`, `object`, `array`, `null`
@@ -811,15 +843,145 @@ The project is structured as a monorepo:
 - Nested objects and arrays (unlimited depth)
 - `$ref` and `$defs` for schema references
 
-### Custom Extensions
-- `x-hidden` - Hide field completely
-- `x-roles` - Role-based visibility and permissions
-- `x-item-label` - Custom array item labels with template interpolation
-- `x-enum-labels` - Custom display labels for enum options
-- `x-error-messages` - Custom validation messages
-- `x-component-props` - Override component-specific settings per field
+### Custom Extensions (`x-*` attributes)
 
-## 🛣 Roadmap
+QuickForms extends JSON Schema with custom `x-*` attributes to provide escape hatches for common customization needs:
+
+#### `x-hidden`
+**Purpose**: Completely hide a field from rendering
+**Type**: `boolean`
+**Example**:
+```json
+{
+  "systemId": {
+    "type": "string",
+    "x-hidden": true
+  }
+}
+```
+
+#### `x-roles`
+**Purpose**: Role-based access control for field visibility and editability
+**Type**: `Record<string, ('view' | 'edit')[]>`
+**Example**:
+```json
+{
+  "adminField": {
+    "type": "string",
+    "x-roles": {
+      "admin": ["view", "edit"],
+      "user": ["view"],
+      "guest": []
+    }
+  }
+}
+```
+
+#### `x-item-label`
+**Purpose**: Custom labels for array items with template interpolation
+**Type**: `string | "none" | false`
+**Example**:
+```json
+{
+  "workHistory": {
+    "type": "array",
+    "x-item-label": "{{company}} - {{position}}",
+    "items": {
+      "type": "object",
+      "properties": {
+        "company": { "type": "string" },
+        "position": { "type": "string" }
+      }
+    }
+  }
+}
+```
+Use `"none"` or `false` to hide labels entirely.
+
+#### `x-enum-labels`
+**Purpose**: Custom display text for enum options (value → label mapping)
+**Type**: `Record<string, string>`
+**Example**:
+```json
+{
+  "status": {
+    "type": "string",
+    "enum": ["draft", "active", "paused"],
+    "x-enum-labels": {
+      "draft": "📝 Draft",
+      "active": "✅ Active",
+      "paused": "⏸️ Paused"
+    }
+  }
+}
+```
+
+#### `x-error-messages`
+**Purpose**: Custom validation error messages per rule type
+**Type**: `Record<string, string>`
+**Example**:
+```json
+{
+  "password": {
+    "type": "string",
+    "minLength": 8,
+    "x-error-messages": {
+      "required": "Password is required for security",
+      "minLength": "Password must be at least 8 characters"
+    }
+  }
+}
+```
+
+#### `x-component-props`
+**Purpose**: Override component-specific behavior for a single field
+**Type**: `Record<string, any>`
+**Example**:
+```json
+{
+  "country": {
+    "type": "string",
+    "enum": ["US", "CA", "UK", "..."],
+    "x-component-props": {
+      "autocomplete": true
+    }
+  }
+}
+```
+
+#### `x-hint`
+**Purpose**: HTML-enabled hint text (takes precedence over `description`)
+**Type**: `string`
+**Example**:
+```json
+{
+  "email": {
+    "type": "string",
+    "x-hint": "Read our <a href='/policy'>privacy policy</a>"
+  }
+}
+```
+
+#### `x-hint-mode`
+**Purpose**: Control when hints are displayed
+**Type**: `"always" | "focus" | "hover"`
+**Default**: `"always"`
+**Example**:
+```json
+{
+  "password": {
+    "type": "string",
+    "description": "Must be 8+ characters",
+    "x-hint-mode": "focus"
+  }
+}
+```
+
+---
+
+**Note**: All `x-*` attributes are optional and designed as escape hatches. QuickForms works perfectly with standard JSON Schema—use extensions only when you need them.
+
+## Roadmap
 
 - [x] Phase 1: Core Architecture & Validation
 - [x] Phase 2: Vue Basic Fields & Theming
@@ -831,7 +993,7 @@ The project is structured as a monorepo:
 - [ ] Phase 8: i18n/Localization
 - [ ] Phase 9: Quasar Support
 
-## ❓ FAQ
+## FAQ
 
 **Q: How is this different from JSONForms?**
 
@@ -850,15 +1012,15 @@ A: The core is framework-agnostic. Vue bindings are production-ready. React/Angu
 
 A: Yes! See the "Custom Components" section above. The tester system gives you full control over component selection.
 
-## 👥 Contributing
+## Contributing
 
 Contributions are welcome! Please read our contributing guidelines and submit PRs to the `main` branch.
 
-## 📦 Packages
+## Packages
 
 - **[@quickflo/quickforms](./packages/core)** - Framework-agnostic core
 - **[@quickflo/quickforms-vue](./packages/vue)** - Vue 3 bindings
 
-## 📄 License
+## License
 
 MIT
