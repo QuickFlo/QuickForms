@@ -90,7 +90,7 @@ Sensible defaults, clear customization paths. No rebuilding components.
 
 ```bash
 # Install core and vue package
-pnpm add @quickflo/quickforms @quickflo/quickforms-vue
+pnpm add @quickflo/quickforms @quickflo/quickforms-vue @quickflo/quickforms-quasar
 
 # Peer dependencies
 pnpm add vue vee-validate
