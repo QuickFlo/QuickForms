@@ -2,7 +2,7 @@
 
 # QuickForms
 
-**A Vue 3 form generator built from JSON Schema, with reasonable escape hatches.**
+**A Vue 3 JSON Schema form generator, with reasonable escape hatches.**
 
 QuickForms generates forms from JSON Schema with sensible defaults and clear customization paths. Built for Vue 3 with a framework-agnostic core.
 
