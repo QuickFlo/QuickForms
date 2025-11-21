@@ -3,26 +3,34 @@
  */
 export interface JSONSchema {
   // Core schema properties
-  type?: 'string' | 'number' | 'integer' | 'boolean' | 'object' | 'array' | 'null';
+  type?:
+    | "string"
+    | "number"
+    | "integer"
+    | "boolean"
+    | "object"
+    | "array"
+    | "null";
   title?: string;
   description?: string;
   default?: any;
   const?: any;
   enum?: any[];
-  
+  placeholder?: string;
+
   // String validation
   minLength?: number;
   maxLength?: number;
   pattern?: string;
   format?: string; // email, date, time, date-time, uri, etc.
-  
+
   // Number validation
   minimum?: number;
   maximum?: number;
   exclusiveMinimum?: number;
   exclusiveMaximum?: number;
   multipleOf?: number;
-  
+
   // Object properties
   properties?: Record<string, JSONSchema>;
   required?: string[];
@@ -30,36 +38,36 @@ export interface JSONSchema {
   patternProperties?: Record<string, JSONSchema>;
   minProperties?: number;
   maxProperties?: number;
-  
+
   // Array properties
   items?: JSONSchema | JSONSchema[];
   minItems?: number;
   maxItems?: number;
   uniqueItems?: boolean;
   contains?: JSONSchema;
-  
+
   // Composition
   allOf?: JSONSchema[];
   anyOf?: JSONSchema[];
   oneOf?: JSONSchema[];
   not?: JSONSchema;
-  
+
   // Conditional
   if?: JSONSchema;
   then?: JSONSchema;
   else?: JSONSchema;
-  
+
   // References
   $ref?: string;
   $defs?: Record<string, JSONSchema>;
   definitions?: Record<string, JSONSchema>;
-  
+
   // Discriminator for oneOf (OpenAPI style)
   discriminator?: {
     propertyName: string;
     mapping?: Record<string, string>;
   };
-  
+
   // Custom extensions (x- prefix)
   [key: `x-${string}`]: any;
 }
@@ -80,7 +88,7 @@ export interface UISchemaElement {
  * Visibility rule for conditional rendering
  */
 export interface Rule {
-  effect: 'SHOW' | 'HIDE' | 'ENABLE' | 'DISABLE';
+  effect: "SHOW" | "HIDE" | "ENABLE" | "DISABLE";
   condition: {
     scope: string;
     schema: JSONSchema;
@@ -100,7 +108,10 @@ export interface FieldComponent<T = any> {
  * Returns a number indicating priority (higher = better match)
  * Returns -1 if component should not be used
  */
-export type TesterFunction = (schema: JSONSchema, uischema?: UISchemaElement) => number;
+export type TesterFunction = (
+  schema: JSONSchema,
+  uischema?: UISchemaElement
+) => number;
 
 /**
  * Props passed to field renderer components

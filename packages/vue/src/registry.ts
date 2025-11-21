@@ -1,5 +1,5 @@
 import type { Component } from 'vue';
-import { ComponentRegistry, isStringType, isNumberType, isBooleanType, isEnumType, isDateFormat, isObjectType, isArrayType, hasOneOf, hasAnyOf, hasAllOf, rankWith } from '@quickflo/quickforms';
+import { ComponentRegistry, isStringType, isNumberType, isBooleanType, isEnumType, isDateFormat, isObjectType, isArrayType, hasOneOf, hasAnyOf, hasAllOf, hasConst, rankWith } from '@quickflo/quickforms';
 import StringField from './components/StringField.vue';
 import NumberField from './components/NumberField.vue';
 import BooleanField from './components/BooleanField.vue';
@@ -9,6 +9,7 @@ import ObjectField from './components/ObjectField.vue';
 import ArrayField from './components/ArrayField.vue';
 import OneOfField from './components/OneOfField.vue';
 import AllOfField from './components/AllOfField.vue';
+import HiddenField from './components/HiddenField.vue';
 
 /**
  * Create a default component registry with all built-in field components
@@ -35,6 +36,12 @@ import AllOfField from './components/AllOfField.vue';
  */
 export function createDefaultRegistry(): ComponentRegistry<Component> {
   const registry = new ComponentRegistry<Component>();
+
+  // Register hidden field for const values (highest priority: 100)
+  // This should be checked before any other field type
+  registry.register('hidden', HiddenField, (schema) =>
+    rankWith(100, hasConst(schema))
+  );
 
   // Register string field (base priority: 1)
   registry.register('string', StringField, (schema) =>
