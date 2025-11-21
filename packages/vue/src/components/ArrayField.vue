@@ -1,8 +1,9 @@
 <script setup lang="ts">
 import { computed } from "vue";
 import { useFormField } from "../composables/useFormField.js";
+import { useFormContext } from "../composables/useFormContext.js";
 import { generateFieldId } from "../composables/utils.js";
-import { SchemaUtils } from "@quickflo/forms-core";
+import { SchemaUtils } from "@quickflo/quickforms";
 import FieldRenderer from "./FieldRenderer.vue";
 import type { FieldProps } from "../types/index.js";
 
@@ -17,6 +18,7 @@ const { value, errorMessage, label, hint } = useFormField(
   props.schema,
   { label: props.label }
 );
+const formContext = useFormContext();
 const fieldId = generateFieldId(props.path);
 const schemaUtils = new SchemaUtils();
 
@@ -129,7 +131,7 @@ const getItemLabel = (index: number) => {
         :id="`${fieldId}-hint`"
         class="quickform-hint quickform-array-hint"
       >
-        {{ hint }}
+        <span v-html="hint"></span>
       </div>
 
       <div class="quickform-array-items">
@@ -174,7 +176,7 @@ const getItemLabel = (index: number) => {
               class="quickform-btn-icon quickform-btn-danger"
               :disabled="!canRemove"
               @click="removeItem(index)"
-              title="Remove Item"
+              :title="formContext.labels.removeItem"
             >
               ×
             </button>
@@ -193,7 +195,7 @@ const getItemLabel = (index: number) => {
           :disabled="!canAdd"
           @click="addItem"
         >
-          + Add Item
+          + {{ formContext.labels.addItem }}
         </button>
       </div>
 

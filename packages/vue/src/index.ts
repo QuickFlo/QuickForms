@@ -26,7 +26,7 @@ export * from './composables/utils.js';
 export type { VueFieldComponent, FieldProps, FormOptions, FormContext } from './types/index.js';
 
 // Re-export core types and utilities
-export type { JSONSchema, UISchemaElement, TesterFunction } from '@quickflo/forms-core';
+export type { JSONSchema, UISchemaElement, TesterFunction } from '@quickflo/quickforms';
 export {
   ComponentRegistry,
   SchemaUtils,
@@ -58,4 +58,4 @@ export {
   hasAllOf,
   isDiscriminatedUnion,
   hasConditional
-} from '@quickflo/forms-core';
+} from '@quickflo/quickforms';

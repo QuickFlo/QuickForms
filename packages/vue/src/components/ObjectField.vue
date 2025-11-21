@@ -34,7 +34,7 @@ const properties = computed(() => {
       </legend>
       
       <div v-if="hint" :id="`${fieldId}-hint`" class="quickform-hint quickform-object-hint">
-        {{ hint }}
+        <span v-html="hint"></span>
       </div>
 
       <div class="quickform-object-content">

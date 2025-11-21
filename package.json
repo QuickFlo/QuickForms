@@ -1,6 +1,6 @@
 {
-  "name": "@quickflo/forms-monorepo",
-  "version": "0.1.0",
+  "name": "@quickflo/quickforms-monorepo",
+  "version": "0.2.0",
   "private": true,
   "description": "Framework-agnostic JSON Schema form generator - QuickFlo Forms",
   "packageManager": "pnpm@10.12.1",

@@ -39,7 +39,7 @@ importers:
 
   packages/vue:
     dependencies:
-      '@quickflo/forms-core':
+      '@quickflo/quickforms':
         specifier: workspace:*
         version: link:../core
       vee-validate:

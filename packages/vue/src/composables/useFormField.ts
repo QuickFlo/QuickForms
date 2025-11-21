@@ -1,9 +1,10 @@
 import { computed } from "vue";
 import { useField } from "vee-validate";
-import type { JSONSchema } from "@quickflo/forms-core";
-import { SchemaUtils } from "@quickflo/forms-core";
+import type { JSONSchema } from "@quickflo/quickforms";
+import { SchemaUtils } from "@quickflo/quickforms";
 import type { FormContext } from "../types/index.js";
 import { useFormContext } from "./useFormContext.js";
+import { getHint } from "./utils.js";
 
 const schemaUtils = new SchemaUtils();
 
@@ -277,8 +278,30 @@ export function useFormField(
     return schema.title || path;
   });
 
-  // Computed hint from schema
-  const hint = computed(() => schema.description);
+  // Computed hint from schema with optional custom renderer
+  const hint = computed(() => {
+    const rawHint = getHint(schema);
+    if (!rawHint) return undefined;
+    
+    // Apply hintRenderer if provided
+    if (formContext?.hintRenderer) {
+      return formContext.hintRenderer(rawHint, {
+        schema,
+        path,
+        value: value.value
+      });
+    }
+    
+    return rawHint;
+  });
+
+  // Get hint display mode (per-field override or global default)
+  const hintMode = computed(() => {
+    const xHintMode = (schema as any)['x-hint-mode'] as 'always' | 'focus' | 'hover' | undefined;
+    if (xHintMode) return xHintMode;
+    
+    return formContext?.componentDefaults?.hints?.showMode || 'always';
+  });
 
   // Check if field is required
   const required = computed(() => {
@@ -309,6 +332,7 @@ export function useFormField(
     meta,
     label,
     hint,
+    hintMode,
     required,
   };
 }
