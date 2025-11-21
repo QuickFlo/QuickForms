@@ -36,7 +36,128 @@ Override CSS variables in your app to theme all forms globally:
 
 See `packages/vue/src/styles/variables.css` for all 60+ available variables.
 
-### 2. Direct CSS Overrides
+#### Spacing and Layout
+
+Control spacing between and within form fields:
+
+```css
+:root {
+  /* Vertical spacing between fields */
+  --quickform-field-margin-bottom: 1.5rem; /* default: 1rem */
+  
+  /* Input padding */
+  --quickform-input-padding-x: 0.75rem; /* default: 0.5rem */
+  --quickform-input-padding-y: 0.75rem; /* default: 0.5rem */
+  
+  /* Label, hint, and error spacing */
+  --quickform-label-margin-bottom: 0.5rem; /* default: 0.25rem */
+  --quickform-hint-margin-top: 0.5rem; /* default: 0.25rem */
+  --quickform-error-margin-top: 0.5rem; /* default: 0.25rem */
+  
+  /* Nested objects and arrays */
+  --quickform-object-padding: 2rem; /* default: 1.5rem */
+  
+  /* Submit button area */
+  --quickform-spacing-xl: 2rem; /* default: 1.5rem */
+}
+```
+
+All available spacing variables:
+- `--quickform-spacing-xs: 0.125rem` (2px)
+- `--quickform-spacing-sm: 0.25rem` (4px)
+- `--quickform-spacing-md: 0.5rem` (8px)
+- `--quickform-spacing-lg: 1rem` (16px)
+- `--quickform-spacing-xl: 1.5rem` (24px)
+
+**Compact Theme Example:**
+```css
+:root {
+  --quickform-field-margin-bottom: 0.75rem;
+  --quickform-input-padding-x: 0.5rem;
+  --quickform-input-padding-y: 0.375rem;
+  --quickform-object-padding: 1rem;
+}
+```
+
+**Spacious Theme Example:**
+```css
+:root {
+  --quickform-field-margin-bottom: 2rem;
+  --quickform-input-padding-x: 1rem;
+  --quickform-input-padding-y: 0.875rem;
+  --quickform-object-padding: 2rem;
+}
+```
+
+### 2. Form Layout Options
+
+Control the overall form layout with CSS:
+
+#### Horizontal/Grid Layout
+
+```vue
+<template>
+  <div class="horizontal-form">
+    <DynamicForm :schema="schema" v-model="data" />
+  </div>
+</template>
+
+<style scoped>
+.horizontal-form :deep(.quickform) {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.5rem;
+}
+
+/* Make submit button span full width */
+.horizontal-form :deep(.quickform-actions) {
+  grid-column: 1 / -1;
+}
+</style>
+```
+
+#### Container Spacing
+
+```vue
+<template>
+  <div class="form-container">
+    <DynamicForm :schema="schema" v-model="data" />
+  </div>
+</template>
+
+<style scoped>
+.form-container {
+  padding: 2rem;
+  max-width: 600px;
+  margin: 0 auto;
+  
+  /* Add extra vertical spacing between all fields */
+  :deep(.quickform-field) {
+    margin-bottom: 1.5rem;
+  }
+  
+  /* Style nested objects with padding and background */
+  :deep(.quickform-object-field) {
+    padding: 1.5rem;
+    background-color: #f9fafb;
+    border-radius: 0.5rem;
+  }
+}
+</style>
+```
+
+#### Inline Fields
+
+```css
+/* Make specific fields appear inline */
+.inline-fields :deep(.quickform-field) {
+  display: inline-block;
+  width: auto;
+  margin-right: 1rem;
+}
+```
+
+### 3. Direct CSS Overrides
 
 For more specific control, override CSS classes directly:
 
@@ -64,7 +185,7 @@ For more specific control, override CSS classes directly:
 </style>
 ```
 
-### 3. Custom Components (Complete Control)
+### 4. Custom Components (Complete Control)
 
 Register your own components for specific field types:
 
@@ -224,9 +345,76 @@ const options = {
 4. **Maintain accessibility** - Don't remove focus rings, maintain color contrast
 5. **Check mobile** - Test on small screens and touch devices
 
+## Quasar Package Spacing
+
+The Quasar package uses native Quasar components, so spacing is controlled differently:
+
+### Global Component Defaults
+
+Use `componentDefaults.global` to set props on all Quasar components:
+
+```typescript
+import { createQuasarRegistry } from '@quickflo/quickforms-quasar';
+
+const formOptions = {
+  registry: createQuasarRegistry(),
+  componentDefaults: {
+    global: {
+      dense: true,      // Compact all fields
+      outlined: true,   // Outlined style for all inputs
+    },
+    input: {
+      // Props for QInput components
+    },
+    select: {
+      // Props for QSelect components
+    }
+  }
+};
+```
+
+### Quasar Spacing Utilities
+
+Wrap forms in Quasar spacing classes:
+
+```vue
+<template>
+  <DynamicForm class="q-pa-md q-gutter-md" :schema="schema" v-model="data" :options="formOptions" />
+</template>
+```
+
+Quasar spacing classes:
+- `q-pa-{size}` - Padding (xs, sm, md, lg, xl)
+- `q-ma-{size}` - Margin
+- `q-gutter-{size}` - Gap between children
+- `q-px-{size}`, `q-py-{size}` - Horizontal/vertical padding
+
+### Per-Field Spacing in Quasar
+
+Use `x-quasar-props` for field-specific Quasar props:
+
+```json
+{
+  "name": {
+    "type": "string",
+    "title": "Name",
+    "x-quasar-props": {
+      "dense": false,
+      "class": "q-mb-lg"
+    }
+  }
+}
+```
+
+### Quasar Theming
+
+Quasar uses its own SASS theming system. See `packages/quasar/THEMING.md` for details on customizing colors and styles using Quasar's native approach.
+
 ## More Examples
 
 See the `/packages/vue/dev` directory for complete working examples:
 - `WorkflowsTheme.vue` - Complete theme matching a production app
 - `ThemeExample.vue` - Dark mode and custom themes
 - `CustomRegistryExample.vue` - Custom components
+
+For Quasar examples, see `/packages/quasar/dev/App.vue` for comprehensive demos.

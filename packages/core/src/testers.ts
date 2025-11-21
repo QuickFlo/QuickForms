@@ -47,6 +47,13 @@ export const isNullType = (schema: JSONSchema): boolean => {
 };
 
 /**
+ * Const tester - for fields that can only have one specific value
+ */
+export const hasConst = (schema: JSONSchema): boolean => {
+  return schema.const !== undefined;
+};
+
+/**
  * Enum tester
  */
 export const isEnumType = (schema: JSONSchema): boolean => {

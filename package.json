@@ -1,6 +1,6 @@
 {
   "name": "@quickflo/quickforms-monorepo",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "private": true,
   "description": "Framework-agnostic JSON Schema form generator - QuickFlo Forms",
   "packageManager": "pnpm@10.12.1",
@@ -13,7 +13,8 @@
     "prepublish": "pnpm run build",
     "publish:core": "cd packages/core && npm publish --access public --registry=https://registry.npmjs.org/ --@quickflo:registry=https://registry.npmjs.org/",
     "publish:vue": "cd packages/vue && npm publish --access public --registry=https://registry.npmjs.org/ --@quickflo:registry=https://registry.npmjs.org/",
-    "publish:all": "pnpm run prepublish && pnpm run publish:core && pnpm run publish:vue"
+    "publish:quasar": "cd packages/quasar && npm publish --access public --registry=https://registry.npmjs.org/ --@quickflo:registry=https://registry.npmjs.org/",
+    "publish:all": "pnpm run prepublish && pnpm run publish:core && pnpm run publish:vue && pnpm run publish:quasar"
   },
   "keywords": [
     "jsonschema",

@@ -16,6 +16,7 @@ export { default as ObjectField } from './components/ObjectField.vue';
 export { default as ArrayField } from './components/ArrayField.vue';
 export { default as OneOfField } from './components/OneOfField.vue';
 export { default as AllOfField } from './components/AllOfField.vue';
+export { default as HiddenField } from './components/HiddenField.vue';
 
 // Composables
 export { useFormField } from './composables/useFormField.js';
@@ -56,6 +57,7 @@ export {
   hasOneOf,
   hasAnyOf,
   hasAllOf,
+  hasConst,
   isDiscriminatedUnion,
   hasConditional
 } from '@quickflo/quickforms';

@@ -51,7 +51,7 @@ const defaultLabels = {
 // Default component configurations
 const defaultComponentDefaults = {
   select: {
-    autocomplete: false,
+    autocomplete: true,  // Enable autocomplete by default (Quasar uses this)
     autocompleteThreshold: 5,
   },
   array: {
@@ -80,6 +80,9 @@ const formContext = reactive({
   formValues: () => toRaw(values),
   labels: { ...defaultLabels, ...props.options.labels },
   componentDefaults: {
+    // Start with all custom component defaults from options
+    ...props.options.componentDefaults,
+    // Then merge in the built-in defaults
     select: { ...defaultComponentDefaults.select, ...props.options.componentDefaults?.select },
     array: { ...defaultComponentDefaults.array, ...props.options.componentDefaults?.array },
     number: { ...defaultComponentDefaults.number, ...props.options.componentDefaults?.number },
