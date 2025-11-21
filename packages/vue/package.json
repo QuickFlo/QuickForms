@@ -1,7 +1,7 @@
 {
-  "name": "@quickflo/forms-vue",
-  "version": "0.1.0",
-  "description": "Vue 3 bindings for QuickFlo Forms - JSON Schema form generator",
+  "name": "@quickflo/quickforms-vue",
+  "version": "0.2.0",
+  "description": "Vue 3 bindings for QuickForms - JSON Schema form generator",
   "type": "module",
   "main": "./dist/index.js",
   "module": "./dist/index.js",
@@ -36,7 +36,7 @@
     "vue": "^3.3.0"
   },
   "dependencies": {
-    "@quickflo/forms-core": "workspace:*",
+    "@quickflo/quickforms": "workspace:*",
     "vee-validate": "^4.12.0"
   },
   "devDependencies": {

@@ -1,5 +1,5 @@
 import type { Component } from 'vue';
-import type { JSONSchema, UISchemaElement, TesterFunction, ComponentRegistry } from '@quickflo/forms-core';
+import type { JSONSchema, UISchemaElement, TesterFunction, ComponentRegistry } from '@quickflo/quickforms';
 
 /**
  * Vue component with tester function
@@ -37,6 +37,64 @@ export type ValidatorFunction = (
 ) => ValidationResult | Promise<ValidationResult>;
 
 /**
+ * Hint renderer function - customize hint display
+ */
+export type HintRendererFunction = (
+  hint: string,
+  field: {
+    schema: JSONSchema;
+    path: string;
+    value: any;
+  }
+) => string;
+
+/**
+ * Internationalization / customizable labels for UI text
+ */
+export interface FormLabels {
+  /** Placeholder for select/enum fields. Default: "Select an option..." */
+  selectPlaceholder?: string;
+  /** Label for add button in arrays. Default: "Add item" */
+  addItem?: string;
+  /** Label for remove button in arrays. Default: "Remove" */
+  removeItem?: string;
+  /** Label for submit button. Default: "Submit" */
+  submit?: string;
+  /** Show password toggle hint. Default: "Show password" */
+  showPassword?: string;
+  /** Hide password toggle hint. Default: "Hide password" */
+  hidePassword?: string;
+}
+
+/**
+ * Component-specific default configurations
+ */
+export interface ComponentDefaults {
+  select?: {
+    /** Enable datalist autocomplete for enum fields. Default: false */
+    autocomplete?: boolean;
+    /** Minimum options to show autocomplete. Default: 5 */
+    autocompleteThreshold?: number;
+  };
+  array?: {
+    /** Allow collapsing array items. Default: false */
+    collapsible?: boolean;
+    /** Start with items collapsed. Default: false */
+    defaultCollapsed?: boolean;
+  };
+  number?: {
+    /** Prefix for number display (e.g., "$"). Default: undefined */
+    prefix?: string;
+    /** Suffix for number display (e.g., "%"). Default: undefined */
+    suffix?: string;
+  };
+  hints?: {
+    /** When to show hints. Default: "always" */
+    showMode?: 'always' | 'focus' | 'hover';
+  };
+}
+
+/**
  * Options for form configuration
  */
 export interface FormOptions {
@@ -58,6 +116,12 @@ export interface FormOptions {
   validators?: Record<string, ValidatorFunction>;
   /** Debounce delay for async validators in milliseconds */
   validatorDebounce?: number | Record<string, number>;
+  /** Customizable labels for i18n or branding */
+  labels?: FormLabels;
+  /** Component-specific default configurations */
+  componentDefaults?: ComponentDefaults;
+  /** Custom hint renderer function for dynamic hints */
+  hintRenderer?: HintRendererFunction;
 }
 
 /**
@@ -75,4 +139,7 @@ export interface FormContext {
   validators?: Record<string, ValidatorFunction>;
   validatorDebounce?: number | Record<string, number>;
   formValues: () => Record<string, any>;
+  labels: FormLabels;
+  componentDefaults: ComponentDefaults;
+  hintRenderer?: HintRendererFunction;
 }

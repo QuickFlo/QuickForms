@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { computed, ref } from 'vue';
 import { useFormField } from '../composables/useFormField.js';
 import { generateFieldId } from '../composables/utils.js';
 import type { FieldProps } from '../types/index.js';
@@ -8,13 +9,28 @@ const props = withDefaults(defineProps<FieldProps>(), {
   readonly: false
 });
 
-const { value, errorMessage, label, hint } = useFormField(props.path, props.schema, { label: props.label });
+const { value, errorMessage, label, hint, hintMode } = useFormField(props.path, props.schema, { label: props.label });
 const fieldId = generateFieldId(props.path);
+const isFocused = ref(false);
+const isHovered = ref(false);
+
+const showHint = computed(() => {
+  if (!hint.value || errorMessage.value) return false;
+  if (hintMode.value === 'always') return true;
+  if (hintMode.value === 'focus') return isFocused.value;
+  if (hintMode.value === 'hover') return isHovered.value;
+  return true;
+});
 </script>
 
 <template>
   <div class="quickform-field quickform-boolean-field">
-    <label :for="fieldId" class="quickform-checkbox-label">
+    <label 
+      :for="fieldId" 
+      class="quickform-checkbox-label"
+      @mouseenter="isHovered = true"
+      @mouseleave="isHovered = false"
+    >
       <input
         :id="fieldId"
         v-model="value"
@@ -24,6 +40,8 @@ const fieldId = generateFieldId(props.path);
         :readonly="readonly"
         :aria-describedby="hint ? `${fieldId}-hint` : undefined"
         :aria-invalid="!!errorMessage"
+        @focus="isFocused = true"
+        @blur="isFocused = false"
       />
       <span class="quickform-checkbox-text">
         {{ label }}
@@ -31,8 +49,8 @@ const fieldId = generateFieldId(props.path);
       </span>
     </label>
 
-    <div v-if="hint && !errorMessage" :id="`${fieldId}-hint`" class="quickform-hint">
-      {{ hint }}
+    <div v-if="showHint" :id="`${fieldId}-hint`" class="quickform-hint">
+      <span v-html="hint"></span>
     </div>
 
     <div v-if="errorMessage" class="quickform-error">
