@@ -729,7 +729,7 @@ const schema: JSONSchema = {
 
 ## Custom Components
 
-QuickForms allows you to register your own components for specific fields using a powerful "tester" system.
+QuickForms allows you to register your own components for specific fields using a powerful "tester" system (all credit goes to jsonforms for this design concept).
 
 ```typescript
 import { createDefaultRegistry, rankWith, isStringType, and, hasFormat } from '@quickflo/quickforms-vue';
@@ -1094,8 +1094,8 @@ Use `"none"` or `false` to hide labels entirely.
 - [x] Phase 4: Complex Types (Nested Objects, Arrays, OneOf/AnyOf/AllOf)
 - [x] Phase 5: Validation System (Modes, Custom Messages, Events)
 - [x] Phase 6: Role-Based Access Control
-- [ ] Phase 7: i18n/Localization
-- [ ] Phase 8: Quasar Support
+- [x] Phase 7: i18n/Localization
+- [x] Phase 8: Quasar Support
 - [ ] Phase 9: UI Schema Support (Layouts, Rules)
 
 ## FAQ
