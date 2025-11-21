@@ -124,16 +124,7 @@
   --quickform-password-toggle-size: 2.5rem;
   --quickform-password-toggle-color: var(--quickform-color-text-secondary);
   --quickform-password-toggle-hover-color: var(--quickform-color-text);
-  
-  /* Submit Button */
-  --quickform-submit-bg: var(--quickform-color-primary);
-  --quickform-submit-bg-hover: var(--quickform-color-primary-hover);
-  --quickform-submit-color: #ffffff;
-  --quickform-submit-padding-x: 1.5rem;
-  --quickform-submit-padding-y: 0.5rem;
-  --quickform-submit-font-weight: var(--quickform-font-weight-medium);
-  --quickform-submit-border-radius: var(--quickform-radius-md);
-  
+    
   /* Required Indicator */
   --quickform-required-color: var(--quickform-color-error);
   --quickform-required-margin-left: var(--quickform-spacing-xs);

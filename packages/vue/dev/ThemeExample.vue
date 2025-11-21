@@ -112,7 +112,6 @@ h1 {
   --quickform-color-primary-light: rgba(139, 92, 246, 0.1);
   --quickform-color-border-focus: #8b5cf6;
   --quickform-radius-md: 0.75rem;
-  --quickform-submit-bg: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
 }
 
 /* Dark Theme */
@@ -144,7 +143,6 @@ h1 {
   --quickform-color-border-focus: #000000;
   --quickform-input-border-width: 2px;
   --quickform-radius-md: 0;
-  --quickform-submit-border-radius: 0;
   --quickform-font-family: monospace;
   --quickform-label-font-weight: 700;
   --quickform-shadow-focus: none;

@@ -22,7 +22,9 @@ const props = withDefaults(defineProps<Props>(), {
 const emit = defineEmits<{
   "update:modelValue": [value: Record<string, any>];
   submit: [value: Record<string, any>];
-  validation: [result: { valid: boolean; errors: Record<string, string | undefined> }];
+  validation: [
+    result: { valid: boolean; errors: Record<string, string | undefined> }
+  ];
 }>();
 
 const schemaUtils = new SchemaUtils();
@@ -40,18 +42,18 @@ const { handleSubmit, values, setValues, errors, meta } = useForm({
 
 // Default labels for i18n
 const defaultLabels = {
-  selectPlaceholder: 'Select an option...',
-  addItem: 'Add item',
-  removeItem: 'Remove',
-  submit: 'Submit',
-  showPassword: 'Show password',
-  hidePassword: 'Hide password',
+  selectPlaceholder: "Select an option...",
+  addItem: "Add item",
+  removeItem: "Remove",
+  submit: "Submit",
+  showPassword: "Show password",
+  hidePassword: "Hide password",
 };
 
 // Default component configurations
 const defaultComponentDefaults = {
   select: {
-    autocomplete: true,  // Enable autocomplete by default (Quasar uses this)
+    autocomplete: true, // Enable autocomplete by default (Quasar uses this)
     autocompleteThreshold: 5,
   },
   array: {
@@ -60,7 +62,7 @@ const defaultComponentDefaults = {
   },
   number: {},
   hints: {
-    showMode: 'always' as const,
+    showMode: "always" as const,
   },
 };
 
@@ -73,7 +75,7 @@ const formContext = reactive({
   rootPath: "",
   registry: markRaw(registry), // markRaw prevents Vue from making components reactive
   context: computed(() => props.options.context || {}),
-  validationMode: props.options.validationMode || 'ValidateAndShow',
+  validationMode: props.options.validationMode || "ValidateAndShow",
   errorMessages: props.options.errorMessages,
   validators: props.options.validators,
   validatorDebounce: props.options.validatorDebounce,
@@ -83,10 +85,22 @@ const formContext = reactive({
     // Start with all custom component defaults from options
     ...props.options.componentDefaults,
     // Then merge in the built-in defaults
-    select: { ...defaultComponentDefaults.select, ...props.options.componentDefaults?.select },
-    array: { ...defaultComponentDefaults.array, ...props.options.componentDefaults?.array },
-    number: { ...defaultComponentDefaults.number, ...props.options.componentDefaults?.number },
-    hints: { ...defaultComponentDefaults.hints, ...props.options.componentDefaults?.hints },
+    select: {
+      ...defaultComponentDefaults.select,
+      ...props.options.componentDefaults?.select,
+    },
+    array: {
+      ...defaultComponentDefaults.array,
+      ...props.options.componentDefaults?.array,
+    },
+    number: {
+      ...defaultComponentDefaults.number,
+      ...props.options.componentDefaults?.number,
+    },
+    hints: {
+      ...defaultComponentDefaults.hints,
+      ...props.options.componentDefaults?.hints,
+    },
   },
   hintRenderer: props.options.hintRenderer,
 });
@@ -161,18 +175,6 @@ const properties = computed(() => {
       :disabled="options.disabled"
       :readonly="options.readonly"
     />
-
-    <div class="quickform-actions">
-      <slot name="actions" :is-valid="meta.valid" :errors="errors">
-        <button
-          type="submit"
-          class="quickform-submit"
-          :disabled="options.disabled || !meta.valid"
-        >
-          Submit
-        </button>
-      </slot>
-    </div>
   </form>
 </template>
 
@@ -181,37 +183,5 @@ const properties = computed(() => {
 
 .quickform {
   max-width: 100%;
-}
-
-.quickform-actions {
-  margin-top: var(--quickform-spacing-xl);
-  display: flex;
-  gap: var(--quickform-spacing-md);
-}
-
-.quickform-submit {
-  padding: var(--quickform-submit-padding-y) var(--quickform-submit-padding-x);
-  background-color: var(--quickform-submit-bg);
-  color: var(--quickform-submit-color);
-  border: none;
-  border-radius: var(--quickform-submit-border-radius);
-  font-size: var(--quickform-font-size-base);
-  font-weight: var(--quickform-submit-font-weight);
-  font-family: var(--quickform-font-family);
-  cursor: pointer;
-  transition: background-color var(--quickform-transition-base)
-      var(--quickform-transition-timing),
-    transform var(--quickform-transition-fast)
-      var(--quickform-transition-timing);
-}
-
-.quickform-submit:hover:not(:disabled) {
-  background-color: var(--quickform-submit-bg-hover);
-}
-
-.quickform-submit:disabled {
-  background-color: var(--quickform-color-text-secondary);
-  cursor: not-allowed;
-  opacity: 0.5;
 }
 </style>
