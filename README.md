@@ -55,7 +55,7 @@ Unlike other form generators like JSONForms, QuickForms prioritizes **developer 
 
 ```bash
 # Install core and vue package
-pnpm add @quickforms/core @quickforms/vue
+pnpm add @quickflo/forms-core @quickflo/forms-vue
 
 # Peer dependencies
 pnpm add vue vee-validate
@@ -68,8 +68,8 @@ pnpm add vue vee-validate
 ```vue
 <script setup lang="ts">
 import { ref } from 'vue';
-import { DynamicForm } from '@quickforms/vue';
-import type { JSONSchema } from '@quickforms/core';
+import { DynamicForm } from '@quickflo/forms-vue';
+import type { JSONSchema } from '@quickflo/forms-core';
 
 const schema: JSONSchema = {
   type: 'object',
@@ -492,7 +492,7 @@ const schema: JSONSchema = {
 QuickForms allows you to register your own components for specific fields using a powerful "tester" system.
 
 ```typescript
-import { createDefaultRegistry, rankWith, isStringType, and, hasFormat } from '@quickforms/vue';
+import { createDefaultRegistry, rankWith, isStringType, and, hasFormat } from '@quickflo/forms-vue';
 import MyCustomPhoneInput from './MyCustomPhoneInput.vue';
 
 // 1. Create a registry (start with defaults)
@@ -514,7 +514,7 @@ Custom components receive standard props:
 
 ```vue
 <script setup lang="ts">
-import { useFormField } from '@quickforms/vue';
+import { useFormField } from '@quickflo/forms-vue';
 
 const props = defineProps<{
   schema: JSONSchema;
@@ -609,9 +609,9 @@ type ValidatorFunction = (
 
 The project is structured as a monorepo:
 
-- **`@quickforms/core`**: Framework-agnostic logic (validation, schema utils, registry). Can be used to build bindings for React, Angular, etc.
-- **`@quickforms/vue`**: Vue 3 bindings using Composition API and VeeValidate.
-- **`@quickforms/quasar`** *(Coming Soon)*: Pre-configured bindings for Quasar framework.
+- **`@quickflo/forms-core`**: Framework-agnostic logic (validation, schema utils, registry). Can be used to build bindings for React, Angular, etc.
+- **`@quickflo/forms-vue`**: Vue 3 bindings using Composition API and VeeValidate.
+- **`@quickflo/forms-quasar`** *(Coming Soon)*: Pre-configured bindings for Quasar framework.
 
 ## 🎓 Supported JSON Schema Features
 
@@ -678,8 +678,8 @@ Contributions are welcome! Please read our contributing guidelines and submit PR
 
 ## 📦 Packages
 
-- **[@quickforms/core](./packages/core)** - Framework-agnostic core
-- **[@quickforms/vue](./packages/vue)** - Vue 3 bindings
+- **[@quickflo/forms-core](./packages/core)** - Framework-agnostic core
+- **[@quickflo/forms-vue](./packages/vue)** - Vue 3 bindings
 
 ## 📄 License
 

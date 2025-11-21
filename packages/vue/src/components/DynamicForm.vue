@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { computed, watch, reactive, markRaw, toRaw } from "vue";
 import { useForm } from "vee-validate";
-import { SchemaUtils } from "@quickforms/core";
-import type { JSONSchema } from "@quickforms/core";
+import { SchemaUtils } from "@quickflo/forms-core";
+import type { JSONSchema } from "@quickflo/forms-core";
 import { provideFormContext } from "../composables/useFormContext.js";
 import type { FormOptions } from "../types/index.js";
 import { createDefaultRegistry } from "../registry.js";

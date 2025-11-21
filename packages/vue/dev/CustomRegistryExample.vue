@@ -2,7 +2,7 @@
 import { ref } from 'vue';
 import DynamicForm from '../src/components/DynamicForm.vue';
 import { createDefaultRegistry, rankWith, and, isStringType, hasFormat } from '../src/index.js';
-import type { JSONSchema } from '@quickforms/core';
+import type { JSONSchema } from '@quickflo/forms-core';
 import CustomPhoneField from './CustomPhoneField.vue';
 
 // Create default registry

@@ -2,7 +2,7 @@
 import { ref, computed, watch, onMounted } from 'vue';
 import { useFormField } from '../composables/useFormField.js';
 import { generateFieldId } from '../composables/utils.js';
-import { SchemaUtils } from '@quickforms/core';
+import { SchemaUtils } from '@quickflo/forms-core';
 import FieldRenderer from './FieldRenderer.vue';
 import type { FieldProps } from '../types/index.js';
 

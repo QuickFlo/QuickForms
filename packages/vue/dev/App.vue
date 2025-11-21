@@ -3,7 +3,7 @@ import { ref, shallowRef, computed } from "vue";
 import DynamicForm from "../src/components/DynamicForm.vue";
 import CustomRegistryExample from "./CustomRegistryExample.vue";
 import ThemeExample from "./ThemeExample.vue";
-import type { JSONSchema } from "@quickforms/core";
+import type { JSONSchema } from "@quickflo/forms-core";
 
 const currentView = ref("default");
 
@@ -49,7 +49,11 @@ const conditionalSchema: JSONSchema = {
             type: { const: "individual" },
             firstName: { type: "string", title: "First Name" },
             lastName: { type: "string", title: "Last Name" },
-            ssn: { type: "string", title: "SSN", pattern: "^\\d{3}-\\d{2}-\\d{4}$" },
+            ssn: {
+              type: "string",
+              title: "SSN",
+              pattern: "^\\d{3}-\\d{2}-\\d{4}$",
+            },
           },
           required: ["firstName", "lastName", "ssn"],
         },
@@ -98,14 +102,14 @@ const fullTestSchema: JSONSchema = {
       minLength: 8,
       "x-error-messages": {
         required: "Password is required for security",
-        minLength: "Password must be at least 8 characters for your security"
-      }
+        minLength: "Password must be at least 8 characters for your security",
+      },
     },
     confirmPassword: {
       type: "string",
       format: "password",
       title: "Confirm Password",
-      description: "Re-enter your password (validated with custom validator)"
+      description: "Re-enter your password (validated with custom validator)",
     },
     website: {
       type: "string",
@@ -122,8 +126,8 @@ const fullTestSchema: JSONSchema = {
       "x-error-messages": {
         required: "We need to know your age",
         minimum: "You must be at least 18 years old to use this service",
-        maximum: "Please enter a valid age"
-      }
+        maximum: "Please enter a valid age",
+      },
     },
     score: {
       type: "integer",
@@ -186,8 +190,8 @@ const fullTestSchema: JSONSchema = {
           title: "Zip Code",
           pattern: "^\\d{5}$",
           "x-error-messages": {
-            pattern: "Zip code must be exactly 5 digits (e.g., 94102)"
-          }
+            pattern: "Zip code must be exactly 5 digits (e.g., 94102)",
+          },
         },
         state: {
           type: "string",
@@ -303,7 +307,10 @@ const fullTestSchema: JSONSchema = {
 };
 
 const formData = ref({});
-const validationState = ref<{ valid: boolean; errors: Record<string, string | undefined> }>({ valid: true, errors: {} });
+const validationState = ref<{
+  valid: boolean;
+  errors: Record<string, string | undefined>;
+}>({ valid: true, errors: {} });
 
 // Schema switcher for reactivity testing
 const currentSchema = ref<"simple" | "conditional" | "full">("full");
@@ -322,13 +329,15 @@ const activeSchema = computed(() => {
 // Mock API for async validation
 const checkUsernameAvailable = async (username: string): Promise<boolean> => {
   // Simulate API call
-  await new Promise(resolve => setTimeout(resolve, 800));
-  const takenUsernames = ['admin', 'test', 'user', 'demo'];
+  await new Promise((resolve) => setTimeout(resolve, 800));
+  const takenUsernames = ["admin", "test", "user", "demo"];
   return !takenUsernames.includes(username.toLowerCase());
 };
 
 // Validation mode for testing
-const validationMode = ref<'ValidateAndShow' | 'ValidateAndHide' | 'NoValidation'>('ValidateAndShow');
+const validationMode = ref<
+  "ValidateAndShow" | "ValidateAndHide" | "NoValidation"
+>("ValidateAndShow");
 
 // Role switcher for testing x-roles
 const currentRole = ref<"admin" | "user" | "guest">("user");
@@ -340,46 +349,54 @@ const formOptions = computed(() => ({
   validationMode: validationMode.value,
   errorMessages: {
     name: {
-      required: 'Hey! We really need your name here.',
-      minLength: 'Come on, your name is longer than that!'
+      required: "Hey! We really need your name here.",
+      minLength: "Come on, your name is longer than that!",
     },
     email: {
-      required: 'Email is mandatory, friend.',
-      format: 'That doesn\'t look like a real email address.'
-    }
+      required: "Email is mandatory, friend.",
+      format: "That doesn't look like a real email address.",
+    },
   },
   validators: {
     // Sync validator - password confirmation
     password: (value, allValues) => {
       if (allValues.confirmPassword && value !== allValues.confirmPassword) {
-        return 'Passwords must match';
+        return "Passwords must match";
       }
       return true;
     },
     confirmPassword: (value, allValues) => {
       if (value !== allValues.password) {
-        return 'Passwords must match';
+        return "Passwords must match";
       }
       return true;
     },
     // Async validator - username availability (only for simple schema)
-    ...(currentSchema.value === 'simple' ? {
-      firstName: async (value) => {
-        if (!value || value.length < 3) return true; // Let JSON Schema handle this
-        const available = await checkUsernameAvailable(value);
-        return available || 'This username is already taken (try something other than: admin, test, user, demo)';
-      }
-    } : {})
+    ...(currentSchema.value === "simple"
+      ? {
+          firstName: async (value) => {
+            if (!value || value.length < 3) return true; // Let JSON Schema handle this
+            const available = await checkUsernameAvailable(value);
+            return (
+              available ||
+              "This username is already taken (try something other than: admin, test, user, demo)"
+            );
+          },
+        }
+      : {}),
   },
   // Debounce async validators
   validatorDebounce: {
-    firstName: 500 // Wait 500ms after user stops typing
-  }
+    firstName: 500, // Wait 500ms after user stops typing
+  },
 }));
 
-const handleValidation = (result: { valid: boolean; errors: Record<string, string | undefined> }) => {
+const handleValidation = (result: {
+  valid: boolean;
+  errors: Record<string, string | undefined>;
+}) => {
   validationState.value = result;
-  console.log('Validation state:', result);
+  console.log("Validation state:", result);
 };
 
 const handleSubmit = (data: any) => {
@@ -620,7 +637,10 @@ const handleSubmit = (data: any) => {
       <!-- Data Panel -->
       <div>
         <div
-          v-if="Object.keys(validationState.errors).length > 0 && validationMode === 'ValidateAndShow'"
+          v-if="
+            Object.keys(validationState.errors).length > 0 &&
+            validationMode === 'ValidateAndShow'
+          "
           style="
             background: white;
             padding: 2rem;
@@ -641,7 +661,11 @@ const handleSubmit = (data: any) => {
             ⚠️ Validation Errors
           </h2>
           <ul style="margin: 0; padding-left: 1.5rem; line-height: 1.8">
-            <li v-for="(error, field) in validationState.errors" :key="field" style="color: #dc2626">
+            <li
+              v-for="(error, field) in validationState.errors"
+              :key="field"
+              style="color: #dc2626"
+            >
               <strong>{{ field }}:</strong> {{ error }}
             </li>
           </ul>
@@ -712,7 +736,10 @@ const handleSubmit = (data: any) => {
             <li>✅ Required fields</li>
             <li>✅ Field validation (minLength, maxLength, pattern, etc.)</li>
             <li>✅ Custom error messages (x-error-messages)</li>
-            <li>✅ Validation modes (ValidateAndShow, ValidateAndHide, NoValidation)</li>
+            <li>
+              ✅ Validation modes (ValidateAndShow, ValidateAndHide,
+              NoValidation)
+            </li>
             <li>✅ Validation events</li>
             <li>✅ Custom validators (sync & async)</li>
             <li>✅ Validator debouncing</li>

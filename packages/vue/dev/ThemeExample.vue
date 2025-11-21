@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref } from "vue";
 import DynamicForm from "../src/components/DynamicForm.vue";
-import type { JSONSchema } from "@quickforms/core";
+import type { JSONSchema } from "@quickflo/forms-core";
 
 const schema: JSONSchema = {
   type: "object",

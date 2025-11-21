@@ -1,4 +1,4 @@
-import type { JSONSchema } from '@quickforms/core';
+import type { JSONSchema } from '@quickflo/forms-core';
 
 /**
  * Generate a field ID for accessibility

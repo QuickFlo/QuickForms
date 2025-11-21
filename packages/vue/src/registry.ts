@@ -1,5 +1,5 @@
 import type { Component } from 'vue';
-import { ComponentRegistry, isStringType, isNumberType, isBooleanType, isEnumType, isDateFormat, isObjectType, isArrayType, hasOneOf, hasAnyOf, hasAllOf, rankWith } from '@quickforms/core';
+import { ComponentRegistry, isStringType, isNumberType, isBooleanType, isEnumType, isDateFormat, isObjectType, isArrayType, hasOneOf, hasAnyOf, hasAllOf, rankWith } from '@quickflo/forms-core';
 import StringField from './components/StringField.vue';
 import NumberField from './components/NumberField.vue';
 import BooleanField from './components/BooleanField.vue';
@@ -19,7 +19,7 @@ import AllOfField from './components/AllOfField.vue';
  * @example
  * ```typescript
  * import { createDefaultRegistry, rankWith } from '@quickforms/vue';
- * import { isStringType } from '@quickforms/core';
+ * import { isStringType } from '@quickflo/forms-core';
  * import CustomPhoneInput from './CustomPhoneInput.vue';
  * 
  * const registry = createDefaultRegistry();

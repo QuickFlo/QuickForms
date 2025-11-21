@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue';
-import type { JSONSchema, UISchemaElement } from '@quickforms/core';
+import type { JSONSchema, UISchemaElement } from '@quickflo/forms-core';
 import { useFormContext } from '../composables/useFormContext.js';
 
 interface Props {

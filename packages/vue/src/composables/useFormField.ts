@@ -1,7 +1,7 @@
 import { computed } from "vue";
 import { useField } from "vee-validate";
-import type { JSONSchema } from "@quickforms/core";
-import { SchemaUtils } from "@quickforms/core";
+import type { JSONSchema } from "@quickflo/forms-core";
+import { SchemaUtils } from "@quickflo/forms-core";
 import type { FormContext } from "../types/index.js";
 import { useFormContext } from "./useFormContext.js";
 

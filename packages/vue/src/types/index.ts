@@ -1,5 +1,5 @@
 import type { Component } from 'vue';
-import type { JSONSchema, UISchemaElement, TesterFunction, ComponentRegistry } from '@quickforms/core';
+import type { JSONSchema, UISchemaElement, TesterFunction, ComponentRegistry } from '@quickflo/forms-core';
 
 /**
  * Vue component with tester function
