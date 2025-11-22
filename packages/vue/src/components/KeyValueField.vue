@@ -26,11 +26,17 @@ interface KeyValuePair {
 
 let nextId = 0;
 const pairs = ref<KeyValuePair[]>([]);
+const isInternalUpdate = ref(false);
 
 // Initialize from value
 watch(
   () => value.value,
   (newValue) => {
+    if (isInternalUpdate.value) {
+      isInternalUpdate.value = false;
+      return;
+    }
+    
     if (newValue && typeof newValue === 'object' && !Array.isArray(newValue)) {
       pairs.value = Object.entries(newValue).map(([key, val]) => ({
         key,
@@ -54,6 +60,7 @@ watch(
         obj[pair.key] = pair.value;
       }
     });
+    isInternalUpdate.value = true;
     setValue(obj);
   },
   { deep: true }

@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { ref, watch } from 'vue';
+import { ref, watch, computed } from 'vue';
 import { QInput, QBtn, QIcon } from 'quasar';
-import { useFormField, generateFieldId } from '@quickflo/quickforms-vue';
+import { useFormField, generateFieldId, useFormContext } from '@quickflo/quickforms-vue';
 import type { FieldProps } from '@quickflo/quickforms-vue';
 
 const props = withDefaults(defineProps<FieldProps>(), {
@@ -15,7 +15,49 @@ const { value, setValue, label, hint, errorMessage, required } = useFormField(
   { label: props.label }
 );
 
+const formContext = useFormContext();
 const fieldId = generateFieldId(props.path);
+
+// Merge QuickForms convenience features for button customization
+const quickformsFeatures = computed(() => {
+  const globalDefaults = (formContext as any)?.quickformsDefaults?.keyvalue || {};
+  const schemaFeatures = (props.schema as any)["x-quickforms-quasar"] || {};
+
+  // Merge QBtn props: defaults -> global -> schema (schema has highest priority)
+  const addButtonDefaults = {
+    outline: true,
+    color: "primary",
+    icon: "add",
+    label: formContext?.labels?.addItem || "Add Parameter",
+    size: "sm",
+  };
+
+  const removeButtonDefaults = {
+    flat: true,
+    round: true,
+    dense: true,
+    size: "sm",
+    icon: "close",
+    color: "negative",
+  };
+
+  const addButton = {
+    ...addButtonDefaults,
+    ...(globalDefaults.addButton || {}),
+    ...(schemaFeatures.addButton || {}),
+  };
+
+  const removeButton = {
+    ...removeButtonDefaults,
+    ...(globalDefaults.removeButton || {}),
+    ...(schemaFeatures.removeButton || {}),
+  };
+
+  return {
+    addButton,
+    removeButton,
+  };
+});
 
 // Convert object to array of key-value pairs for editing
 interface KeyValuePair {
@@ -26,11 +68,17 @@ interface KeyValuePair {
 
 let nextId = 0;
 const pairs = ref<KeyValuePair[]>([]);
+const isInternalUpdate = ref(false);
 
 // Initialize from value
 watch(
   () => value.value,
   (newValue) => {
+    if (isInternalUpdate.value) {
+      isInternalUpdate.value = false;
+      return;
+    }
+    
     if (newValue && typeof newValue === 'object' && !Array.isArray(newValue)) {
       pairs.value = Object.entries(newValue).map(([key, val]) => ({
         key,
@@ -54,6 +102,7 @@ watch(
         obj[pair.key] = pair.value;
       }
     });
+    isInternalUpdate.value = true;
     setValue(obj);
   },
   { deep: true }
@@ -79,10 +128,10 @@ function removePair(id: number) {
       {{ hint }}
     </div>
 
-    <div class="q-pa-md bg-grey-1 rounded-borders">
+    <div class="q-pa-md rounded-borders">
       <div v-if="pairs.length" class="row items-center q-gutter-sm q-mb-sm">
-        <div class="col text-weight-medium text-caption text-grey-8">Key</div>
-        <div class="col text-weight-medium text-caption text-grey-8">Value</div>
+        <div class="col text-weight-medium text-caption">Key</div>
+        <div class="col text-weight-medium text-caption">Value</div>
         <div style="width: 40px"></div>
       </div>
 
@@ -110,23 +159,19 @@ function removePair(id: number) {
           :readonly="readonly"
         />
         <QBtn
-          flat
-          round
-          dense
-          icon="close"
-          color="negative"
-          size="sm"
+          v-bind="quickformsFeatures.removeButton"
           :disable="disabled || readonly"
           @click="removePair(pair.id)"
-        />
+          :title="formContext?.labels?.removeItem || 'Remove'"
+        >
+          <q-tooltip>{{
+            formContext?.labels?.removeItem || "Remove"
+          }}</q-tooltip>
+        </QBtn>
       </div>
 
       <QBtn
-        outline
-        color="primary"
-        icon="add"
-        label="Add Parameter"
-        size="sm"
+        v-bind="quickformsFeatures.addButton"
         class="full-width"
         :disable="disabled || readonly"
         @click="addPair"

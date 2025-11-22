@@ -379,6 +379,26 @@ const schema: JSONSchema = {
       },
     },
 
+    // === KEY-VALUE EDITOR (RECORD TYPE) ===
+    additionalParams: {
+      type: "object",
+      title: "Additional Parameters",
+      description: "Dynamic key-value pairs (Record<string, string>)",
+      additionalProperties: {
+        type: "string",
+      },
+    },
+
+    // === KEY-VALUE EDITOR (OAUTH EXAMPLE) ===
+    oauthHeaders: {
+      type: "object",
+      title: "Custom OAuth Headers",
+      description: "Add custom headers for OAuth requests",
+      additionalProperties: {
+        type: "string",
+      },
+    },
+
     // === URL FIELD ===
     website: {
       type: "string",
