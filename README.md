@@ -8,25 +8,20 @@
 [![npm version](https://img.shields.io/npm/v/@quickflo/quickforms.svg)](https://www.npmjs.com/package/@quickflo/quickforms)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
+
 ## ✨ Features
 
-- 🚀 **Fast & Lightweight** - ~56KB gzipped, framework-agnostic core
-- 🎨 **Themeable** - 60+ CSS variables, no design system lock-in
-- 🔧 **Escape Hatches** - Override defaults without rebuilding components
-- 📝 **JSON Schema** - Full Draft 7+ support (oneOf, anyOf, nested objects, arrays)
-- ✅ **Flexible Validation** - Three modes, custom sync/async validators
-- 🔐 **Role-Based Access** - Field-level visibility and editability control
-- 🌍 **i18n Ready** - Customize all labels and messages
-- 🧩 **Extensible** - Custom component registry with tester system
-- 💜 **Quasar Support** - Pre-styled components out of the box
+- **Fast & Lightweight** - ~56KB gzipped, framework-agnostic core
+- **Themeable** - 60+ CSS variables, no design system lock-in
+- **Escape Hatches** - Override defaults without rebuilding components
+- **JSON Schema** - Full Draft 7+ support (oneOf, anyOf, nested objects, arrays)
+- **Flexible Validation** - Three modes, custom sync/async validators
+- **Role-Based Access** - Field-level visibility and editability control
+- **i18n Ready** - Customize all labels and messages
+- **Extensible** - Custom component registry with tester system
+- **Quasar Support** - Pre-styled components out of the box
 
-## 📸 Screenshots
-
-### Quasar
 ![QuickForms with Quasar](./docs/assets/quickforms-showcase-quasar.png)
-
-### Plain Vue
-![QuickForms with Plain Vue](./docs/assets/quickforms-showcase-vue.png)
 
 ## 📦 Installation
 
@@ -65,7 +60,7 @@ const formData = ref({});
 
 ## 📚 Documentation
 
-**[View Full Documentation →](https://quickflo.github.io/quickforms)**
+**[View Full Documentation →](https://quickflo.github.io/QuickForms)**
 
 The documentation includes:
 - 🚀 **Getting Started** - Installation and basic usage

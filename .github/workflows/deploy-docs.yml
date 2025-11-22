@@ -26,8 +26,6 @@ jobs:
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
-        with:
-          version: 10
 
       - name: Setup Node
         uses: actions/setup-node@v4
@@ -51,7 +49,7 @@ jobs:
 
   deploy:
     environment:
-      name: github-pages
+      name: github-pages  # GitHub-managed environment for Pages deployment
       url: ${{ steps.deployment.outputs.page_url }}
     needs: build
     runs-on: ubuntu-latest

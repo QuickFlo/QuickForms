@@ -4,6 +4,7 @@ export default defineConfig({
   title: "QuickForms",
   description:
     "Vue 3 JSON Schema form generator with reasonable escape hatches",
+  base: "/QuickForms/",
 
   ignoreDeadLinks: true,
 
