@@ -65,7 +65,7 @@ const formData = ref({});
 
 ## 📚 Documentation
 
-**[View Full Documentation →](https://quickflo.github.io/quickforms)**
+**[View Full Documentation →](https://quickflo.github.io/QuickForms)**
 
 The documentation includes:
 - 🚀 **Getting Started** - Installation and basic usage
