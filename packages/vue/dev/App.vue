@@ -243,6 +243,14 @@ const fullTestSchema: JSONSchema = {
       "x-render": "jsoneditor",
       "x-rows": 6,
     },
+    environmentVars: {
+      type: "object",
+      title: "Environment Variables",
+      description: "Key-value pairs (Record<string, string>)",
+      additionalProperties: {
+        type: "string",
+      },
+    },
     paymentMethod: {
       type: "object",
       title: "Payment Method",

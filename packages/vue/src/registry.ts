@@ -1,5 +1,5 @@
 import type { Component } from 'vue';
-import { ComponentRegistry, isStringType, isNumberType, isBooleanType, isEnumType, isDateFormat, isObjectType, isArrayType, isJsonType, hasOneOf, hasAnyOf, hasAllOf, hasConst, rankWith } from '@quickflo/quickforms';
+import { ComponentRegistry, isStringType, isNumberType, isBooleanType, isEnumType, isDateFormat, isObjectType, isArrayType, isRecordType, isJsonType, hasOneOf, hasAnyOf, hasAllOf, hasConst, rankWith } from '@quickflo/quickforms';
 import StringField from './components/StringField.vue';
 import NumberField from './components/NumberField.vue';
 import BooleanField from './components/BooleanField.vue';
@@ -7,6 +7,7 @@ import EnumField from './components/EnumField.vue';
 import DateField from './components/DateField.vue';
 import ObjectField from './components/ObjectField.vue';
 import ArrayField from './components/ArrayField.vue';
+import KeyValueField from './components/KeyValueField.vue';
 import JsonField from './components/JsonField.vue';
 import OneOfField from './components/OneOfField.vue';
 import AllOfField from './components/AllOfField.vue';
@@ -69,7 +70,12 @@ export function createDefaultRegistry(): ComponentRegistry<Component> {
     rankWith(2, isDateFormat(schema))
   );
 
-  // Register JSON field (priority: 5, higher than object since it's more specific)
+  // Register key-value field (priority: 6, for record types with typed additionalProperties)
+  registry.register('keyvalue', KeyValueField, (schema) =>
+    rankWith(6, isRecordType(schema))
+  );
+
+  // Register JSON field (priority: 5, for freeform objects)
   registry.register('json', JsonField, (schema) =>
     rankWith(5, isJsonType(schema))
   );

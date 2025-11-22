@@ -404,6 +404,104 @@ const formOptions = {
 
 ---
 
+## KeyValueField
+
+Renders a dynamic key-value pair editor for record types.
+
+### Handles
+
+- `type: 'object'` with typed `additionalProperties` (e.g., `{ type: 'string' }`) but no defined `properties`
+
+### Example Schema
+
+**Basic record type:**
+```typescript
+{
+  type: 'object',
+  title: 'Additional Parameters',
+  description: 'Dynamic key-value pairs',
+  additionalProperties: {
+    type: 'string'
+  }
+}
+```
+
+**OAuth headers example:**
+```typescript
+{
+  type: 'object',
+  title: 'Custom OAuth Headers',
+  description: 'Add custom headers for OAuth requests',
+  additionalProperties: {
+    type: 'string'
+  }
+}
+```
+
+### Features
+
+- **Dynamic rows**: Add/remove key-value pairs
+- **Type-safe**: Values are typed based on `additionalProperties.type`
+- **Clean UI**: Grid layout with aligned inputs
+- **Theme inheritance**: Inherits from parent Quasar theme (no hardcoded colors)
+- **Validation**: Empty keys are automatically filtered out
+- **Button customization**: Customize add/remove buttons via `x-quickforms-quasar`
+
+### UI Behavior
+
+- **Add button**: Creates a new empty key-value pair
+- **Remove button**: Deletes a specific pair
+- **Auto-cleanup**: Pairs with empty keys are not saved to form data
+
+### Rendering
+
+- **Plain Vue**: Standard HTML inputs with responsive grid layout
+- **Quasar**: `QInput` components with Quasar styling and icons
+
+### Button Customization (Quasar)
+
+**Per-field customization:**
+```typescript
+{
+  type: 'object',
+  title: 'Environment Variables',
+  additionalProperties: { type: 'string' },
+  'x-quickforms-quasar': {
+    addButton: {
+      label: 'Add Variable',
+      icon: 'add_circle',
+      color: 'secondary',
+      outline: false
+    },
+    removeButton: {
+      icon: 'delete',
+      color: 'negative'
+    }
+  }
+}
+```
+
+**Global defaults:**
+```typescript
+const formOptions = {
+  quickformsDefaults: {
+    keyvalue: {
+      addButton: {
+        label: 'Add Item',
+        icon: 'add',
+        color: 'primary'
+      },
+      removeButton: {
+        icon: 'close',
+        color: 'negative'
+      }
+    }
+  }
+}
+```
+
+---
+
 ## ArrayField
 
 Renders dynamic array fields with add/remove buttons.

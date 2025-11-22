@@ -152,6 +152,11 @@ const onSubmit = handleSubmit((submittedValues) => {
   }
 });
 
+// Check if schema is a single field (not a form with multiple properties)
+const isSingleField = computed(() => {
+  return props.schema.type === "object" && !props.schema.properties;
+});
+
 // Get all top-level properties from schema
 const properties = computed(() => {
   if (props.schema.type !== "object" || !props.schema.properties) {
@@ -168,7 +173,17 @@ const properties = computed(() => {
 
 <template>
   <form class="quickform" @submit="onSubmit">
+    <!-- Single field schema (e.g., JSON editor, single object field) -->
     <FieldRenderer
+      v-if="isSingleField"
+      :schema="schema"
+      path=""
+      :disabled="options.disabled"
+      :readonly="options.readonly"
+    />
+    <!-- Multiple fields (normal form) -->
+    <FieldRenderer
+      v-else
       v-for="field in properties"
       :key="field.key"
       :schema="field.schema"
