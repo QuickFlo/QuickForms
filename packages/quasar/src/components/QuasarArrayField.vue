@@ -1,11 +1,12 @@
 <script setup lang="ts">
-import { computed } from 'vue';
-import { QCard, QCardSection, QBtn, QSeparator } from 'quasar';
-import { useFormField, useFormContext } from '@quickflo/quickforms-vue';
-import { generateFieldId } from '@quickflo/quickforms-vue';
-import { SchemaUtils } from '@quickflo/quickforms';
-import { FieldRenderer } from '@quickflo/quickforms-vue';
-import type { FieldProps } from '@quickflo/quickforms-vue';
+import { computed } from "vue";
+import { QCard, QCardSection, QBtn } from "quasar";
+import { useFormField, useFormContext } from "@quickflo/quickforms-vue";
+import { generateFieldId } from "@quickflo/quickforms-vue";
+import { SchemaUtils } from "@quickflo/quickforms";
+import { FieldRenderer } from "@quickflo/quickforms-vue";
+import type { FieldProps } from "@quickflo/quickforms-vue";
+import { mergeQuasarProps } from "../utils";
 
 const props = withDefaults(defineProps<FieldProps>(), {
   disabled: false,
@@ -22,10 +23,72 @@ const formContext = useFormContext();
 const fieldId = generateFieldId(props.path);
 const schemaUtils = new SchemaUtils();
 
+// Merge native Quasar props for the card
 const quasarProps = computed(() => {
-  const xQuasarProps = (props.schema as any)['x-quasar-props'] || {};
-  const xComponentProps = (props.schema as any)['x-component-props'] || {};
-  return { ...xComponentProps, ...xQuasarProps };
+  return mergeQuasarProps(
+    props.schema,
+    formContext?.componentDefaults as any,
+    "card"
+  );
+});
+
+// Merge QuickForms convenience features for button customization
+// Respects quickformsDefaults.array from form options
+const quickformsFeatures = computed(() => {
+  const globalDefaults = (formContext as any)?.quickformsDefaults?.array || {};
+  const schemaFeatures = (props.schema as any)["x-quickforms-quasar"] || {};
+
+  // Position is custom (not a QBtn prop)
+  const addButtonPosition =
+    schemaFeatures.addButtonPosition ??
+    globalDefaults.addButtonPosition ??
+    "bottom-left";
+
+  // Merge QBtn props: defaults -> global -> schema (schema has highest priority)
+  const addButtonDefaults = {
+    outline: true,
+    color: "primary",
+    icon: "add",
+    label: formContext?.labels?.addItem || "Add item",
+  };
+
+  const removeButtonDefaults = {
+    flat: true,
+    round: true,
+    dense: true,
+    size: "sm",
+    icon: "close",
+    color: "negative",
+  };
+
+  const addButton = {
+    ...addButtonDefaults,
+    ...(globalDefaults.addButton || {}),
+    ...(schemaFeatures.addButton || {}),
+  };
+
+  const removeButton = {
+    ...removeButtonDefaults,
+    ...(globalDefaults.removeButton || {}),
+    ...(schemaFeatures.removeButton || {}),
+  };
+
+  return {
+    addButtonPosition,
+    addButton,
+    removeButton,
+  };
+});
+
+// Determine button positioning
+const isTopPosition = computed(() => {
+  const position = quickformsFeatures.value.addButtonPosition;
+  return position === "top-left" || position === "top-right";
+});
+
+const isRightPosition = computed(() => {
+  const position = quickformsFeatures.value.addButtonPosition;
+  return position === "top-right" || position === "bottom-right";
 });
 
 // Ensure value is an array
@@ -54,12 +117,12 @@ const removeItem = (index: number) => {
   value.value = newValue;
 };
 
-const moveItem = (index: number, direction: 'up' | 'down') => {
-  if (direction === 'up' && index === 0) return;
-  if (direction === 'down' && index === arrayValue.value.length - 1) return;
+const moveItem = (index: number, direction: "up" | "down") => {
+  if (direction === "up" && index === 0) return;
+  if (direction === "down" && index === arrayValue.value.length - 1) return;
 
   const newValue = [...arrayValue.value];
-  const targetIndex = direction === 'up' ? index - 1 : index + 1;
+  const targetIndex = direction === "up" ? index - 1 : index + 1;
   const temp = newValue[index];
   newValue[index] = newValue[targetIndex];
   newValue[targetIndex] = temp;
@@ -81,28 +144,28 @@ const canRemove = computed(() => {
 });
 
 const getItemLabel = (index: number) => {
-  const itemLabelPattern = (props.schema as any)['x-item-label'];
+  const itemLabelPattern = (props.schema as any)["x-item-label"];
 
-  if (itemLabelPattern === 'none' || itemLabelPattern === false) {
-    return '';
+  if (itemLabelPattern === "none" || itemLabelPattern === false) {
+    return "";
   }
 
-  if (typeof itemLabelPattern === 'string' && itemLabelPattern.includes('{{')) {
+  if (typeof itemLabelPattern === "string" && itemLabelPattern.includes("{{")) {
     const itemValue = arrayValue.value[index];
-    if (typeof itemValue === 'object' && itemValue !== null) {
+    if (typeof itemValue === "object" && itemValue !== null) {
       let label = itemLabelPattern;
       let hasReplacement = false;
 
       label = label.replace(/\{\{([^}]+)\}\}/g, (_: string, key: string) => {
         const val = itemValue[key.trim()];
-        if (val !== undefined && val !== null && val !== '') {
+        if (val !== undefined && val !== null && val !== "") {
           hasReplacement = true;
           return String(val);
         }
-        return '';
+        return "";
       });
 
-      label = label.replace(/^\s*-\s*/, '').replace(/\s*-\s*$/, '');
+      label = label.replace(/^\s*-\s*/, "").replace(/\s*-\s*$/, "");
 
       if (hasReplacement && label.trim()) {
         return label.trim();
@@ -110,23 +173,60 @@ const getItemLabel = (index: number) => {
     }
   }
 
-  const title = itemsSchema.value?.title || 'Item';
+  const title = itemsSchema.value?.title || "Item";
   return `${title} #${index + 1}`;
 };
 </script>
 
 <template>
   <div :id="fieldId">
-    <div v-if="label" style="font-weight: 500; margin-bottom: 0.5rem">
-      {{ label }}
-      <span v-if="schema.required" style="color: red; margin-left: 0.125rem">*</span>
+    <!-- Label (always shows if present) -->
+    <div 
+      v-if="label"
+      :style="{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: isTopPosition && isRightPosition ? 'space-between' : 'flex-start',
+        marginBottom: '0.5rem'
+      }"
+    >
+      <div style="font-weight: 500;">
+        {{ label }}
+        <span v-if="schema.required" style="color: red; margin-left: 0.125rem"
+          >*</span
+        >
+      </div>
+      <!-- Add button on same line only for top-right -->
+      <div v-if="isTopPosition && isRightPosition">
+        <QBtn
+          v-bind="quickformsFeatures.addButton"
+          :disable="!canAdd"
+          @click="addItem"
+        />
+      </div>
     </div>
 
-    <div v-if="hint" style="font-size: 0.875rem; color: #666; margin-bottom: 0.5rem">
+    <!-- Add button below label for top-left -->
+    <div
+      v-if="isTopPosition && !isRightPosition"
+      style="text-align: left; margin-bottom: 0.5rem;"
+    >
+      <QBtn
+        v-bind="quickformsFeatures.addButton"
+        :disable="!canAdd"
+        @click="addItem"
+      />
+    </div>
+
+    <div
+      v-if="hint"
+      style="font-size: 0.875rem; color: #666; margin-bottom: 0.5rem"
+    >
       {{ hint }}
     </div>
 
     <div style="display: flex; flex-direction: column; gap: 0.75rem">
+
       <QCard
         v-for="(item, index) in arrayValue"
         :key="index"
@@ -170,32 +270,33 @@ const getItemLabel = (index: number) => {
               <q-tooltip>Move Down</q-tooltip>
             </QBtn>
             <QBtn
-              flat
-              round
-              dense
-              size="sm"
-              icon="close"
-              color="negative"
+              v-bind="quickformsFeatures.removeButton"
               :disable="!canRemove"
               @click="removeItem(index)"
               :title="formContext?.labels?.removeItem || 'Remove'"
             >
-              <q-tooltip>Remove</q-tooltip>
+              <q-tooltip>{{
+                formContext?.labels?.removeItem || "Remove"
+              }}</q-tooltip>
             </QBtn>
           </div>
         </QCardSection>
       </QCard>
 
-      <div v-if="arrayValue.length === 0" style="color: #999; font-style: italic">
+      <div
+        v-if="arrayValue.length === 0"
+        style="color: #999; font-style: italic"
+      >
         No items
       </div>
 
-      <div>
+      <!-- Add button (bottom position) -->
+      <div
+        v-if="!isTopPosition"
+        :style="{ textAlign: isRightPosition ? 'right' : 'left' }"
+      >
         <QBtn
-          outline
-          color="primary"
-          icon="add"
-          :label="formContext?.labels?.addItem || 'Add item'"
+          v-bind="quickformsFeatures.addButton"
           :disable="!canAdd"
           @click="addItem"
         />

@@ -72,17 +72,6 @@ watch(
   },
   { immediate: true }
 );
-const rules = computed(() => {
-  const rulesList: any[] = [];
-  if (props.schema.required) {
-    rulesList.push(
-      (val: any) =>
-        (val !== null && val !== undefined && val !== "") ||
-        "This field is required"
-    );
-  }
-  return rulesList;
-});
 
 // Check if autocomplete should be enabled
 // Enabled by default, can be disabled via x-component-props or componentDefaults
@@ -130,7 +119,6 @@ const filterFn = (val: string, update: (fn: () => void) => void) => {
     :error-message="errorMessage || undefined"
     :disable="disabled"
     :readonly="readonly"
-    :rules="rules"
     :required="schema.required"
     :use-input="useFilter"
     :input-debounce="0"

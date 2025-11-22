@@ -174,6 +174,196 @@ const schema = {
 };
 ```
 
+### QuickForms Convenience Features
+
+In addition to native Quasar props, QuickForms provides convenience features via `x-quickforms-quasar`. These are NOT native Quasar props - they're shortcuts we provide that get rendered into the appropriate Quasar component features (like icons into slots).
+
+**Why two namespaces?**
+- `x-quasar-props` - Native Quasar component props (passed directly via `v-bind`)
+- `x-quickforms-quasar` - QuickForms convenience features (interpreted and rendered by our components)
+
+This separation keeps the API clean and makes it clear what's native Quasar vs our convenience layer.
+
+#### Icon Support
+
+Add icons to input fields easily:
+
+```javascript
+const schema = {
+  type: 'object',
+  properties: {
+    username: {
+      type: 'string',
+      title: 'Username',
+      'x-quickforms-quasar': {
+        prependIcon: 'person',  // Icon on the left
+        iconColor: 'primary'
+      }
+    },
+    email: {
+      type: 'string',
+      format: 'email',
+      'x-quickforms-quasar': {
+        prependIcon: 'mail'
+      }
+    },
+    search: {
+      type: 'string',
+      'x-quickforms-quasar': {
+        appendIcon: 'search',  // Icon on the right
+        iconSize: 'md'
+      }
+    },
+    password: {
+      type: 'string',
+      format: 'password',
+      // Password fields automatically get show/hide toggle
+      // You can still add a prepend icon:
+      'x-quickforms-quasar': {
+        prependIcon: 'lock'
+      }
+    }
+  }
+};
+```
+
+**Available icon properties:**
+- `prependIcon` - Icon name for left side of input
+- `appendIcon` - Icon name for right side of input (not available for password fields or selects)
+- `iconColor` - Quasar color for icons (default: `'grey-7'`)
+- `iconSize` - Icon size: `'xs'`, `'sm'`, `'md'`, `'lg'`, `'xl'` (default: `'sm'`)
+
+**Icon names:** Use Material Icons names (Quasar's default): `person`, `mail`, `search`, `lock`, `visibility`, `phone`, etc. See [Material Icons](https://fonts.google.com/icons) for the full list.
+
+**Note:** Password fields automatically include a show/hide toggle icon in the append slot, so `appendIcon` is ignored for password fields. Select fields use the append slot for the dropdown indicator.
+
+#### Global Icon Defaults
+
+Set icon styling globally:
+
+```typescript
+const formOptions: QuasarFormOptions = {
+  registry: createQuasarRegistry(),
+  componentDefaults: {
+    input: {
+      outlined: true
+    }
+  },
+  quickformsDefaults: {
+    input: {
+      iconColor: 'primary',
+      iconSize: 'sm'
+    }
+  }
+};
+```
+
+#### Combining Native Props and Convenience Features
+
+You can use both namespaces together:
+
+```javascript
+{
+  type: 'string',
+  format: 'email',
+  // Native Quasar props
+  'x-quasar-props': {
+    outlined: true,
+    dense: true,
+    clearable: true
+  },
+  // QuickForms convenience features
+  'x-quickforms-quasar': {
+    prependIcon: 'mail',
+    iconColor: 'primary'
+  }
+}
+```
+
+#### Array Field Customization
+
+Customize array field buttons and layout with **full QBtn props support**:
+
+```javascript
+const schema = {
+  type: 'object',
+  properties: {
+    tags: {
+      type: 'array',
+      items: { type: 'string' },
+      title: 'Tags',
+      'x-quickforms-quasar': {
+        addButtonPosition: 'top-right',  // 'top-left', 'top-right', 'bottom-left', 'bottom-right'
+        addButton: {
+          // Native QBtn props - supports ALL Quasar button properties!
+          label: 'Add Tag',
+          icon: 'add_circle',
+          color: 'secondary',
+          size: 'md',
+          // Can use: push, fab, unelevated, glossy, etc.
+        },
+        removeButton: {
+          icon: 'delete',
+          color: 'negative',
+        }
+      }
+    },
+    team: {
+      type: 'array',
+      items: {
+        type: 'object',
+        properties: {
+          name: { type: 'string' },
+          role: { type: 'string' }
+        }
+      },
+      'x-quickforms-quasar': {
+        addButtonPosition: 'bottom-right',
+        addButton: {
+          label: 'Add Team Member',
+          icon: 'person_add',
+          color: 'positive',
+        }
+      }
+    }
+  }
+};
+```
+
+**Available array customization properties:**
+
+- `addButtonPosition` - Position: `'top-left'`, `'top-right'`, `'bottom-left'`, `'bottom-right'` (default: `'bottom-left'`)
+- `addButton` - **Native QBtn props** (supports ALL Quasar button properties)
+  - Default: `{ outline: true, color: 'primary', icon: 'add', label: 'Add item' }`
+  - Examples: `label`, `icon`, `color`, `size`, `class`, `style`, `push`, `fab`, `glossy`, `unelevated`, etc.
+- `removeButton` - **Native QBtn props** (supports ALL Quasar button properties)
+  - Default: `{ flat: true, round: true, dense: true, size: 'sm', icon: 'close', color: 'negative' }`
+
+**Why this approach?** Instead of us defining individual properties like `addButtonLabel`, `addButtonIcon`, etc., we pass native Quasar `QBtn` props directly. This gives you access to **ALL** QBtn features without limitation!
+
+**Set global array defaults:**
+
+```typescript
+const formOptions: QuasarFormOptions = {
+  registry: createQuasarRegistry(),
+  quickformsDefaults: {
+    array: {
+      // Apply to ALL arrays unless overridden per-field
+      addButtonPosition: 'top-right',
+      addButton: {
+        color: 'secondary',
+        size: 'lg',
+        glossy: true,
+      },
+      removeButton: {
+        icon: 'delete',
+        color: 'warning',
+      },
+    },
+  },
+};
+```
+
 ### Custom Component Registration
 
 ```vue

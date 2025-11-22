@@ -241,7 +241,6 @@ registry.register('phone', PhoneInput, (schema) =>
 - `.quickform-oneof-field` - OneOf selectors
 
 ### Buttons
-- `.quickform-submit` - Submit button
 - `.quickform-btn` - Generic button
 - `.quickform-btn-icon` - Icon buttons (array add/remove)
 - `.quickform-password-toggle` - Password visibility toggle

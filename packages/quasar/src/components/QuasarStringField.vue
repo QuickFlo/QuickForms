@@ -1,10 +1,11 @@
 <script setup lang="ts">
-import { computed } from 'vue';
-import { QInput } from 'quasar';
+import { computed, ref } from 'vue';
+import { QInput, QIcon } from 'quasar';
 import { useFormField, useFormContext } from '@quickflo/quickforms-vue';
 import { generateFieldId } from '@quickflo/quickforms-vue';
 import type { FieldProps } from '@quickflo/quickforms-vue';
-import { mergeQuasarProps } from '../utils';
+import { mergeQuasarProps, mergeQuickFormsQuasarFeatures } from '../utils';
+import type { QuasarFormOptions } from '../types';
 
 const props = withDefaults(defineProps<FieldProps>(), {
   disabled: false,
@@ -20,7 +21,7 @@ const { value, errorMessage, label, hint } = useFormField(
 const formContext = useFormContext();
 const fieldId = generateFieldId(props.path);
 
-// Merge global defaults, component defaults, and schema-level props
+// Merge native Quasar props
 const quasarProps = computed(() => {
   return mergeQuasarProps(
     props.schema,
@@ -29,10 +30,24 @@ const quasarProps = computed(() => {
   );
 });
 
+// Merge QuickForms convenience features
+const quickformsFeatures = computed(() => {
+  return mergeQuickFormsQuasarFeatures(
+    props.schema,
+    (formContext as any)?.quickformsDefaults,
+    'input'
+  );
+});
+
+// Password visibility toggle
+const isPasswordVisible = ref(false);
+
 const inputType = computed(() => {
   if (props.schema.format === 'email') return 'email';
   if (props.schema.format === 'url' || props.schema.format === 'uri') return 'url';
-  if (props.schema.format === 'password') return 'password';
+  if (props.schema.format === 'password') {
+    return isPasswordVisible.value ? 'text' : 'password';
+  }
   if (props.schema.format === 'textarea') return 'textarea';
   return 'text';
 });
@@ -44,33 +59,22 @@ const isTextarea = computed(() => {
   );
 });
 
-const rules = computed(() => {
-  const rulesList: any[] = [];
-  if (props.schema.required) {
-    rulesList.push((val: string) => (val && val.length > 0) || 'This field is required');
-  }
-  if (props.schema.minLength) {
-    rulesList.push(
-      (val: string) => 
-        !val || val.length >= (props.schema.minLength || 0) || 
-        `Minimum length is ${props.schema.minLength}`
-    );
-  }
-  if (props.schema.maxLength) {
-    rulesList.push(
-      (val: string) => 
-        !val || val.length <= (props.schema.maxLength || Infinity) || 
-        `Maximum length is ${props.schema.maxLength}`
-    );
-  }
-  if (props.schema.pattern) {
-    const regex = new RegExp(props.schema.pattern);
-    rulesList.push(
-      (val: string) => !val || regex.test(val) || 'Invalid format'
-    );
-  }
-  return rulesList;
-});
+
+const isPasswordField = computed(() => props.schema.format === 'password');
+
+// Icon configuration with proper defaults
+const iconConfig = computed(() => ({
+  color: quickformsFeatures.value.iconColor || 'grey-7',
+  size: quickformsFeatures.value.iconSize || 'sm'
+}));
+
+// Show prepend icon unless it conflicts with something else
+const showPrependIcon = computed(() => !!quickformsFeatures.value.prependIcon);
+
+// Show append icon only if NOT a password field (password toggle takes precedence)
+const showAppendIcon = computed(() => 
+  !isPasswordField.value && !!quickformsFeatures.value.appendIcon
+);
 </script>
 
 <template>
@@ -84,12 +88,36 @@ const rules = computed(() => {
     :error-message="errorMessage || undefined"
     :disable="disabled"
     :readonly="readonly"
-    :rules="rules"
     :required="schema.required"
     v-bind="quasarProps"
   >
     <template v-if="schema.required" #label>
       {{ label }} <span style="color: red">*</span>
+    </template>
+    
+    <!-- Prepend icon slot -->
+    <template v-if="showPrependIcon" #prepend>
+      <QIcon
+        :name="quickformsFeatures.prependIcon!"
+        :color="iconConfig.color"
+        :size="iconConfig.size"
+      />
+    </template>
+    
+    <!-- Append slot: password toggle takes precedence over custom icons -->
+    <template v-if="isPasswordField" #append>
+      <QIcon
+        :name="isPasswordVisible ? 'visibility_off' : 'visibility'"
+        class="cursor-pointer"
+        @click="isPasswordVisible = !isPasswordVisible"
+      />
+    </template>
+    <template v-else-if="showAppendIcon" #append>
+      <QIcon
+        :name="quickformsFeatures.appendIcon!"
+        :color="iconConfig.color"
+        :size="iconConfig.size"
+      />
     </template>
   </QInput>
 </template>

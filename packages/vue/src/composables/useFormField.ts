@@ -116,44 +116,49 @@ export function useFormField(
       }
     }
 
-    // Skip further validation if value is empty and not required
-    if (value === undefined || value === null || value === "") {
-      return true;
-    }
-
     // String validations
-    if (schema.type === "string" && typeof value === "string") {
-      if (schema.minLength !== undefined && value.length < schema.minLength) {
+    if (schema.type === "string") {
+      // minLength validation applies even to empty strings if field has minLength constraint
+      if (schema.minLength !== undefined && typeof value === "string" && value.length < schema.minLength) {
         return getErrorMessage(
           "minLength",
           `Must be at least ${schema.minLength} characters`
         );
       }
-      if (schema.maxLength !== undefined && value.length > schema.maxLength) {
-        return getErrorMessage(
-          "maxLength",
-          `Must be at most ${schema.maxLength} characters`
-        );
+      
+      // Skip further validation if value is empty and not required
+      if (value === undefined || value === null || value === "") {
+        return true;
       }
-      if (schema.pattern) {
-        try {
-          if (!new RegExp(schema.pattern).test(value)) {
-            return getErrorMessage("pattern", "Invalid format");
-          }
-        } catch (e) {
-          console.warn("Invalid regex pattern:", schema.pattern);
+      
+      // Continue with other string validations only if value is not empty
+      if (typeof value === "string") {
+        if (schema.maxLength !== undefined && value.length > schema.maxLength) {
+          return getErrorMessage(
+            "maxLength",
+            `Must be at most ${schema.maxLength} characters`
+          );
         }
-      }
+        if (schema.pattern) {
+          try {
+            if (!new RegExp(schema.pattern).test(value)) {
+              return getErrorMessage("pattern", "Invalid format");
+            }
+          } catch (e) {
+            console.warn("Invalid regex pattern:", schema.pattern);
+          }
+        }
 
-      // Format validations
-      if (schema.format === "email" && !isValidEmail(value)) {
-        return getErrorMessage("format", "Invalid email address");
-      }
-      if (
-        (schema.format === "url" || schema.format === "uri") &&
-        !isValidUrl(value)
-      ) {
-        return getErrorMessage("format", "Invalid URL");
+        // Format validations
+        if (schema.format === "email" && !isValidEmail(value)) {
+          return getErrorMessage("format", "Invalid email address");
+        }
+        if (
+          (schema.format === "url" || schema.format === "uri") &&
+          !isValidUrl(value)
+        ) {
+          return getErrorMessage("format", "Invalid URL");
+        }
       }
     }
 
@@ -267,8 +272,9 @@ export function useFormField(
     path,
     validationMode === "NoValidation" ? undefined : finalValidationRules,
     {
-      validateOnValueUpdate: true, // Always validate on update for custom validators
+      validateOnValueUpdate: true, // Always validate on update
       validateOnMount: false,
+      // Note: VeeValidate will still validate, we just control when errors are displayed
     }
   );
 

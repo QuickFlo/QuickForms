@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { useFormField } from '../src/composables/useFormField.js';
-import { generateFieldId } from '../src/composables/utils.js';
-import type { FieldProps } from '../src/types/index.js';
+import { useFormField } from "../src/composables/useFormField.js";
+import { generateFieldId } from "../src/composables/utils.js";
+import type { FieldProps } from "../src/types/index.js";
 
 const props = withDefaults(defineProps<FieldProps>(), {
   disabled: false,
@@ -18,20 +18,20 @@ const fieldId = generateFieldId(props.path);
 
 // Format phone number as user types
 const formatPhoneNumber = (event: Event) => {
-  const input = event.target as HTMLInputElement;
-  const cleaned = input.value.replace(/\D/g, '');
-  
-  let formatted = '';
+  const input = event.target as any;
+  const cleaned = input.value.replace(/\D/g, "");
+
+  let formatted = "";
   if (cleaned.length > 0) {
-    formatted = '(' + cleaned.substring(0, 3);
+    formatted = "(" + cleaned.substring(0, 3);
   }
   if (cleaned.length > 3) {
-    formatted += ') ' + cleaned.substring(3, 6);
+    formatted += ") " + cleaned.substring(3, 6);
   }
   if (cleaned.length > 6) {
-    formatted += '-' + cleaned.substring(6, 10);
+    formatted += "-" + cleaned.substring(6, 10);
   }
-  
+
   value.value = formatted;
 };
 </script>

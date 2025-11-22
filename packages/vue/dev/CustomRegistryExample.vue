@@ -1,48 +1,53 @@
 <script setup lang="ts">
-import { ref } from 'vue';
-import DynamicForm from '../src/components/DynamicForm.vue';
-import { createDefaultRegistry, rankWith, and, isStringType, hasFormat } from '../src/index.js';
-import type { JSONSchema } from '@quickflo/forms-core';
-import CustomPhoneField from './CustomPhoneField.vue';
+import { ref } from "vue";
+import DynamicForm from "../src/components/DynamicForm.vue";
+import {
+  createDefaultRegistry,
+  rankWith,
+  and,
+  isStringType,
+  hasFormat,
+} from "../src/index.js";
+import type { JSONSchema } from "@quickflo/quickforms";
+import CustomPhoneField from "./CustomPhoneField.vue";
 
 // Create default registry
 const customRegistry = createDefaultRegistry();
 
 // Register custom phone component with high priority
 // It will match any string field with format: 'phone'
-customRegistry.register('phone', CustomPhoneField, (schema) =>
-  rankWith(10, and(isStringType, hasFormat('phone'))(schema))
+customRegistry.register("phone", CustomPhoneField, (schema) =>
+  rankWith(10, and(isStringType, hasFormat("phone"))(schema))
 );
 
 const schema: JSONSchema = {
-  type: 'object',
+  type: "object",
   properties: {
     name: {
-      type: 'string',
-      title: 'Full Name',
-      minLength: 2
+      type: "string",
+      title: "Full Name",
+      minLength: 2,
     },
     phone: {
-      type: 'string',
-      format: 'phone',
-      title: 'Phone Number',
-      description: 'Enter your US phone number',
-      pattern: '^\\([0-9]{3}\\) [0-9]{3}-[0-9]{4}$'
+      type: "string",
+      format: "phone",
+      title: "Phone Number",
+      description: "Enter your US phone number",
+      pattern: "^\\([0-9]{3}\\) [0-9]{3}-[0-9]{4}$",
     },
     email: {
-      type: 'string',
-      format: 'email',
-      title: 'Email Address'
-    }
+      type: "string",
+      format: "email",
+      title: "Email Address",
+    },
   },
-  required: ['name', 'phone', 'email']
+  required: ["name", "phone", "email"],
 };
 
 const formData = ref({});
 
 const handleSubmit = (data: any) => {
-  console.log('✅ Form with custom component submitted!', data);
-  alert('Form submitted! Check console for data.');
+  console.log("✅ Form with custom component submitted!", data);
 };
 </script>
 
@@ -73,7 +78,8 @@ const handleSubmit = (data: any) => {
 
         <div class="code-display">
           <h2>How It Works</h2>
-          <pre>import { createDefaultRegistry, rankWith } from '@quickforms/vue';
+          <pre>
+import { createDefaultRegistry, rankWith } from '@quickforms/vue';
 import CustomPhoneField from './CustomPhoneField.vue';
 
 // Create registry with defaults
@@ -92,7 +98,8 @@ registry.register('phone', CustomPhoneField, (schema) =>
   :schema="schema" 
   v-model="data"
   :options="{ registry }"
-/></pre>
+/></pre
+          >
         </div>
       </div>
     </div>
