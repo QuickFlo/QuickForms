@@ -10,6 +10,7 @@ import {
   isDateTimeFormat,
   isObjectType,
   isArrayType,
+  isRecordType,
   isJsonType,
   hasOneOf,
   hasAnyOf,
@@ -26,6 +27,7 @@ import QuasarTimeField from './components/QuasarTimeField.vue';
 import QuasarDateTimeField from './components/QuasarDateTimeField.vue';
 import QuasarObjectField from './components/QuasarObjectField.vue';
 import QuasarArrayField from './components/QuasarArrayField.vue';
+import QuasarKeyValueField from './components/QuasarKeyValueField.vue';
 import QuasarJsonField from './components/QuasarJsonField.vue';
 import QuasarMultiEnumField from './components/QuasarMultiEnumField.vue';
 import QuasarOneOfField from './components/QuasarOneOfField.vue';
@@ -100,7 +102,12 @@ export function createQuasarRegistry(): ComponentRegistry<Component> {
     rankWith(3, isDateTimeFormat(schema))
   );
 
-  // Register JSON field (priority: 5, higher than object since it's more specific)
+  // Register key-value field (priority: 6, for record types with typed additionalProperties)
+  registry.register('keyvalue', QuasarKeyValueField, (schema) =>
+    rankWith(6, isRecordType(schema))
+  );
+
+  // Register JSON field (priority: 5, for freeform objects)
   registry.register('json', QuasarJsonField, (schema) =>
     rankWith(5, isJsonType(schema))
   );

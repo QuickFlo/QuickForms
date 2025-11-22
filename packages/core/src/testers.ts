@@ -43,8 +43,22 @@ export const isArrayType = (schema: JSONSchema): boolean => {
 };
 
 /**
+ * Record type tester - for dynamic key-value pairs
+ * Matches objects with typed additionalProperties (e.g., Record<string, string>)
+ */
+export const isRecordType = (schema: JSONSchema): boolean => {
+  return (
+    schema.type === 'object' &&
+    schema.additionalProperties !== undefined &&
+    typeof schema.additionalProperties === 'object' &&
+    Object.keys(schema.additionalProperties).length > 0 && // Has typed additionalProperties
+    (!schema.properties || Object.keys(schema.properties).length === 0)
+  );
+};
+
+/**
  * JSON object tester - for freeform JSON editing
- * Matches objects with additionalProperties but no defined properties,
+ * Matches objects with empty additionalProperties (freeform),
  * or any field with x-render: "jsoneditor"
  */
 export const isJsonType = (schema: JSONSchema): boolean => {
@@ -53,10 +67,12 @@ export const isJsonType = (schema: JSONSchema): boolean => {
     return true;
   }
   
-  // Automatic detection: object with additionalProperties but no defined properties
+  // Automatic detection: object with additionalProperties={} (empty, freeform)
   return (
     schema.type === 'object' &&
     schema.additionalProperties !== undefined &&
+    typeof schema.additionalProperties === 'object' &&
+    Object.keys(schema.additionalProperties).length === 0 && // Empty = freeform
     (!schema.properties || Object.keys(schema.properties).length === 0)
   );
 };
