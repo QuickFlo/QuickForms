@@ -353,6 +353,27 @@ const schema: JSONSchema = {
       },
     },
 
+    // === JSON EDITOR (AUTO-DETECTED) ===
+    customConfig: {
+      type: "object",
+      title: "Custom Configuration",
+      description: "Freeform JSON object (auto-detected via additionalProperties)",
+      additionalProperties: {},
+      "x-rows": 8,
+    },
+
+    // === JSON EDITOR (EXPLICIT) ===
+    metadata: {
+      type: "object",
+      title: "Metadata",
+      description: "Explicit JSON editor via x-render extension",
+      "x-render": "jsoneditor",
+      "x-rows": 6,
+      "x-quasar-props": {
+        dense: false,
+      },
+    },
+
     // === URL FIELD ===
     website: {
       type: "string",

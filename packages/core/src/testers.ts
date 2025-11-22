@@ -42,6 +42,25 @@ export const isArrayType = (schema: JSONSchema): boolean => {
   return schema.type === 'array';
 };
 
+/**
+ * JSON object tester - for freeform JSON editing
+ * Matches objects with additionalProperties but no defined properties,
+ * or any field with x-render: "jsoneditor"
+ */
+export const isJsonType = (schema: JSONSchema): boolean => {
+  // Explicit opt-in via x-render extension
+  if ((schema as any)['x-render'] === 'jsoneditor') {
+    return true;
+  }
+  
+  // Automatic detection: object with additionalProperties but no defined properties
+  return (
+    schema.type === 'object' &&
+    schema.additionalProperties !== undefined &&
+    (!schema.properties || Object.keys(schema.properties).length === 0)
+  );
+};
+
 export const isNullType = (schema: JSONSchema): boolean => {
   return schema.type === 'null';
 };

@@ -11,6 +11,7 @@ export { default as QuasarTimeField } from './components/QuasarTimeField.vue';
 export { default as QuasarDateTimeField } from './components/QuasarDateTimeField.vue';
 export { default as QuasarObjectField } from './components/QuasarObjectField.vue';
 export { default as QuasarArrayField } from './components/QuasarArrayField.vue';
+export { default as QuasarJsonField } from './components/QuasarJsonField.vue';
 export { default as QuasarMultiEnumField } from './components/QuasarMultiEnumField.vue';
 export { default as QuasarOneOfField } from './components/QuasarOneOfField.vue';
 export { default as QuasarAllOfField } from './components/QuasarAllOfField.vue';
@@ -51,6 +52,7 @@ export {
   isEnumType,
   isObjectType,
   isArrayType,
+  isJsonType,
   isNullType,
   // Format testers
   isEmailFormat,
