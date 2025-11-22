@@ -63,15 +63,6 @@ const withSeconds = computed(() => {
   return quasarProps.value.withSeconds || false;
 });
 
-const rules = computed(() => {
-  const rulesList: any[] = [];
-  if (props.schema.required) {
-    rulesList.push(
-      (val: string) => (val && val.length > 0) || "This field is required"
-    );
-  }
-  return rulesList;
-});
 
 const setNow = () => {
   const now = new Date();
@@ -103,7 +94,6 @@ const setNow = () => {
     :error-message="errorMessage || undefined"
     :disable="disabled"
     :readonly="readonly"
-    :rules="rules"
     :required="schema.required"
     v-bind="quasarProps"
   >

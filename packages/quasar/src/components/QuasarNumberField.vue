@@ -33,61 +33,6 @@ const step = computed(() => {
   return props.schema.type === "integer" ? 1 : undefined;
 });
 
-const rules = computed(() => {
-  const rulesList: any[] = [];
-  if (props.schema.required) {
-    rulesList.push(
-      (val: number) =>
-        (val !== null && val !== undefined) || "This field is required"
-    );
-  }
-  if (props.schema.minimum !== undefined) {
-    rulesList.push(
-      (val: number) =>
-        val === null ||
-        val === undefined ||
-        val >= (props.schema.minimum || -Infinity) ||
-        `Minimum value is ${props.schema.minimum}`
-    );
-  }
-  if (props.schema.maximum !== undefined) {
-    rulesList.push(
-      (val: number) =>
-        val === null ||
-        val === undefined ||
-        val <= (props.schema.maximum || Infinity) ||
-        `Maximum value is ${props.schema.maximum}`
-    );
-  }
-  if (props.schema.exclusiveMinimum !== undefined) {
-    rulesList.push(
-      (val: number) =>
-        val === null ||
-        val === undefined ||
-        val > (props.schema.exclusiveMinimum || -Infinity) ||
-        `Must be greater than ${props.schema.exclusiveMinimum}`
-    );
-  }
-  if (props.schema.exclusiveMaximum !== undefined) {
-    rulesList.push(
-      (val: number) =>
-        val === null ||
-        val === undefined ||
-        val < (props.schema.exclusiveMaximum || Infinity) ||
-        `Must be less than ${props.schema.exclusiveMaximum}`
-    );
-  }
-  if (props.schema.multipleOf) {
-    rulesList.push(
-      (val: number) =>
-        val === null ||
-        val === undefined ||
-        val % (props.schema.multipleOf || 1) === 0 ||
-        `Must be a multiple of ${props.schema.multipleOf}`
-    );
-  }
-  return rulesList;
-});
 </script>
 
 <template>
@@ -101,7 +46,6 @@ const rules = computed(() => {
     :error-message="errorMessage || undefined"
     :disable="disabled"
     :readonly="readonly"
-    :rules="rules"
     :required="schema.required"
     :step="step"
     v-bind="quasarProps"

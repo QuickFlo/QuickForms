@@ -11,7 +11,7 @@ const props = withDefaults(defineProps<FieldProps>(), {
   readonly: false,
 });
 
-const { value, errorMessage, label, hint } = useFormField(
+const { value, errorMessage, label, hint, setValue } = useFormField(
   props.path,
   props.schema,
   { label: props.label }
@@ -20,9 +20,10 @@ const { value, errorMessage, label, hint } = useFormField(
 const formContext = useFormContext();
 const fieldId = generateFieldId(props.path);
 
-// Ensure value is an array
+// Ensure value is an array (initialize without triggering validation)
 if (!Array.isArray(value.value)) {
-  value.value = [];
+  // Use setValue with shouldValidate: false to avoid triggering dirty state
+  setValue([], false);
 }
 
 const quasarProps = computed(() => {
@@ -86,29 +87,6 @@ watch(
   { immediate: true }
 );
 
-const rules = computed(() => {
-  const rulesList: any[] = []
-  if (props.schema.required) {
-    rulesList.push(
-      (val: any[]) => (val && val.length > 0) || 'At least one item is required'
-    );
-  }
-  if (props.schema.minItems) {
-    rulesList.push(
-      (val: any[]) =>
-        !val || val.length >= (props.schema.minItems || 0) ||
-        `Select at least ${props.schema.minItems} items`
-    );
-  }
-  if (props.schema.maxItems) {
-    rulesList.push(
-      (val: any[]) =>
-        !val || val.length <= (props.schema.maxItems || Infinity) ||
-        `Select at most ${props.schema.maxItems} items`
-    );
-  }
-  return rulesList;
-});
 
 // Check if autocomplete should be enabled (default: true)
 const useFilter = computed(() => {
@@ -153,7 +131,6 @@ const filterFn = (val: string, update: (fn: () => void) => void) => {
     :error-message="errorMessage || undefined"
     :disable="disabled"
     :readonly="readonly"
-    :rules="rules"
     :required="schema.required"
     :use-input="useFilter"
     :input-debounce="0"

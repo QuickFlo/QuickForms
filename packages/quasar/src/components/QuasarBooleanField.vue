@@ -36,7 +36,6 @@ const quasarProps = computed(() => {
     <QCheckbox
       :id="fieldId"
       v-model="value"
-      :label="label"
       :disable="disabled"
       :readonly="readonly"
       :toggle-indeterminate="false"

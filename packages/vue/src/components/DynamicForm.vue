@@ -37,7 +37,8 @@ const { handleSubmit, values, setValues, errors, meta } = useForm({
   initialValues:
     props.options.useDefaults !== false
       ? { ...schemaUtils.getDefaultValue(props.schema), ...props.modelValue }
-      : props.modelValue,
+      : { ...props.modelValue },
+  validateOnMount: props.options.validateOnMount ?? false,
 });
 
 // Default labels for i18n

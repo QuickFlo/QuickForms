@@ -2,12 +2,17 @@
 import { ref } from "vue";
 import { DynamicForm, JSONSchema } from "@quickflo/quickforms-vue";
 import { createQuasarRegistry, QuasarFormOptions } from "../src/index";
+import Showcase from "./Showcase.vue";
+
+const showShowcase = ref(true);
 
 const registry = createQuasarRegistry();
 
 // Global Quasar defaults applied to all components
 const formOptions: QuasarFormOptions = {
   registry,
+  validateOnMount: false,
+
   componentDefaults: {
     global: {
       outlined: true, // Apply outlined style to ALL Quasar components
@@ -15,14 +20,33 @@ const formOptions: QuasarFormOptions = {
     },
     input: {
       // Add clearable button to all inputs
-      clearable: true,
+      clearable: false,
     },
     select: {
-      // Use chips for enum fields
-      useChips: true, // Uncomment to enable
+      clearable: true,
     },
     checkbox: {
       color: "green",
+    },
+  },
+  // QuickForms convenience features
+  quickformsDefaults: {
+    input: {
+      iconColor: "grey-7",
+      iconSize: "sm",
+    },
+
+    array: {
+      // Global defaults for all arrays (can be overridden per-field)
+      addButtonPosition: "bottom-left",
+      addButton: {
+        // Full QBtn props supported!
+        color: "primary",
+        outline: true,
+      },
+      removeButton: {
+        color: "negative",
+      },
     },
   },
 };
@@ -132,13 +156,122 @@ const schema: JSONSchema = {
     tags: {
       type: "array",
       title: "Tags",
-      description: "Add relevant tags",
+      description: "Simple array with custom add button",
       items: {
         type: "string",
         title: "Tag",
+        minLength: 1,
       },
-      "x-quasar-props": {
-        dense: false,
+      "x-quickforms-quasar": {
+        addButtonPosition: "top-right",
+        addButton: {
+          label: "Add Tag",
+          icon: "add_circle",
+          color: "secondary",
+        },
+        removeButton: {
+          icon: "delete",
+        },
+      },
+    },
+
+    // === ARRAY OF OBJECTS ===
+    teamMembers: {
+      type: "array",
+      title: "Team Members",
+      description: "Array of objects with custom labels and positioning",
+      items: {
+        type: "object",
+        title: "Team Member",
+        properties: {
+          name: {
+            type: "string",
+            title: "Name",
+            minLength: 2,
+          },
+          role: {
+            type: "string",
+            title: "Role",
+            enum: ["Developer", "Designer", "Manager", "QA"],
+          },
+          email: {
+            type: "string",
+            format: "email",
+            title: "Email",
+          },
+          startDate: {
+            type: "string",
+            format: "date",
+            title: "Start Date",
+          },
+        },
+        required: ["name", "role"],
+      },
+      minItems: 0,
+      maxItems: 5,
+      "x-item-label": "{{name}} - {{role}}",
+      "x-quickforms-quasar": {
+        addButtonPosition: "bottom-right",
+        addButton: {
+          label: "Add Team Member",
+          icon: "person_add",
+          color: "positive",
+
+          // Can use ANY QBtn prop: size, fab, push, unelevated, etc.
+        },
+        removeButton: {
+          icon: "person_remove",
+          color: "negative",
+        },
+      },
+    },
+
+    // === ARRAY WITH DIFFERENT BUTTON POSITIONS ===
+    todos: {
+      type: "array",
+      title: "Todo List (Add button: bottom-left)",
+      items: {
+        type: "object",
+        properties: {
+          task: {
+            type: "string",
+            title: "Task",
+          },
+          priority: {
+            type: "string",
+            enum: ["low", "medium", "high"],
+            title: "Priority",
+          },
+          completed: {
+            type: "boolean",
+            title: "Completed",
+          },
+        },
+      },
+      "x-item-label": "{{task}}",
+      "x-quickforms-quasar": {
+        addButtonPosition: "bottom-left",
+        addButton: {
+          label: "Add Todo",
+        },
+      },
+    },
+
+    // === ARRAY WITH TOP-LEFT BUTTON ===
+    notes: {
+      type: "array",
+      title: "Notes (Add button: top-left)",
+      description: "Demonstrates top-left button positioning",
+      items: {
+        type: "string",
+        title: "Note",
+      },
+      "x-quickforms-quasar": {
+        addButtonPosition: "top-left",
+        addButton: {
+          label: "New Note",
+          icon: "note_add",
+        },
       },
     },
     // === CONST FIELD (HIDDEN) ===
@@ -180,15 +313,43 @@ const schema: JSONSchema = {
       },
     },
 
-    // === PASSWORD FIELD ===
+    // === PASSWORD FIELD WITH ICON ===
     password: {
       type: "string",
       format: "password",
       title: "Password",
-      description: "Password field with show/hide toggle",
+      description: "Password field with show/hide toggle and prepend icon",
       minLength: 8,
       "x-quasar-props": {
         dense: false,
+      },
+      "x-quickforms-quasar": {
+        prependIcon: "lock",
+        iconColor: "grey-7",
+      },
+    },
+
+    // === TEXT FIELD WITH ICONS ===
+    username: {
+      type: "string",
+      title: "Username",
+      description: "Input field with prepend icon",
+      minLength: 3,
+      "x-quickforms-quasar": {
+        prependIcon: "person",
+        iconColor: "primary",
+      },
+    },
+
+    // === SEARCH FIELD WITH APPEND ICON ===
+    search: {
+      type: "string",
+      title: "Search",
+      description: "Input with append icon",
+      "x-quickforms-quasar": {
+        appendIcon: "search",
+        iconColor: "grey-6",
+        iconSize: "md",
       },
     },
 
@@ -346,10 +507,12 @@ const handleSubmit = () => {
 </script>
 
 <template>
-  <q-layout view="hHh lpR fFf">
+  <Showcase v-if="showShowcase" @back="showShowcase = false" />
+  <q-layout v-else view="hHh lpR fFf">
     <q-header elevated class="bg-primary text-white">
       <q-toolbar>
         <q-toolbar-title> QuickForms Quasar Demo </q-toolbar-title>
+        <q-btn flat label="View Showcase" @click="showShowcase = true" icon="visibility" />
       </q-toolbar>
     </q-header>
 
@@ -368,10 +531,12 @@ const handleSubmit = () => {
                     <q-icon name="info" color="blue" />
                   </template>
                   <div class="text-caption">
-                    <strong>Features shown:</strong> Const fields (hidden),
-                    autocomplete, password, URL, textarea, numbers with
-                    prefix/suffix, nested objects, arrays, oneOf (conditional),
-                    date/time pickers, and more!
+                    <strong>Features shown:</strong> Icon customization
+                    (prepend/append), array button positioning (top/bottom,
+                    left/right), arrays of objects, custom item labels, password
+                    show/hide toggle, const fields (hidden), autocomplete,
+                    nested objects, oneOf (conditional), date/time pickers, and
+                    more!
                   </div>
                 </q-banner>
               </q-card-section>

@@ -4,9 +4,10 @@ import DynamicForm from "../src/components/DynamicForm.vue";
 import CustomRegistryExample from "./CustomRegistryExample.vue";
 import ThemeExample from "./ThemeExample.vue";
 import WorkflowsTheme from "./WorkflowsTheme.vue";
+import Showcase from "./Showcase.vue";
 import type { JSONSchema } from "@quickflo/quickforms";
 
-const currentView = ref("default");
+const currentView = ref("showcase");
 
 // Simple schema for basic testing
 const simpleSchema: JSONSchema = {
@@ -407,7 +408,8 @@ const handleSubmit = (data: any) => {
 </script>
 
 <template>
-  <div v-if="currentView !== 'default'">
+  <Showcase v-if="currentView === 'showcase'" @back="currentView = 'default'" />
+  <div v-else-if="currentView !== 'default'">
     <div
       style="
         padding: 1rem;
@@ -527,6 +529,20 @@ const handleSubmit = (data: any) => {
           "
         >
           View Workflows Theme
+        </button>
+        <button
+          @click="currentView = 'showcase'"
+          style="
+            padding: 0.5rem 1.5rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 0.25rem;
+            cursor: pointer;
+            font-weight: 600;
+          "
+        >
+          🎨 View Showcase
         </button>
       </div>
     </div>

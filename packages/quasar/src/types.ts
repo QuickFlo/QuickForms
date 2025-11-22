@@ -1,4 +1,13 @@
-import type { FormOptions as VueFormOptions } from '@quickflo/quickforms-vue';
+import type { FormOptions as VueFormOptions } from "@quickflo/quickforms-vue";
+import type {
+  QInputProps,
+  QSelectProps,
+  QCheckboxProps,
+  QDateProps,
+  QCardProps,
+  QExpansionItemProps,
+  QBtnProps,
+} from "quasar";
 
 // We'll define our own base since ComponentDefaults isn't exported from Vue
 interface VueComponentDefaults {
@@ -15,132 +24,126 @@ interface VueComponentDefaults {
     suffix?: string;
   };
   hints?: {
-    showMode?: 'always' | 'focus' | 'hover';
+    showMode?: "always" | "focus" | "hover";
   };
 }
 
 /**
+ * QuickForms convenience features for Quasar components
+ * These are NOT native Quasar props - they're convenience shortcuts we provide
+ * Use via x-quickforms-quasar in schema or quickformsDefaults in form options
+ */
+export interface QuickFormsQuasarFeatures {
+  /** Icon to display in prepend slot (left side of input) */
+  prependIcon?: string;
+  /** Icon to display in append slot (right side of input) */
+  appendIcon?: string;
+  /** Color for icons. Default: 'grey-7' */
+  iconColor?: string;
+  /** Size for icons. Default: 'sm' */
+  iconSize?: string;
+}
+
+/**
+ * QuickForms features specific to array fields
+ * Customize buttons and layout for array item management
+ */
+export interface QuickFormsQuasarArrayFeatures {
+  /** Position of the "Add Item" button. Default: 'bottom-left' */
+  addButtonPosition?: "top-left" | "top-right" | "bottom-left" | "bottom-right";
+  /**
+   * Native Quasar QBtn props for the "Add Item" button
+   * Passed directly via v-bind - supports ALL QBtn properties
+   * Defaults: { outline: true, color: 'primary', icon: 'add', label: 'Add item' }
+   */
+  addButton?: Partial<QBtnProps>;
+  /**
+   * Native Quasar QBtn props for the "Remove" button
+   * Passed directly via v-bind - supports ALL QBtn properties
+   * Defaults: { flat: true, round: true, dense: true, size: 'sm', icon: 'close', color: 'negative' }
+   */
+  removeButton?: Partial<QBtnProps>;
+}
+
+/**
  * Quasar-specific component defaults
- * These are applied globally to all Quasar components unless overridden by x-quasar-props
+ * Uses native Quasar component prop types - these get passed through via v-bind
+ * All properties here are NATIVE Quasar props from the official Quasar type definitions
  */
 export interface QuasarComponentDefaults extends VueComponentDefaults {
-  /** Global defaults applied to ALL Quasar components */
-  global?: {
-    /** CSS class(es) to apply to all components. Can be string or array. */
-    class?: string | string[];
-    /** Inline styles to apply to all components. */
-    style?: string | Record<string, string>;
-    /** Use outlined style for inputs. Default: false */
-    outlined?: boolean;
-    /** Use filled style for inputs. Default: false */
-    filled?: boolean;
-    /** Use dense mode for all components. Default: false */
-    dense?: boolean;
-    /** Use square borders. Default: false */
-    square?: boolean;
-    /** Use rounded borders. Default: false */
-    rounded?: boolean;
-    /** Global color for all components. Default: undefined */
-    color?: string;
-    /** Show bottom border only. Default: false */
-    borderless?: boolean;
-    /** Hide bottom space reserved for hint/error. Default: false */
-    hideBottomSpace?: boolean;
-  };
-  /** QInput-specific defaults */
-  input?: {
-    /** CSS class(es) for input fields */
-    class?: string | string[];
-    /** Inline styles for input fields */
-    style?: string | Record<string, string>;
-    /** Default outlined style. Default: false */
-    outlined?: boolean;
-    /** Default dense mode. Default: false */
-    dense?: boolean;
-    /** Show clear button. Default: false */
-    clearable?: boolean;
-    /** Input color. Default: undefined */
-    color?: string;
-  };
-  /** QSelect-specific defaults */
+  /**
+   * Global defaults applied to ALL Quasar field components (QInput, QSelect, etc)
+   * Uses common props that exist across multiple Quasar components
+   */
+  global?: Partial<
+    Pick<
+      QInputProps,
+      | "outlined"
+      | "filled"
+      | "dense"
+      | "square"
+      | "rounded"
+      | "color"
+      | "borderless"
+      | "hideBottomSpace"
+    >
+  >;
+
+  /** QInput-specific defaults (for string/number fields) */
+  input?: Partial<QInputProps>;
+
+  /** QSelect-specific defaults (for enum fields) */
   select?: {
-    // QuickForms properties (framework-agnostic, use via x-component-props or componentDefaults)
-    /** Enable/disable autocomplete filtering. Default: true (enabled for all selects) */
+    /** Enable/disable autocomplete filtering. Default: true (QuickForms feature, not Quasar) */
     autocomplete?: boolean;
-    // Quasar-specific properties (use via x-quasar-props)
-    /** CSS class(es) for select fields */
-    class?: string | string[];
-    /** Inline styles for select fields */
-    style?: string | Record<string, string>;
-    /** Default outlined style. Default: false */
-    outlined?: boolean;
-    /** Default dense mode. Default: false */
-    dense?: boolean;
-    /** Use chips for multiple selection. Default: false */
-    useChips?: boolean;
-    /** Select color. Default: undefined */
-    color?: string;
-  };
-  /** QCheckbox-specific defaults */
-  checkbox?: {
-    /** CSS class(es) for checkboxes */
-    class?: string | string[];
-    /** Inline styles for checkboxes */
-    style?: string | Record<string, string>;
-    /** Checkbox color. Default: 'primary' */
-    color?: string;
-    /** Keep color when unchecked. Default: false */
-    keepColor?: boolean;
-    /** Use dense mode. Default: false */
-    dense?: boolean;
-  };
-  /** QDate/QTime-specific defaults */
-  datetime?: {
-    /** CSS class(es) for datetime fields */
-    class?: string | string[];
-    /** Inline styles for datetime fields */
-    style?: string | Record<string, string>;
+  } & Partial<QSelectProps>;
+
+  /** QCheckbox-specific defaults (for boolean fields) */
+  checkbox?: Partial<QCheckboxProps>;
+
+  /** QDate/QTime-specific defaults (for date/datetime fields) */
+  datetime?: Partial<QDateProps> & {
     /** Date mask format. Default: 'YYYY-MM-DD' */
     dateMask?: string;
     /** Time mask format. Default: 'HH:mm:ss' */
     timeMask?: string;
     /** DateTime mask format. Default: 'YYYY-MM-DD HH:mm:ss' */
     dateTimeMask?: string;
-    /** Color for date/time picker. Default: 'primary' */
-    color?: string;
   };
-  /** QCard-specific defaults for arrays/objects */
-  card?: {
-    /** CSS class(es) for cards */
-    class?: string | string[];
-    /** Inline styles for cards */
-    style?: string | Record<string, string>;
-    /** Use flat style. Default: true */
-    flat?: boolean;
-    /** Show border. Default: true */
-    bordered?: boolean;
-    /** Use square borders. Default: false */
-    square?: boolean;
-  };
-  /** QExpansionItem-specific defaults for objects */
-  expansion?: {
-    /** CSS class(es) for expansion items */
-    class?: string | string[];
-    /** Inline styles for expansion items */
-    style?: string | Record<string, string>;
-    /** Start expanded. Default: true */
-    defaultOpened?: boolean;
-    /** Expansion icon. Default: undefined */
-    icon?: string;
-    /** Use dense mode. Default: false */
-    dense?: boolean;
-  };
+
+  /** QCard-specific defaults (for arrays/objects) */
+  card?: Partial<QCardProps>;
+
+  /** QExpansionItem-specific defaults (for objects) */
+  expansion?: Partial<QExpansionItemProps>;
+}
+
+/**
+ * QuickForms Quasar-specific convenience defaults
+ * These are convenience features we provide on top of native Quasar
+ * Use via x-quickforms-quasar in schema
+ */
+export interface QuickFormsQuasarDefaults {
+  /** Global QuickForms features for all components */
+  global?: QuickFormsQuasarFeatures;
+  /** Input-specific QuickForms features */
+  input?: QuickFormsQuasarFeatures;
+  /** Select-specific QuickForms features (no appendIcon since dropdown uses it) */
+  select?: Omit<QuickFormsQuasarFeatures, "appendIcon">;
+  /** DateTime-specific QuickForms features */
+  datetime?: QuickFormsQuasarFeatures;
+  /** Array-specific QuickForms features */
+  array?: QuickFormsQuasarArrayFeatures;
 }
 
 /**
  * Quasar-specific form options
  * Extends Vue FormOptions with Quasar-specific componentDefaults
  */
-export interface QuasarFormOptions extends Omit<VueFormOptions, 'componentDefaults'> {
+export interface QuasarFormOptions
+  extends Omit<VueFormOptions, "componentDefaults"> {
+  /** Native Quasar component defaults (passed via v-bind) */
   componentDefaults?: QuasarComponentDefaults;
+  /** QuickForms convenience features (interpreted by our components) */
+  quickformsDefaults?: QuickFormsQuasarDefaults;
 }
