@@ -116,6 +116,9 @@ export interface QuasarComponentDefaults extends VueComponentDefaults {
 
   /** QExpansionItem-specific defaults (for objects) */
   expansion?: Partial<QExpansionItemProps>;
+
+  /** QInput textarea-specific defaults (for JSON editor) */
+  jsoneditor?: Partial<QInputProps>;
 }
 
 /**
@@ -134,6 +137,11 @@ export interface QuickFormsQuasarDefaults {
   datetime?: QuickFormsQuasarFeatures;
   /** Array-specific QuickForms features */
   array?: QuickFormsQuasarArrayFeatures;
+  /** JSON editor-specific QuickForms features */
+  jsoneditor?: QuickFormsQuasarFeatures & {
+    /** Show the info icon with format shortcut hint. Default: true */
+    showFormatHint?: boolean;
+  };
 }
 
 /**

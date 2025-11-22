@@ -305,6 +305,105 @@ Renders nested object fields.
 
 ---
 
+## JsonField
+
+Renders a JSON editor for freeform object configuration.
+
+### Handles
+
+- `type: 'object'` with `additionalProperties` but no defined `properties`
+- Any field with `x-render: 'jsoneditor'`
+
+### Example Schema
+
+**Auto-detected (freeform object):**
+```typescript
+{
+  type: 'object',
+  title: 'Custom Configuration',
+  description: 'Freeform JSON object',
+  additionalProperties: {}
+}
+```
+
+**Explicit via x-render:**
+```typescript
+{
+  type: 'object',
+  title: 'API Settings',
+  description: 'Configuration in JSON format',
+  'x-render': 'jsoneditor',
+  'x-rows': 10  // Control textarea height
+}
+```
+
+**With custom props (Quasar):**
+```typescript
+{
+  type: 'object',
+  title: 'Metadata',
+  'x-render': 'jsoneditor',
+  'x-rows': 8,
+  'x-quasar-props': {
+    dense: false,
+    color: 'secondary'
+  },
+  'x-quickforms-quasar': {
+    prependIcon: 'settings',
+    iconColor: 'primary',
+    showFormatHint: false  // Hide info icon
+  }
+}
+```
+
+**Hide format hint (Vue):**
+```typescript
+{
+  type: 'object',
+  'x-render': 'jsoneditor',
+  'x-show-format-hint': false  // Hide info icon
+}
+```
+
+### Features
+
+- **Tab indentation**: Press Tab to insert 2 spaces
+- **Format shortcut**: Press Ctrl+Space to auto-format JSON
+- **Real-time validation**: Shows parse errors as you type
+- **Monospace font**: Better readability for JSON
+- **Info icon**: Hover tooltip showing format shortcut (can be hidden)
+- **No auto-formatting**: Only formats on initial load or manual trigger
+
+### Keyboard Shortcuts
+
+- **Ctrl+Space**: Format JSON with proper indentation
+- **Tab**: Insert 2 spaces for indentation
+- **Enter**: Insert new line (does not submit form)
+
+### Configuration
+
+**Global defaults (Quasar):**
+```typescript
+const formOptions = {
+  componentDefaults: {
+    jsoneditor: {
+      dense: true,
+      color: 'primary',
+      rows: 12
+    }
+  },
+  quickformsDefaults: {
+    jsoneditor: {
+      prependIcon: 'code',
+      iconColor: 'grey-7',
+      showFormatHint: true  // Default: true
+    }
+  }
+}
+```
+
+---
+
 ## ArrayField
 
 Renders dynamic array fields with add/remove buttons.

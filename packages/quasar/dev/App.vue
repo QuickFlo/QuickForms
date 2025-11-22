@@ -362,15 +362,20 @@ const schema: JSONSchema = {
       "x-rows": 8,
     },
 
-    // === JSON EDITOR (EXPLICIT) ===
+    // === JSON EDITOR (EXPLICIT WITH CUSTOMIZATION) ===
     metadata: {
       type: "object",
       title: "Metadata",
-      description: "Explicit JSON editor via x-render extension",
+      description: "Explicit JSON editor via x-render extension with custom props",
       "x-render": "jsoneditor",
       "x-rows": 6,
       "x-quasar-props": {
         dense: false,
+        color: "secondary",
+      },
+      "x-quickforms-quasar": {
+        prependIcon: "settings",
+        iconColor: "primary",
       },
     },
 

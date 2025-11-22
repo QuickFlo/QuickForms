@@ -17,6 +17,13 @@ const { value, setValue, label, hint, errorMessage, required } = useFormField(
 
 const fieldId = generateFieldId(props.path);
 
+// Check if we should show the format hint icon
+// Can be controlled via x-show-format-hint in schema
+const showFormatHint = computed(() => {
+  const xShowFormatHint = (props.schema as any)['x-show-format-hint'];
+  return xShowFormatHint !== false; // Default: true
+});
+
 // Local text state for JSON editing
 const jsonText = ref('');
 const parseError = ref<string | null>(null);
@@ -110,26 +117,23 @@ const rows = computed(() => {
   return xRows !== undefined ? xRows : 8;
 });
 
-// Enhanced hint with format shortcut info
-const enhancedHint = computed(() => {
-  const formatHint = 'Press Ctrl+Space to format';
-  return hint.value ? `${hint.value} • ${formatHint}` : formatHint;
-});
 </script>
 
 <template>
   <div class="quickform-field quickform-json-field">
-    <label 
-      v-if="label" 
-      :for="fieldId" 
-      class="quickform-label"
-    >
-      {{ label }}
-      <span v-if="required" class="quickform-required">*</span>
-    </label>
+    <div v-if="label" class="quickform-label-wrapper">
+      <label 
+        :for="fieldId" 
+        class="quickform-label"
+      >
+        {{ label }}
+        <span v-if="required" class="quickform-required">*</span>
+      </label>
+      <span v-if="showFormatHint" class="quickform-info-icon" title="Press Ctrl+Space to format JSON">ⓘ</span>
+    </div>
 
-    <div :id="`${fieldId}-hint`" class="quickform-hint">
-      <span v-html="enhancedHint"></span>
+    <div v-if="hint" :id="`${fieldId}-hint`" class="quickform-hint">
+      <span v-html="hint"></span>
     </div>
 
     <textarea
@@ -159,12 +163,29 @@ const enhancedHint = computed(() => {
   margin-bottom: var(--quickform-spacing-md, 1rem);
 }
 
+.quickform-label-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: var(--quickform-spacing-xs, 0.5rem);
+}
+
 .quickform-label {
-  display: block;
   font-weight: var(--quickform-label-font-weight, 500);
   font-size: var(--quickform-label-font-size, 0.875rem);
   color: var(--quickform-label-color, #374151);
-  margin-bottom: var(--quickform-spacing-xs, 0.5rem);
+}
+
+.quickform-info-icon {
+  font-size: 1rem;
+  color: var(--quickform-hint-color, #6b7280);
+  cursor: help;
+  opacity: 0.7;
+  transition: opacity 0.2s;
+}
+
+.quickform-info-icon:hover {
+  opacity: 1;
 }
 
 .quickform-required {
