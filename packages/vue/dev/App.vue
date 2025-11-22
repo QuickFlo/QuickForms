@@ -230,6 +230,19 @@ const fullTestSchema: JSONSchema = {
         required: ["company", "position"],
       },
     },
+    customConfig: {
+      type: "object",
+      title: "Custom Configuration",
+      description: "Freeform JSON object (auto-detected via additionalProperties)",
+      additionalProperties: {},
+    },
+    apiSettings: {
+      type: "object",
+      title: "API Settings",
+      description: "Explicit JSON editor via x-render extension",
+      "x-render": "jsoneditor",
+      "x-rows": 6,
+    },
     paymentMethod: {
       type: "object",
       title: "Payment Method",

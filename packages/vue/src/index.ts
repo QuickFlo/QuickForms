@@ -14,6 +14,7 @@ export { default as EnumField } from './components/EnumField.vue';
 export { default as DateField } from './components/DateField.vue';
 export { default as ObjectField } from './components/ObjectField.vue';
 export { default as ArrayField } from './components/ArrayField.vue';
+export { default as JsonField } from './components/JsonField.vue';
 export { default as OneOfField } from './components/OneOfField.vue';
 export { default as AllOfField } from './components/AllOfField.vue';
 export { default as HiddenField } from './components/HiddenField.vue';
@@ -46,6 +47,7 @@ export {
   isEnumType,
   isObjectType,
   isArrayType,
+  isJsonType,
   isNullType,
   // Format testers
   isEmailFormat,

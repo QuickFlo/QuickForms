@@ -330,6 +330,82 @@ All `x-*` attributes are optional. QuickForms works perfectly with standard JSON
 
 ---
 
+## `x-render`
+
+**Purpose:** Force a specific renderer for a field
+
+**Type:** `string`
+
+**Example:**
+```typescript
+{
+  apiSettings: {
+    type: 'object',
+    title: 'API Settings',
+    'x-render': 'jsoneditor'  // Force JSON editor
+  }
+}
+```
+
+**Available Renderers:**
+- `'jsoneditor'` - JSON textarea editor with formatting support
+
+**Use Cases:**
+- Force JSON editor for object fields that would normally render as nested fields
+- Override automatic component selection
+
+**Related:** [JsonField Component](/guide/components#jsonfield)
+
+---
+
+## `x-rows`
+
+**Purpose:** Control textarea height in rows
+
+**Type:** `number`
+
+**Default:** `8` (for JSON editor), varies by field type
+
+**Example:**
+```typescript
+{
+  config: {
+    type: 'object',
+    'x-render': 'jsoneditor',
+    'x-rows': 12  // Taller editor
+  }
+}
+```
+
+**Applies to:**
+- `format: 'textarea'` - String textarea fields
+- `x-render: 'jsoneditor'` - JSON editor fields
+
+---
+
+## `x-show-format-hint`
+
+**Purpose:** Show/hide the format hint icon in JSON editor (Vue package)
+
+**Type:** `boolean`
+
+**Default:** `true`
+
+**Example:**
+```typescript
+{
+  config: {
+    type: 'object',
+    'x-render': 'jsoneditor',
+    'x-show-format-hint': false  // Hide the ⓘ icon
+  }
+}
+```
+
+**Note:** For Quasar, use `x-quickforms-quasar: { showFormatHint: false }` instead.
+
+---
+
 ## Combining Extensions
 
 Multiple extensions can be used together:

@@ -53,7 +53,10 @@ export default defineConfig({
           text: "API Reference",
           items: [
             { text: "Form Options", link: "/guide/form-options" },
-            { text: "Schema Extensions", link: "/guide/schema-extensions" },
+            {
+              text: "Schema Extensions (x-*)",
+              link: "/guide/schema-extensions",
+            },
             { text: "Components", link: "/guide/components" },
             { text: "Composables", link: "/guide/composables" },
             { text: "Testers & Registry", link: "/guide/testers-registry" },
