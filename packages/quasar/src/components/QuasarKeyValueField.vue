@@ -200,7 +200,7 @@ function removePair(id: number) {
       {{ hint }}
     </div>
 
-    <div class="q-pa-md rounded-borders">
+    <div class="rounded-borders">
       <div v-if="pairs.length" class="row items-center q-gutter-sm q-mb-sm">
         <div class="col text-weight-medium text-caption">Key</div>
         <div class="col text-weight-medium text-caption">Value</div>
