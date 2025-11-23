@@ -23,6 +23,12 @@ const quickformsFeatures = computed(() => {
   const globalDefaults = (formContext as any)?.quickformsDefaults?.keyvalue || {};
   const schemaFeatures = (props.schema as any)["x-quickforms-quasar"] || {};
 
+  // Position is custom (not a QBtn prop)
+  const addButtonPosition =
+    schemaFeatures.addButtonPosition ??
+    globalDefaults.addButtonPosition ??
+    "bottom-left";
+
   // Merge QBtn props: defaults -> global -> schema (schema has highest priority)
   const addButtonDefaults = {
     outline: true,
@@ -54,9 +60,26 @@ const quickformsFeatures = computed(() => {
   };
 
   return {
+    addButtonPosition,
     addButton,
     removeButton,
   };
+});
+
+// Determine button positioning
+const isTopPosition = computed(() => {
+  const position = quickformsFeatures.value.addButtonPosition;
+  return position === "top-left" || position === "top-right";
+});
+
+const isRightPosition = computed(() => {
+  const position = quickformsFeatures.value.addButtonPosition;
+  return position === "top-right" || position === "bottom-right";
+});
+
+const isCenterPosition = computed(() => {
+  const position = quickformsFeatures.value.addButtonPosition;
+  return position === "bottom-center";
 });
 
 // Convert object to array of key-value pairs for editing
@@ -119,9 +142,39 @@ function removePair(id: number) {
 
 <template>
   <div class="quickform-keyvalue-field">
-    <div v-if="label" class="text-subtitle2 q-mb-xs">
-      {{ label }}
-      <span v-if="required" style="color: red; margin-left: 0.25rem">*</span>
+    <!-- Label with optional top-right button -->
+    <div
+      v-if="label"
+      :style="{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: isTopPosition && isRightPosition ? 'space-between' : 'flex-start',
+        marginBottom: '0.5rem'
+      }"
+    >
+      <div class="text-subtitle2">
+        {{ label }}
+        <span v-if="required" style="color: red; margin-left: 0.25rem">*</span>
+      </div>
+      <!-- Add button on same line only for top-right -->
+      <QBtn
+        v-if="isTopPosition && isRightPosition"
+        v-bind="quickformsFeatures.addButton"
+        :disable="disabled || readonly"
+        @click="addPair"
+      />
+    </div>
+
+    <!-- Add button below label for top-left -->
+    <div
+      v-if="isTopPosition && !isRightPosition"
+      style="text-align: left; margin-bottom: 0.5rem;"
+    >
+      <QBtn
+        v-bind="quickformsFeatures.addButton"
+        :disable="disabled || readonly"
+        @click="addPair"
+      />
     </div>
 
     <div v-if="hint" class="text-caption text-grey-7 q-mb-sm">
@@ -170,12 +223,21 @@ function removePair(id: number) {
         </QBtn>
       </div>
 
-      <QBtn
-        v-bind="quickformsFeatures.addButton"
-        class="full-width"
-        :disable="disabled || readonly"
-        @click="addPair"
-      />
+      <!-- Add button (bottom positions) -->
+      <div
+        v-if="!isTopPosition"
+        :style="{
+          textAlign: isRightPosition ? 'right' : isCenterPosition ? 'center' : 'left',
+          marginTop: pairs.length ? '0.5rem' : '0'
+        }"
+      >
+        <QBtn
+          v-bind="quickformsFeatures.addButton"
+          :class="{ 'full-width': isCenterPosition }"
+          :disable="disabled || readonly"
+          @click="addPair"
+        />
+      </div>
     </div>
 
     <div v-if="errorMessage" class="text-negative text-caption q-mt-xs">

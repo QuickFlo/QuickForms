@@ -357,7 +357,8 @@ const schema: JSONSchema = {
     customConfig: {
       type: "object",
       title: "Custom Configuration",
-      description: "Freeform JSON object (auto-detected via additionalProperties)",
+      description:
+        "Freeform JSON object (auto-detected via additionalProperties)",
       additionalProperties: {},
       "x-rows": 8,
     },
@@ -366,7 +367,8 @@ const schema: JSONSchema = {
     metadata: {
       type: "object",
       title: "Metadata",
-      description: "Explicit JSON editor via x-render extension with custom props",
+      description:
+        "Explicit JSON editor via x-render extension with custom props",
       "x-render": "jsoneditor",
       "x-rows": 6,
       "x-quasar-props": {
@@ -389,13 +391,66 @@ const schema: JSONSchema = {
       },
     },
 
-    // === KEY-VALUE EDITOR (OAUTH EXAMPLE) ===
+    // === KEY-VALUE EDITOR (DEFAULT POSITION) ===
     oauthHeaders: {
       type: "object",
-      title: "Custom OAuth Headers",
-      description: "Add custom headers for OAuth requests",
+      title: "OAuth Headers (bottom-left)",
+      description: "Default button position",
       additionalProperties: {
         type: "string",
+      },
+    },
+
+    // === KEY-VALUE EDITOR (TOP-RIGHT) ===
+    apiHeaders: {
+      type: "object",
+      title: "API Headers (top-right)",
+      description: "Button on same line as label",
+      additionalProperties: {
+        type: "string",
+      },
+      "x-quickforms-quasar": {
+        addButtonPosition: "top-right",
+        addButton: {
+          icon: "add_circle",
+          label: "Add Header",
+        },
+      },
+    },
+
+    // === KEY-VALUE EDITOR (BOTTOM-CENTER) ===
+    envVars: {
+      type: "object",
+      title: "Environment Variables (bottom-center)",
+      description: "Full-width centered button",
+      additionalProperties: {
+        type: "string",
+      },
+      "x-quickforms-quasar": {
+        addButtonPosition: "bottom-center",
+        addButton: {
+          icon: "add",
+          label: "Add Environment Variable",
+          color: "secondary",
+          style: "height: 40px;",
+        },
+      },
+    },
+
+    // === KEY-VALUE EDITOR (BOTTOM-RIGHT) ===
+    metadata2: {
+      type: "object",
+      title: "Custom Metadata (bottom-right)",
+      description: "Right-aligned button",
+      additionalProperties: {
+        type: "string",
+      },
+      "x-quickforms-quasar": {
+        addButtonPosition: "bottom-right",
+        addButton: {
+          icon: "add",
+          label: "Add Field",
+        },
       },
     },
 
@@ -558,7 +613,12 @@ const handleSubmit = () => {
     <q-header elevated class="bg-primary text-white">
       <q-toolbar>
         <q-toolbar-title> QuickForms Quasar Demo </q-toolbar-title>
-        <q-btn flat label="View Showcase" @click="showShowcase = true" icon="visibility" />
+        <q-btn
+          flat
+          label="View Showcase"
+          @click="showShowcase = true"
+          icon="visibility"
+        />
       </q-toolbar>
     </q-header>
 

@@ -460,18 +460,18 @@ Renders a dynamic key-value pair editor for record types.
 
 ### Button Customization (Quasar)
 
-**Per-field customization:**
+**Button positioning:**
 ```typescript
 {
   type: 'object',
   title: 'Environment Variables',
   additionalProperties: { type: 'string' },
   'x-quickforms-quasar': {
+    addButtonPosition: 'bottom-right',  // Options: 'top-left', 'top-right', 'bottom-left', 'bottom-right', 'bottom-center'
     addButton: {
       label: 'Add Variable',
       icon: 'add_circle',
-      color: 'secondary',
-      outline: false
+      color: 'secondary'
     },
     removeButton: {
       icon: 'delete',
@@ -481,11 +481,19 @@ Renders a dynamic key-value pair editor for record types.
 }
 ```
 
+**Position options:**
+- `top-left` - Button appears above the grid, left-aligned
+- `top-right` - Button appears on the same line as the label, right-aligned
+- `bottom-left` - Button appears below the grid, left-aligned (default)
+- `bottom-right` - Button appears below the grid, right-aligned
+- `bottom-center` - Button appears below the grid, centered and full-width
+
 **Global defaults:**
 ```typescript
 const formOptions = {
   quickformsDefaults: {
     keyvalue: {
+      addButtonPosition: 'bottom-left',
       addButton: {
         label: 'Add Item',
         icon: 'add',
