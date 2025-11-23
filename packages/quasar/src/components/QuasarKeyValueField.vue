@@ -3,6 +3,7 @@ import { ref, watch, computed } from 'vue';
 import { QInput, QBtn, QIcon } from 'quasar';
 import { useFormField, generateFieldId, useFormContext } from '@quickflo/quickforms-vue';
 import type { FieldProps } from '@quickflo/quickforms-vue';
+import { mergeQuasarProps } from '../utils';
 
 const props = withDefaults(defineProps<FieldProps>(), {
   disabled: false,
@@ -17,6 +18,15 @@ const { value, setValue, label, hint, errorMessage, required } = useFormField(
 
 const formContext = useFormContext();
 const fieldId = generateFieldId(props.path);
+
+// Merge native Quasar QInput props for key/value inputs
+const inputProps = computed(() => {
+  return mergeQuasarProps(
+    props.schema,
+    formContext?.componentDefaults as any,
+    'keyvalue'
+  );
+});
 
 // Merge QuickForms convenience features for button customization
 const quickformsFeatures = computed(() => {
@@ -201,6 +211,7 @@ function removePair(id: number) {
           class="col"
           :disable="disabled"
           :readonly="readonly"
+          v-bind="inputProps"
         />
         <QInput
           v-model="pair.value"
@@ -210,6 +221,7 @@ function removePair(id: number) {
           class="col"
           :disable="disabled"
           :readonly="readonly"
+          v-bind="inputProps"
         />
         <QBtn
           v-bind="quickformsFeatures.removeButton"

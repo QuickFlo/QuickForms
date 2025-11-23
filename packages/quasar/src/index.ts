@@ -18,7 +18,14 @@ export { default as QuasarOneOfField } from './components/QuasarOneOfField.vue';
 export { default as QuasarAllOfField } from './components/QuasarAllOfField.vue';
 
 // Quasar-specific types
-export type { QuasarComponentDefaults, QuasarFormOptions } from './types.js';
+export type {
+  QuasarComponentDefaults,
+  QuasarFormOptions,
+  QuickFormsQuasarFeatures,
+  QuickFormsQuasarArrayFeatures,
+  QuickFormsQuasarKeyValueFeatures,
+  QuickFormsQuasarDefaults,
+} from './types.js';
 
 // Re-export types from Vue package
 export type {

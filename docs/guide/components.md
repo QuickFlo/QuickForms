@@ -491,7 +491,16 @@ Renders a dynamic key-value pair editor for record types.
 **Global defaults:**
 ```typescript
 const formOptions = {
+  componentDefaults: {
+    // Native QInput props applied to ALL key/value input fields
+    keyvalue: {
+      filled: true,
+      color: 'primary',
+      dense: true
+    }
+  },
   quickformsDefaults: {
+    // QuickForms button features for key-value fields
     keyvalue: {
       addButtonPosition: 'bottom-left',
       addButton: {
@@ -507,6 +516,22 @@ const formOptions = {
   }
 }
 ```
+
+**Customize input styling:**
+```typescript
+{
+  type: 'object',
+  title: 'Styled Parameters',
+  additionalProperties: { type: 'string' },
+  'x-quasar-props': {
+    filled: true,
+    color: 'purple',
+    labelColor: 'purple'
+  }
+}
+```
+
+Note: `componentDefaults.keyvalue` and `x-quasar-props` accept any native Quasar QInput props and apply them to both the key and value input fields.
 
 ---
 

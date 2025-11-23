@@ -438,7 +438,7 @@ const schema: JSONSchema = {
     },
 
     // === KEY-VALUE EDITOR (BOTTOM-RIGHT) ===
-    metadata2: {
+    metadata: {
       type: "object",
       title: "Custom Metadata (bottom-right)",
       description: "Right-aligned button",
@@ -451,6 +451,21 @@ const schema: JSONSchema = {
           icon: "add",
           label: "Add Field",
         },
+      },
+    },
+
+    // === KEY-VALUE EDITOR (CUSTOM INPUT STYLING) ===
+    styledParams: {
+      type: "object",
+      title: "Styled Parameters",
+      description: "Custom QInput props applied to key/value inputs",
+      additionalProperties: {
+        type: "string",
+      },
+      "x-quasar-props": {
+        filled: true,
+        color: "purple",
+        labelColor: "purple",
       },
     },
 

@@ -66,6 +66,32 @@ export interface QuickFormsQuasarArrayFeatures {
 }
 
 /**
+ * QuickForms features specific to key-value fields
+ * Customize buttons and layout for record/map type management
+ */
+export interface QuickFormsQuasarKeyValueFeatures {
+  /** Position of the "Add" button. Default: 'bottom-left' */
+  addButtonPosition?:
+    | "top-left"
+    | "top-right"
+    | "bottom-left"
+    | "bottom-right"
+    | "bottom-center";
+  /**
+   * Native Quasar QBtn props for the "Add" button
+   * Passed directly via v-bind - supports ALL QBtn properties
+   * Defaults: { outline: true, color: 'primary', icon: 'add', label: 'Add Parameter', size: 'sm' }
+   */
+  addButton?: Partial<QBtnProps>;
+  /**
+   * Native Quasar QBtn props for the "Remove" button
+   * Passed directly via v-bind - supports ALL QBtn properties
+   * Defaults: { flat: true, round: true, dense: true, size: 'sm', icon: 'close', color: 'negative' }
+   */
+  removeButton?: Partial<QBtnProps>;
+}
+
+/**
  * Quasar-specific component defaults
  * Uses native Quasar component prop types - these get passed through via v-bind
  * All properties here are NATIVE Quasar props from the official Quasar type definitions
@@ -119,6 +145,9 @@ export interface QuasarComponentDefaults extends VueComponentDefaults {
 
   /** QInput textarea-specific defaults (for JSON editor) */
   jsoneditor?: Partial<QInputProps>;
+
+  /** QInput defaults for key-value field inputs (affects both key and value inputs) */
+  keyvalue?: Partial<QInputProps>;
 }
 
 /**
@@ -137,6 +166,8 @@ export interface QuickFormsQuasarDefaults {
   datetime?: QuickFormsQuasarFeatures;
   /** Array-specific QuickForms features */
   array?: QuickFormsQuasarArrayFeatures;
+  /** Key-value specific QuickForms features */
+  keyvalue?: QuickFormsQuasarKeyValueFeatures;
   /** JSON editor-specific QuickForms features */
   jsoneditor?: QuickFormsQuasarFeatures & {
     /** Show the info icon with format shortcut hint. Default: true */
