@@ -48,6 +48,9 @@ const formOptions: QuasarFormOptions = {
         color: "negative",
       },
     },
+    keyvalue: {
+      addButton: {},
+    },
   },
 };
 

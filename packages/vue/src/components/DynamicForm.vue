@@ -103,6 +103,7 @@ const formContext = reactive({
       ...props.options.componentDefaults?.hints,
     },
   },
+  quickformsDefaults: (props.options as any).quickformsDefaults || {},
   hintRenderer: props.options.hintRenderer,
 });
 

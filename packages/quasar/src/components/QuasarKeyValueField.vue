@@ -69,6 +69,15 @@ const quickformsFeatures = computed(() => {
     ...(schemaFeatures.removeButton || {}),
   };
 
+  // Debug logging
+  console.log('KeyValueField Debug:', {
+    formContext: formContext,
+    globalDefaults,
+    schemaFeatures,
+    addButton,
+    removeButton
+  });
+
   return {
     addButtonPosition,
     addButton,
