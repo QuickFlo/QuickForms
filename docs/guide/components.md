@@ -460,6 +460,20 @@ Renders a dynamic key-value pair editor for record types.
 
 ### Button Customization (Quasar)
 
+**Column headers:**
+```typescript
+{
+  type: 'object',
+  title: 'API Configuration',
+  additionalProperties: { type: 'string' },
+  'x-quickforms-quasar': {
+    showHeaders: true,  // Default: false
+    keyLabel: 'Parameter',  // Default: 'Key'
+    valueLabel: 'Value'  // Default: 'Value'
+  }
+}
+```
+
 **Button positioning:**
 ```typescript
 {
@@ -471,7 +485,9 @@ Renders a dynamic key-value pair editor for record types.
     addButton: {
       label: 'Add Variable',
       icon: 'add_circle',
-      color: 'secondary'
+      color: 'secondary',
+      class: 'text-bold',
+      style: { height: '50px' }
     },
     removeButton: {
       icon: 'delete',
@@ -502,11 +518,16 @@ const formOptions = {
   quickformsDefaults: {
     // QuickForms button features for key-value fields
     keyvalue: {
+      showHeaders: false,  // Show 'Key' and 'Value' column headers
+      keyLabel: 'Key',     // Customize key column header
+      valueLabel: 'Value', // Customize value column header
       addButtonPosition: 'bottom-left',
       addButton: {
         label: 'Add Item',
         icon: 'add',
-        color: 'primary'
+        color: 'primary',
+        class: '',         // Add CSS classes
+        style: {}          // Add inline styles
       },
       removeButton: {
         icon: 'close',
