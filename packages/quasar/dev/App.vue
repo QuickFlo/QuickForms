@@ -469,6 +469,28 @@ const schema: JSONSchema = {
       },
     },
 
+    // === KEY-VALUE EDITOR (CUSTOM BUTTON STYLING) ===
+    customButtonParams: {
+      type: "object",
+      title: "Custom Button Styling",
+      description: "Using class and style on buttons",
+      additionalProperties: {
+        type: "string",
+      },
+      "x-quickforms-quasar": {
+        addButton: {
+          label: "Add Custom",
+          icon: "add_circle",
+          unelevated: true,
+          style: { borderRadius: "20px" },
+          class: "text-weight-bold",
+        },
+        removeButton: {
+          style: { opacity: 0.7 },
+        },
+      },
+    },
+
     // === URL FIELD ===
     website: {
       type: "string",

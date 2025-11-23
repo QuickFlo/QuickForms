@@ -1,4 +1,5 @@
 import type { FormOptions as VueFormOptions } from "@quickflo/quickforms-vue";
+import type { StyleValue } from "vue";
 import type {
   QInputProps,
   QSelectProps,
@@ -8,6 +9,15 @@ import type {
   QExpansionItemProps,
   QBtnProps,
 } from "quasar";
+
+/**
+ * Common Vue component attributes (class and style)
+ * These can be passed to any Vue component via v-bind
+ */
+interface VueComponentAttributes {
+  class?: string | string[] | Record<string, boolean>;
+  style?: StyleValue;
+}
 
 // We'll define our own base since ComponentDefaults isn't exported from Vue
 interface VueComponentDefaults {
@@ -53,16 +63,16 @@ export interface QuickFormsQuasarArrayFeatures {
   addButtonPosition?: "top-left" | "top-right" | "bottom-left" | "bottom-right";
   /**
    * Native Quasar QBtn props for the "Add Item" button
-   * Passed directly via v-bind - supports ALL QBtn properties
+   * Passed directly via v-bind - supports ALL QBtn properties + class/style
    * Defaults: { outline: true, color: 'primary', icon: 'add', label: 'Add item' }
    */
-  addButton?: Partial<QBtnProps>;
+  addButton?: Partial<QBtnProps> & VueComponentAttributes;
   /**
    * Native Quasar QBtn props for the "Remove" button
-   * Passed directly via v-bind - supports ALL QBtn properties
+   * Passed directly via v-bind - supports ALL QBtn properties + class/style
    * Defaults: { flat: true, round: true, dense: true, size: 'sm', icon: 'close', color: 'negative' }
    */
-  removeButton?: Partial<QBtnProps>;
+  removeButton?: Partial<QBtnProps> & VueComponentAttributes;
 }
 
 /**
@@ -79,16 +89,16 @@ export interface QuickFormsQuasarKeyValueFeatures {
     | "bottom-center";
   /**
    * Native Quasar QBtn props for the "Add" button
-   * Passed directly via v-bind - supports ALL QBtn properties
+   * Passed directly via v-bind - supports ALL QBtn properties + class/style
    * Defaults: { outline: true, color: 'primary', icon: 'add', label: 'Add Parameter', size: 'sm' }
    */
-  addButton?: Partial<QBtnProps>;
+  addButton?: Partial<QBtnProps> & VueComponentAttributes;
   /**
    * Native Quasar QBtn props for the "Remove" button
-   * Passed directly via v-bind - supports ALL QBtn properties
+   * Passed directly via v-bind - supports ALL QBtn properties + class/style
    * Defaults: { flat: true, round: true, dense: true, size: 'sm', icon: 'close', color: 'negative' }
    */
-  removeButton?: Partial<QBtnProps>;
+  removeButton?: Partial<QBtnProps> & VueComponentAttributes;
 }
 
 /**
