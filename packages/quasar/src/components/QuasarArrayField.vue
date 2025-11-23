@@ -174,23 +174,24 @@ const getItemLabel = (index: number) => {
   }
 
   const title = itemsSchema.value?.title || "Item";
-  return `${title} #${index + 1}`;
+  return `${title} ${index + 1}`;
 };
 </script>
 
 <template>
   <div :id="fieldId">
     <!-- Label (always shows if present) -->
-    <div 
+    <div
       v-if="label"
       :style="{
         display: 'flex',
         alignItems: 'center',
-        justifyContent: isTopPosition && isRightPosition ? 'space-between' : 'flex-start',
-        marginBottom: '0.5rem'
+        justifyContent:
+          isTopPosition && isRightPosition ? 'space-between' : 'flex-start',
+        marginBottom: '0.5rem',
       }"
     >
-      <div style="font-weight: 500;">
+      <div style="font-weight: 500">
         {{ label }}
         <span v-if="schema.required" style="color: red; margin-left: 0.125rem"
           >*</span
@@ -209,7 +210,7 @@ const getItemLabel = (index: number) => {
     <!-- Add button below label for top-left -->
     <div
       v-if="isTopPosition && !isRightPosition"
-      style="text-align: left; margin-bottom: 0.5rem;"
+      style="text-align: left; margin-bottom: 0.5rem"
     >
       <QBtn
         v-bind="quickformsFeatures.addButton"
@@ -226,7 +227,6 @@ const getItemLabel = (index: number) => {
     </div>
 
     <div style="display: flex; flex-direction: column; gap: 0.75rem">
-
       <QCard
         v-for="(item, index) in arrayValue"
         :key="index"

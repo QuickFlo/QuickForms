@@ -99,6 +99,12 @@ export interface QuickFormsQuasarKeyValueFeatures {
    * Defaults: { flat: true, round: true, dense: true, size: 'sm', icon: 'close', color: 'negative' }
    */
   removeButton?: Partial<QBtnProps> & VueComponentAttributes;
+  /** Show column headers (Key/Value). Default: false */
+  showHeaders?: boolean;
+  /** Custom label for the key column. Default: 'Key' */
+  keyLabel?: string;
+  /** Custom label for the value column. Default: 'Value' */
+  valueLabel?: string;
 }
 
 /**

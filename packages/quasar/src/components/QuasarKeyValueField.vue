@@ -1,9 +1,13 @@
 <script setup lang="ts">
-import { ref, watch, computed } from 'vue';
-import { QInput, QBtn, QIcon } from 'quasar';
-import { useFormField, generateFieldId, useFormContext } from '@quickflo/quickforms-vue';
-import type { FieldProps } from '@quickflo/quickforms-vue';
-import { mergeQuasarProps } from '../utils';
+import { ref, watch, computed } from "vue";
+import { QInput, QBtn, QIcon } from "quasar";
+import {
+  useFormField,
+  generateFieldId,
+  useFormContext,
+} from "@quickflo/quickforms-vue";
+import type { FieldProps } from "@quickflo/quickforms-vue";
+import { mergeQuasarProps } from "../utils";
 
 const props = withDefaults(defineProps<FieldProps>(), {
   disabled: false,
@@ -24,13 +28,14 @@ const inputProps = computed(() => {
   return mergeQuasarProps(
     props.schema,
     formContext?.componentDefaults as any,
-    'keyvalue'
+    "keyvalue"
   );
 });
 
 // Merge QuickForms convenience features for button customization
 const quickformsFeatures = computed(() => {
-  const globalDefaults = (formContext as any)?.quickformsDefaults?.keyvalue || {};
+  const globalDefaults =
+    (formContext as any)?.quickformsDefaults?.keyvalue || {};
   const schemaFeatures = (props.schema as any)["x-quickforms-quasar"] || {};
 
   // Position is custom (not a QBtn prop)
@@ -38,6 +43,22 @@ const quickformsFeatures = computed(() => {
     schemaFeatures.addButtonPosition ??
     globalDefaults.addButtonPosition ??
     "bottom-left";
+
+  // Header display options
+  const showHeaders =
+    schemaFeatures.showHeaders ??
+    globalDefaults.showHeaders ??
+    false;
+
+  const keyLabel =
+    schemaFeatures.keyLabel ??
+    globalDefaults.keyLabel ??
+    "Key";
+
+  const valueLabel =
+    schemaFeatures.valueLabel ??
+    globalDefaults.valueLabel ??
+    "Value";
 
   // Merge QBtn props: defaults -> global -> schema (schema has highest priority)
   const addButtonDefaults = {
@@ -69,19 +90,13 @@ const quickformsFeatures = computed(() => {
     ...(schemaFeatures.removeButton || {}),
   };
 
-  // Debug logging
-  console.log('KeyValueField Debug:', {
-    formContext: formContext,
-    globalDefaults,
-    schemaFeatures,
-    addButton,
-    removeButton
-  });
-
   return {
     addButtonPosition,
     addButton,
     removeButton,
+    showHeaders,
+    keyLabel,
+    valueLabel,
   };
 });
 
@@ -120,12 +135,12 @@ watch(
       isInternalUpdate.value = false;
       return;
     }
-    
-    if (newValue && typeof newValue === 'object' && !Array.isArray(newValue)) {
+
+    if (newValue && typeof newValue === "object" && !Array.isArray(newValue)) {
       pairs.value = Object.entries(newValue).map(([key, val]) => ({
         key,
         value: String(val),
-        id: nextId++
+        id: nextId++,
       }));
     } else if (!pairs.value.length) {
       pairs.value = [];
@@ -139,7 +154,7 @@ watch(
   pairs,
   (newPairs) => {
     const obj: Record<string, string> = {};
-    newPairs.forEach(pair => {
+    newPairs.forEach((pair) => {
       if (pair.key.trim()) {
         obj[pair.key] = pair.value;
       }
@@ -151,11 +166,11 @@ watch(
 );
 
 function addPair() {
-  pairs.value.push({ key: '', value: '', id: nextId++ });
+  pairs.value.push({ key: "", value: "", id: nextId++ });
 }
 
 function removePair(id: number) {
-  pairs.value = pairs.value.filter(p => p.id !== id);
+  pairs.value = pairs.value.filter((p) => p.id !== id);
 }
 </script>
 
@@ -167,8 +182,9 @@ function removePair(id: number) {
       :style="{
         display: 'flex',
         alignItems: 'center',
-        justifyContent: isTopPosition && isRightPosition ? 'space-between' : 'flex-start',
-        marginBottom: '0.5rem'
+        justifyContent:
+          isTopPosition && isRightPosition ? 'space-between' : 'flex-start',
+        marginBottom: '0.5rem',
       }"
     >
       <div class="text-subtitle2">
@@ -187,7 +203,7 @@ function removePair(id: number) {
     <!-- Add button below label for top-left -->
     <div
       v-if="isTopPosition && !isRightPosition"
-      style="text-align: left; margin-bottom: 0.5rem;"
+      style="text-align: left; margin-bottom: 0.5rem"
     >
       <QBtn
         v-bind="quickformsFeatures.addButton"
@@ -201,9 +217,9 @@ function removePair(id: number) {
     </div>
 
     <div class="rounded-borders">
-      <div v-if="pairs.length" class="row items-center q-gutter-sm q-mb-sm">
-        <div class="col text-weight-medium text-caption">Key</div>
-        <div class="col text-weight-medium text-caption">Value</div>
+      <div v-if="quickformsFeatures.showHeaders && pairs.length" class="row items-center q-gutter-sm q-mb-sm">
+        <div class="col text-weight-medium text-caption">{{ quickformsFeatures.keyLabel }}</div>
+        <div class="col text-weight-medium text-caption">{{ quickformsFeatures.valueLabel }}</div>
         <div style="width: 40px"></div>
       </div>
 
@@ -248,8 +264,12 @@ function removePair(id: number) {
       <div
         v-if="!isTopPosition"
         :style="{
-          textAlign: isRightPosition ? 'right' : isCenterPosition ? 'center' : 'left',
-          marginTop: pairs.length ? '0.5rem' : '0'
+          textAlign: isRightPosition
+            ? 'right'
+            : isCenterPosition
+            ? 'center'
+            : 'left',
+          marginTop: pairs.length ? '0.5rem' : '0',
         }"
       >
         <QBtn
