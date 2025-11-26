@@ -124,6 +124,7 @@ watch(
 watch(
   values,
   (newValues) => {
+    console.log('[DynamicForm] values changed', newValues)
     emit("update:modelValue", newValues);
   },
   { deep: true }
