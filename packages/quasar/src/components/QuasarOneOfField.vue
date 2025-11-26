@@ -3,9 +3,9 @@ import { ref, computed, onMounted, watch } from 'vue';
 import { QCard, QCardSection, QSelect } from 'quasar';
 import { useFormField, useFormContext } from '@quickflo/quickforms-vue';
 import { generateFieldId } from '@quickflo/quickforms-vue';
-import { SchemaUtils } from '@quickflo/quickforms';
 import { FieldRenderer } from '@quickflo/quickforms-vue';
 import type { FieldProps } from '@quickflo/quickforms-vue';
+import { schemaUtils } from '../schema-utils-singleton';
 
 const props = withDefaults(defineProps<FieldProps>(), {
   disabled: false,
@@ -19,7 +19,6 @@ const { value, label, hint, errorMessage } = useFormField(
 );
 
 const fieldId = generateFieldId(props.path);
-const schemaUtils = new SchemaUtils();
 const formContext = useFormContext();
 
 const quasarProps = computed(() => {

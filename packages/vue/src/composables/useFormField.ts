@@ -1,12 +1,10 @@
 import { computed } from "vue";
 import { useField } from "vee-validate";
 import type { JSONSchema } from "@quickflo/quickforms";
-import { SchemaUtils } from "@quickflo/quickforms";
 import type { FormContext } from "../types/index.js";
 import { useFormContext } from "./useFormContext.js";
 import { getHint } from "./utils.js";
-
-const schemaUtils = new SchemaUtils();
+import { schemaUtils } from "../schema-utils-singleton.js";
 
 // Helper functions for validation
 function isValidEmail(value: string): boolean {

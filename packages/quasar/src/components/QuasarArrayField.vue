@@ -3,10 +3,10 @@ import { computed } from "vue";
 import { QCard, QCardSection, QBtn } from "quasar";
 import { useFormField, useFormContext } from "@quickflo/quickforms-vue";
 import { generateFieldId } from "@quickflo/quickforms-vue";
-import { SchemaUtils } from "@quickflo/quickforms";
 import { FieldRenderer } from "@quickflo/quickforms-vue";
 import type { FieldProps } from "@quickflo/quickforms-vue";
 import { mergeQuasarProps } from "../utils";
+import { schemaUtils } from "../schema-utils-singleton.js";
 
 const props = withDefaults(defineProps<FieldProps>(), {
   disabled: false,
@@ -21,7 +21,6 @@ const { value, errorMessage, label, hint } = useFormField(
 
 const formContext = useFormContext();
 const fieldId = generateFieldId(props.path);
-const schemaUtils = new SchemaUtils();
 
 // Merge native Quasar props for the card
 const quasarProps = computed(() => {

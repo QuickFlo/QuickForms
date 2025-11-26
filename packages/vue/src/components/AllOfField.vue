@@ -2,9 +2,9 @@
 import { computed } from 'vue';
 import { useFormField } from '../composables/useFormField.js';
 import { generateFieldId } from '../composables/utils.js';
-import { SchemaUtils } from '@quickflo/quickforms';
 import FieldRenderer from './FieldRenderer.vue';
 import type { FieldProps } from '../types/index.js';
+import { schemaUtils } from '../schema-utils-singleton.js';
 
 const props = withDefaults(defineProps<FieldProps>(), {
   disabled: false,
@@ -13,7 +13,6 @@ const props = withDefaults(defineProps<FieldProps>(), {
 
 const { label, hint, errorMessage } = useFormField(props.path, props.schema, { label: props.label });
 const fieldId = generateFieldId(props.path);
-const schemaUtils = new SchemaUtils();
 
 // Merge all schemas in allOf
 const mergedSchema = computed(() => {

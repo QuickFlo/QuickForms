@@ -3,9 +3,9 @@ import { computed } from "vue";
 import { useFormField } from "../composables/useFormField.js";
 import { useFormContext } from "../composables/useFormContext.js";
 import { generateFieldId } from "../composables/utils.js";
-import { SchemaUtils } from "@quickflo/quickforms";
 import FieldRenderer from "./FieldRenderer.vue";
 import type { FieldProps } from "../types/index.js";
+import { schemaUtils } from "../schema-utils-singleton.js";
 
 const props = withDefaults(defineProps<FieldProps>(), {
   disabled: false,
@@ -20,7 +20,6 @@ const { value, errorMessage, label, hint } = useFormField(
 );
 const formContext = useFormContext();
 const fieldId = generateFieldId(props.path);
-const schemaUtils = new SchemaUtils();
 
 // Ensure value is an array
 const arrayValue = computed({

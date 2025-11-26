@@ -1,20 +1,31 @@
 <script setup lang="ts">
-import { computed, watch, reactive, markRaw, toRaw, ref, nextTick, onMounted } from "vue";
+import {
+  computed,
+  watch,
+  reactive,
+  markRaw,
+  toRaw,
+  ref,
+  nextTick,
+  onMounted,
+} from "vue";
 import { useForm } from "vee-validate";
-import { SchemaUtils } from "@quickflo/quickforms";
 import type { JSONSchema } from "@quickflo/quickforms";
 import { provideFormContext } from "../composables/useFormContext.js";
 import type { FormOptions } from "../types/index.js";
 import { createDefaultRegistry } from "../registry.js";
 import FieldRenderer from "./FieldRenderer.vue";
+import { schemaUtils } from "../schema-utils-singleton.js";
 
 interface Props {
   schema: JSONSchema;
   options?: FormOptions;
+  showLoadingOverlay?: boolean;
 }
 
 const props = withDefaults(defineProps<Props>(), {
   options: () => ({}),
+  showLoadingOverlay: true,
 });
 
 const model = defineModel<Record<string, any>>({ default: () => ({}) });
@@ -26,8 +37,6 @@ const emit = defineEmits<{
   ];
   ready: [];
 }>();
-
-const schemaUtils = new SchemaUtils();
 
 // Use provided registry or create default
 const registry = props.options.registry || createDefaultRegistry();
@@ -141,32 +150,21 @@ provideFormContext(formContext as any);
 const isReady = ref(false);
 const formContentRef = ref<HTMLDivElement | null>(null);
 
-// Mark form as ready after fields are actually rendered
-function checkIfReady() {
-  // Use requestAnimationFrame to wait for DOM updates
-  requestAnimationFrame(() => {
-    requestAnimationFrame(() => {
-      // Check if form content has children (fields have rendered)
-      if (formContentRef.value) {
-        const hasFields = formContentRef.value.children.length > 0;
-        if (hasFields) {
-          isReady.value = true;
-          emit("ready");
-        } else {
-          // Retry if no fields yet
-          setTimeout(checkIfReady, 10);
-        }
-      } else {
-        // Form content ref not available yet, retry
-        setTimeout(checkIfReady, 10);
-      }
-    });
+// Mark form as ready after the initial DOM render
+function markReady() {
+  nextTick(() => {
+    if (isReady.value) {
+      return;
+    }
+
+    isReady.value = true;
+    emit("ready");
   });
 }
 
 // Mark form as ready after initial render
 onMounted(() => {
-  checkIfReady();
+  markReady();
 });
 
 // Reset ready state when schema changes
@@ -174,9 +172,7 @@ watch(
   () => props.schema,
   () => {
     isReady.value = false;
-    nextTick(() => {
-      checkIfReady();
-    });
+    markReady();
   }
 );
 
@@ -185,35 +181,32 @@ let isUpdatingFromModel = false;
 let isUpdatingModel = false;
 
 // Sync model changes to form values
-watch(
-  model,
-  (newValue) => {
-    if (isUpdatingModel) return;
-    
-    isUpdatingFromModel = true;
-    
-    if (isSingleField.value) {
-      const targetValue =
-        newValue &&
-        typeof newValue === "object" &&
-        Object.keys(newValue as Record<string, any>).length > 0
-          ? (newValue as Record<string, any>)
-          : props.options.useDefaults !== false
-            ? (schemaUtils.getDefaultValue(props.schema) as Record<string, any>)
-            : ({} as Record<string, any>);
+watch(model, (newValue) => {
+  if (isUpdatingModel) return;
 
-      setFieldValue(SINGLE_FIELD_PATH, targetValue);
-    } else {
-      if (newValue) {
-        setValues(newValue as Record<string, any>);
-      }
+  isUpdatingFromModel = true;
+
+  if (isSingleField.value) {
+    const targetValue =
+      newValue &&
+      typeof newValue === "object" &&
+      Object.keys(newValue as Record<string, any>).length > 0
+        ? (newValue as Record<string, any>)
+        : props.options.useDefaults !== false
+        ? (schemaUtils.getDefaultValue(props.schema) as Record<string, any>)
+        : ({} as Record<string, any>);
+
+    setFieldValue(SINGLE_FIELD_PATH, targetValue);
+  } else {
+    if (newValue) {
+      setValues(newValue as Record<string, any>);
     }
-    
-    nextTick(() => {
-      isUpdatingFromModel = false;
-    });
   }
-);
+
+  nextTick(() => {
+    isUpdatingFromModel = false;
+  });
+});
 
 // Sync form value changes back to model
 if (isSingleField.value) {
@@ -221,7 +214,7 @@ if (isSingleField.value) {
     () => values[SINGLE_FIELD_PATH],
     (newValue) => {
       if (isUpdatingFromModel) return;
-      
+
       isUpdatingModel = true;
       model.value = newValue as Record<string, any>;
       nextTick(() => {
@@ -235,7 +228,7 @@ if (isSingleField.value) {
     values,
     (newValues) => {
       if (isUpdatingFromModel) return;
-      
+
       isUpdatingModel = true;
       model.value = newValues as Record<string, any>;
       nextTick(() => {
@@ -291,7 +284,10 @@ const properties = computed(() => {
 <template>
   <form class="quickform" @submit="onSubmit">
     <!-- Loading overlay (shown until form is ready) -->
-    <div v-if="!isReady" class="quickform-loading-overlay">
+    <div
+      v-if="showLoadingOverlay && !isReady"
+      class="quickform-loading-overlay"
+    >
       <slot name="loading">
         <div class="quickform-loading-default">
           <div class="quickform-spinner"></div>
@@ -299,11 +295,11 @@ const properties = computed(() => {
       </slot>
     </div>
 
-    <!-- Form content (always rendered, but hidden until ready) -->
-    <div 
-      ref="formContentRef" 
+    <!-- Form content (always rendered, but hidden until ready if overlay is enabled) -->
+    <div
+      ref="formContentRef"
       class="quickform-content"
-      :class="{ 'quickform-content-hidden': !isReady }"
+      :class="{ 'quickform-content-hidden': showLoadingOverlay && !isReady }"
     >
       <!-- Single field schema (e.g., JSON editor, single object field) -->
       <FieldRenderer
