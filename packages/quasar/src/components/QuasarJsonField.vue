@@ -1,9 +1,13 @@
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue';
-import { QInput, QIcon } from 'quasar';
-import { useFormField, generateFieldId, useFormContext } from '@quickflo/quickforms-vue';
-import type { FieldProps } from '@quickflo/quickforms-vue';
-import type { QuasarFormOptions } from '../types';
+import { computed, ref, watch } from "vue";
+import { QInput, QIcon } from "quasar";
+import {
+  useFormField,
+  generateFieldId,
+  useFormContext,
+} from "@quickflo/quickforms-vue";
+import type { FieldProps } from "@quickflo/quickforms-vue";
+import type { QuasarFormOptions } from "../types";
 
 const props = withDefaults(defineProps<FieldProps>(), {
   disabled: false,
@@ -21,7 +25,7 @@ const formContext = useFormContext<QuasarFormOptions>();
 const fieldId = generateFieldId(props.path);
 
 // Local text state for JSON editing
-const jsonText = ref('');
+const jsonText = ref("");
 const parseError = ref<string | null>(null);
 const isInitialized = ref(false);
 
@@ -35,7 +39,7 @@ watch(
         jsonText.value = JSON.stringify(newValue || {}, null, 2);
         parseError.value = null;
       } catch (err) {
-        jsonText.value = '{}';
+        jsonText.value = "{}";
       }
       isInitialized.value = true;
     }
@@ -70,36 +74,39 @@ function formatJson() {
 // Handle keyboard events for better editor UX
 function handleKeyDown(event: KeyboardEvent) {
   const target = event.target as HTMLTextAreaElement;
-  
+
   // Format JSON: Ctrl + Space
-  if (event.ctrlKey && (event.key === ' ' || event.code === 'Space')) {
+  if (event.ctrlKey && (event.key === " " || event.code === "Space")) {
     event.preventDefault();
     event.stopPropagation();
     formatJson();
     return;
   }
-  
+
   // Tab key - insert 2 spaces
-  if (event.key === 'Tab') {
+  if (event.key === "Tab") {
     event.preventDefault();
     event.stopPropagation();
-    
+
     const start = target.selectionStart;
     const end = target.selectionEnd;
-    const spaces = '  '; // 2 spaces
-    
+    const spaces = "  "; // 2 spaces
+
     // Insert spaces at cursor position
-    jsonText.value = jsonText.value.substring(0, start) + spaces + jsonText.value.substring(end);
-    
+    jsonText.value =
+      jsonText.value.substring(0, start) +
+      spaces +
+      jsonText.value.substring(end);
+
     // Move cursor after inserted spaces
     setTimeout(() => {
       target.selectionStart = target.selectionEnd = start + spaces.length;
     }, 0);
     return;
   }
-  
+
   // Enter, Space - stop propagation to prevent form submission
-  if (event.key === 'Enter' || event.key === ' ') {
+  if (event.key === "Enter" || event.key === " ") {
     event.stopPropagation();
   }
 }
@@ -110,19 +117,24 @@ const displayError = computed(() => parseError.value || errorMessage.value);
 const quasarProps = computed(() => {
   const globalDefaults = formContext?.componentDefaults?.global || {};
   const jsonEditorDefaults = formContext?.componentDefaults?.jsoneditor || {};
-  const xQuasarProps = (props.schema as any)['x-quasar-props'] || {};
-  const xComponentProps = (props.schema as any)['x-component-props'] || {};
-  
+  const xQuasarProps = (props.schema as any)["x-quasar-props"] || {};
+  const xComponentProps = (props.schema as any)["x-component-props"] || {};
+
   // Merge in order: global defaults < jsoneditor defaults < schema-specific props
-  return { ...globalDefaults, ...jsonEditorDefaults, ...xComponentProps, ...xQuasarProps };
+  return {
+    ...globalDefaults,
+    ...jsonEditorDefaults,
+    ...xComponentProps,
+    ...xQuasarProps,
+  };
 });
 
 // Get QuickForms-specific features (icons, etc.)
 const quickformsFeatures = computed(() => {
   const globalFeatures = formContext?.quickformsDefaults?.global || {};
   const jsonEditorFeatures = formContext?.quickformsDefaults?.jsoneditor || {};
-  const xQuickformsQuasar = (props.schema as any)['x-quickforms-quasar'] || {};
-  
+  const xQuickformsQuasar = (props.schema as any)["x-quickforms-quasar"] || {};
+
   // Merge in order: global < jsoneditor < schema-specific
   return { ...globalFeatures, ...jsonEditorFeatures, ...xQuickformsQuasar };
 });
@@ -134,10 +146,9 @@ const showFormatHint = computed(() => {
 
 // Get rows from schema or default
 const rows = computed(() => {
-  const xRows = (props.schema as any)['x-rows'];
+  const xRows = (props.schema as any)["x-rows"];
   return xRows !== undefined ? xRows : 8;
 });
-
 </script>
 
 <template>
@@ -147,7 +158,12 @@ const rows = computed(() => {
         {{ label }}
         <span v-if="required" style="color: red; margin-left: 0.25rem">*</span>
       </span>
-      <span v-if="showFormatHint" class="quickform-info-icon" title="Press Ctrl+Space to format JSON">ⓘ</span>
+      <span
+        v-if="showFormatHint"
+        class="quickform-info-icon"
+        title="Press Ctrl+Space to format JSON"
+        >ⓘ</span
+      >
     </div>
     <QInput
       :id="fieldId"
@@ -222,7 +238,8 @@ const rows = computed(() => {
 }
 
 .quickform-json-field-wrapper :deep(.quickform-json-editor) {
-  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', 'Consolas', 'source-code-pro', monospace;
+  font-family: "Monaco", "Menlo", "Ubuntu Mono", "Consolas", "source-code-pro",
+    monospace;
   font-size: 0.813rem;
   line-height: 1.5;
 }
