@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, watch, reactive, markRaw, toRaw } from "vue";
+import { computed, watch, reactive, markRaw, toRaw, ref, nextTick, onMounted } from "vue";
 import { useForm } from "vee-validate";
 import { SchemaUtils } from "@quickflo/quickforms";
 import type { JSONSchema } from "@quickflo/quickforms";
@@ -10,21 +10,21 @@ import FieldRenderer from "./FieldRenderer.vue";
 
 interface Props {
   schema: JSONSchema;
-  modelValue?: Record<string, any>;
   options?: FormOptions;
 }
 
 const props = withDefaults(defineProps<Props>(), {
-  modelValue: () => ({}),
   options: () => ({}),
 });
 
+const model = defineModel<Record<string, any>>({ default: () => ({}) });
+
 const emit = defineEmits<{
-  "update:modelValue": [value: Record<string, any>];
   submit: [value: Record<string, any>];
   validation: [
     result: { valid: boolean; errors: Record<string, string | undefined> }
   ];
+  ready: [];
 }>();
 
 const schemaUtils = new SchemaUtils();
@@ -44,17 +44,17 @@ const isSingleField = computed(() => {
 const initialValues = isSingleField.value
   ? {
       [SINGLE_FIELD_PATH]:
-        props.modelValue &&
-        typeof props.modelValue === "object" &&
-        Object.keys(props.modelValue).length > 0
-          ? props.modelValue
+        model.value &&
+        typeof model.value === "object" &&
+        Object.keys(model.value).length > 0
+          ? model.value
           : props.options.useDefaults !== false
           ? schemaUtils.getDefaultValue(props.schema)
           : {},
     }
   : props.options.useDefaults !== false
-  ? { ...schemaUtils.getDefaultValue(props.schema), ...props.modelValue }
-  : { ...props.modelValue };
+  ? { ...schemaUtils.getDefaultValue(props.schema), ...model.value }
+  : { ...model.value };
 
 // Initialize form with VeeValidate
 const { handleSubmit, values, setValues, setFieldValue, errors, meta } =
@@ -137,10 +137,41 @@ const formContext = reactive({
 
 provideFormContext(formContext as any);
 
-// Watch for external model value changes (parent updating v-model)
+// Track form ready state
+const isReady = ref(false);
+
+// Mark form as ready after initial render
+onMounted(() => {
+  nextTick(() => {
+    isReady.value = true;
+    emit("ready");
+  });
+});
+
+// Reset ready state when schema changes
 watch(
-  () => props.modelValue,
+  () => props.schema,
+  () => {
+    isReady.value = false;
+    nextTick(() => {
+      isReady.value = true;
+      emit("ready");
+    });
+  }
+);
+
+// Flag to prevent circular updates
+let isUpdatingFromModel = false;
+let isUpdatingModel = false;
+
+// Sync model changes to form values
+watch(
+  model,
   (newValue) => {
+    if (isUpdatingModel) return;
+    
+    isUpdatingFromModel = true;
+    
     if (isSingleField.value) {
       const targetValue =
         newValue &&
@@ -151,29 +182,31 @@ watch(
             ? (schemaUtils.getDefaultValue(props.schema) as Record<string, any>)
             : ({} as Record<string, any>);
 
-      // Only update if actually different to prevent loops
-      const currentValue = values[SINGLE_FIELD_PATH];
-      if (JSON.stringify(currentValue) !== JSON.stringify(targetValue)) {
-        setFieldValue(SINGLE_FIELD_PATH, targetValue);
-      }
+      setFieldValue(SINGLE_FIELD_PATH, targetValue);
     } else {
-      if (newValue && JSON.stringify(newValue) !== JSON.stringify(values)) {
+      if (newValue) {
         setValues(newValue as Record<string, any>);
       }
     }
-  },
-  { deep: true }
+    
+    nextTick(() => {
+      isUpdatingFromModel = false;
+    });
+  }
 );
 
-// Watch for internal form value changes (user editing form fields)
+// Sync form value changes back to model
 if (isSingleField.value) {
   watch(
     () => values[SINGLE_FIELD_PATH],
     (newValue) => {
-      // Only emit if different from current modelValue to prevent loops
-      if (JSON.stringify(newValue) !== JSON.stringify(props.modelValue)) {
-        emit("update:modelValue", newValue as Record<string, any>);
-      }
+      if (isUpdatingFromModel) return;
+      
+      isUpdatingModel = true;
+      model.value = newValue as Record<string, any>;
+      nextTick(() => {
+        isUpdatingModel = false;
+      });
     },
     { deep: true }
   );
@@ -181,10 +214,13 @@ if (isSingleField.value) {
   watch(
     values,
     (newValues) => {
-      // Only emit if different from current modelValue to prevent loops
-      if (JSON.stringify(newValues) !== JSON.stringify(props.modelValue)) {
-        emit("update:modelValue", newValues as Record<string, any>);
-      }
+      if (isUpdatingFromModel) return;
+      
+      isUpdatingModel = true;
+      model.value = newValues as Record<string, any>;
+      nextTick(() => {
+        isUpdatingModel = false;
+      });
     },
     { deep: true }
   );
@@ -199,7 +235,7 @@ watch(
       errors: currentErrors as Record<string, string | undefined>,
     });
   },
-  { deep: true, immediate: true }
+  { immediate: true }
 );
 
 // Handle form submission
@@ -234,24 +270,36 @@ const properties = computed(() => {
 
 <template>
   <form class="quickform" @submit="onSubmit">
-    <!-- Single field schema (e.g., JSON editor, single object field) -->
-    <FieldRenderer
-      v-if="isSingleField"
-      :schema="schema"
-      :path="SINGLE_FIELD_PATH"
-      :disabled="options.disabled"
-      :readonly="options.readonly"
-    />
-    <!-- Multiple fields (normal form) -->
-    <FieldRenderer
-      v-else
-      v-for="field in properties"
-      :key="field.key"
-      :schema="field.schema"
-      :path="field.path"
-      :disabled="options.disabled"
-      :readonly="options.readonly"
-    />
+    <!-- Loading state (shown until form is ready) -->
+    <div v-if="!isReady" class="quickform-loading">
+      <slot name="loading">
+        <div class="quickform-loading-default">
+          <div class="quickform-spinner"></div>
+        </div>
+      </slot>
+    </div>
+
+    <!-- Form content (shown when ready) -->
+    <div v-show="isReady" class="quickform-content">
+      <!-- Single field schema (e.g., JSON editor, single object field) -->
+      <FieldRenderer
+        v-if="isSingleField"
+        :schema="schema"
+        :path="SINGLE_FIELD_PATH"
+        :disabled="options.disabled"
+        :readonly="options.readonly"
+      />
+      <!-- Multiple fields (normal form) -->
+      <FieldRenderer
+        v-else
+        v-for="field in properties"
+        :key="field.key"
+        :schema="field.schema"
+        :path="field.path"
+        :disabled="options.disabled"
+        :readonly="options.readonly"
+      />
+    </div>
   </form>
 </template>
 
@@ -260,5 +308,38 @@ const properties = computed(() => {
 
 .quickform {
   max-width: 100%;
+}
+
+.quickform-loading {
+  min-height: 100px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.quickform-loading-default {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+}
+
+.quickform-spinner {
+  width: 32px;
+  height: 32px;
+  border: 3px solid var(--quickform-color-border, #e5e7eb);
+  border-top-color: var(--quickform-color-primary, #3b82f6);
+  border-radius: 50%;
+  animation: quickform-spin 0.8s linear infinite;
+}
+
+@keyframes quickform-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.quickform-content {
+  /* Container for form fields */
 }
 </style>
