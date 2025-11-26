@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, watch, reactive, markRaw, toRaw } from "vue";
+import { computed, watch, reactive, markRaw, toRaw, ref, nextTick, onMounted } from "vue";
 import { useForm } from "vee-validate";
 import { SchemaUtils } from "@quickflo/quickforms";
 import type { JSONSchema } from "@quickflo/quickforms";
@@ -10,21 +10,21 @@ import FieldRenderer from "./FieldRenderer.vue";
 
 interface Props {
   schema: JSONSchema;
-  modelValue?: Record<string, any>;
   options?: FormOptions;
 }
 
 const props = withDefaults(defineProps<Props>(), {
-  modelValue: () => ({}),
   options: () => ({}),
 });
 
+const model = defineModel<Record<string, any>>({ default: () => ({}) });
+
 const emit = defineEmits<{
-  "update:modelValue": [value: Record<string, any>];
   submit: [value: Record<string, any>];
   validation: [
     result: { valid: boolean; errors: Record<string, string | undefined> }
   ];
+  ready: [];
 }>();
 
 const schemaUtils = new SchemaUtils();
@@ -32,14 +32,36 @@ const schemaUtils = new SchemaUtils();
 // Use provided registry or create default
 const registry = props.options.registry || createDefaultRegistry();
 
-// Initialize form with VeeValidate
-const { handleSubmit, values, setValues, errors, meta } = useForm({
-  initialValues:
-    props.options.useDefaults !== false
-      ? { ...schemaUtils.getDefaultValue(props.schema), ...props.modelValue }
-      : { ...props.modelValue },
-  validateOnMount: props.options.validateOnMount ?? false,
+// Single-field support: use a synthetic root path to avoid empty field names
+const SINGLE_FIELD_PATH = "__root__";
+
+// Determine if this schema represents a single logical field
+const isSingleField = computed(() => {
+  return props.schema.type === "object" && !props.schema.properties;
 });
+
+// Compute initial values for the form
+const initialValues = isSingleField.value
+  ? {
+      [SINGLE_FIELD_PATH]:
+        model.value &&
+        typeof model.value === "object" &&
+        Object.keys(model.value).length > 0
+          ? model.value
+          : props.options.useDefaults !== false
+          ? schemaUtils.getDefaultValue(props.schema)
+          : {},
+    }
+  : props.options.useDefaults !== false
+  ? { ...schemaUtils.getDefaultValue(props.schema), ...model.value }
+  : { ...model.value };
+
+// Initialize form with VeeValidate
+const { handleSubmit, values, setValues, setFieldValue, errors, meta } =
+  useForm({
+    initialValues,
+    validateOnMount: props.options.validateOnMount ?? false,
+  });
 
 // Default labels for i18n
 const defaultLabels = {
@@ -80,7 +102,13 @@ const formContext = reactive({
   errorMessages: props.options.errorMessages,
   validators: props.options.validators,
   validatorDebounce: props.options.validatorDebounce,
-  formValues: () => toRaw(values),
+  formValues: () => {
+    if (isSingleField.value) {
+      return toRaw(values[SINGLE_FIELD_PATH] as Record<string, any>);
+    }
+
+    return toRaw(values);
+  },
   labels: { ...defaultLabels, ...props.options.labels },
   componentDefaults: {
     // Start with all custom component defaults from options
@@ -109,25 +137,114 @@ const formContext = reactive({
 
 provideFormContext(formContext as any);
 
-// Watch for external model value changes
+// Track form ready state
+const isReady = ref(false);
+const formContentRef = ref<HTMLDivElement | null>(null);
+
+// Mark form as ready after fields are actually rendered
+function checkIfReady() {
+  // Use requestAnimationFrame to wait for DOM updates
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      // Check if form content has children (fields have rendered)
+      if (formContentRef.value) {
+        const hasFields = formContentRef.value.children.length > 0;
+        if (hasFields) {
+          isReady.value = true;
+          emit("ready");
+        } else {
+          // Retry if no fields yet
+          setTimeout(checkIfReady, 10);
+        }
+      } else {
+        // Form content ref not available yet, retry
+        setTimeout(checkIfReady, 10);
+      }
+    });
+  });
+}
+
+// Mark form as ready after initial render
+onMounted(() => {
+  checkIfReady();
+});
+
+// Reset ready state when schema changes
 watch(
-  () => props.modelValue,
-  (newValue) => {
-    if (newValue && JSON.stringify(newValue) !== JSON.stringify(values)) {
-      setValues(newValue);
-    }
-  },
-  { deep: true }
+  () => props.schema,
+  () => {
+    isReady.value = false;
+    nextTick(() => {
+      checkIfReady();
+    });
+  }
 );
 
-// Watch for internal form changes
+// Flag to prevent circular updates
+let isUpdatingFromModel = false;
+let isUpdatingModel = false;
+
+// Sync model changes to form values
 watch(
-  values,
-  (newValues) => {
-    emit("update:modelValue", newValues);
-  },
-  { deep: true }
+  model,
+  (newValue) => {
+    if (isUpdatingModel) return;
+    
+    isUpdatingFromModel = true;
+    
+    if (isSingleField.value) {
+      const targetValue =
+        newValue &&
+        typeof newValue === "object" &&
+        Object.keys(newValue as Record<string, any>).length > 0
+          ? (newValue as Record<string, any>)
+          : props.options.useDefaults !== false
+            ? (schemaUtils.getDefaultValue(props.schema) as Record<string, any>)
+            : ({} as Record<string, any>);
+
+      setFieldValue(SINGLE_FIELD_PATH, targetValue);
+    } else {
+      if (newValue) {
+        setValues(newValue as Record<string, any>);
+      }
+    }
+    
+    nextTick(() => {
+      isUpdatingFromModel = false;
+    });
+  }
 );
+
+// Sync form value changes back to model
+if (isSingleField.value) {
+  watch(
+    () => values[SINGLE_FIELD_PATH],
+    (newValue) => {
+      if (isUpdatingFromModel) return;
+      
+      isUpdatingModel = true;
+      model.value = newValue as Record<string, any>;
+      nextTick(() => {
+        isUpdatingModel = false;
+      });
+    },
+    { deep: true }
+  );
+} else {
+  watch(
+    values,
+    (newValues) => {
+      if (isUpdatingFromModel) return;
+      
+      isUpdatingModel = true;
+      model.value = newValues as Record<string, any>;
+      nextTick(() => {
+        isUpdatingModel = false;
+      });
+    },
+    { deep: true }
+  );
+}
 
 // Emit validation state changes
 watch(
@@ -138,24 +255,23 @@ watch(
       errors: currentErrors as Record<string, string | undefined>,
     });
   },
-  { deep: true, immediate: true }
+  { immediate: true }
 );
 
 // Handle form submission
 const onSubmit = handleSubmit((submittedValues) => {
+  const logicalValues = isSingleField.value
+    ? (submittedValues[SINGLE_FIELD_PATH] as Record<string, any>)
+    : (submittedValues as Record<string, any>);
+
   // Validate against JSON Schema
-  const validation = schemaUtils.validate(props.schema, submittedValues);
+  const validation = schemaUtils.validate(props.schema, logicalValues);
 
   if (validation.valid) {
-    emit("submit", submittedValues);
+    emit("submit", logicalValues);
   } else {
     console.error("Form validation failed:", validation.errors);
   }
-});
-
-// Check if schema is a single field (not a form with multiple properties)
-const isSingleField = computed(() => {
-  return props.schema.type === "object" && !props.schema.properties;
 });
 
 // Get all top-level properties from schema
@@ -174,24 +290,40 @@ const properties = computed(() => {
 
 <template>
   <form class="quickform" @submit="onSubmit">
-    <!-- Single field schema (e.g., JSON editor, single object field) -->
-    <FieldRenderer
-      v-if="isSingleField"
-      :schema="schema"
-      path=""
-      :disabled="options.disabled"
-      :readonly="options.readonly"
-    />
-    <!-- Multiple fields (normal form) -->
-    <FieldRenderer
-      v-else
-      v-for="field in properties"
-      :key="field.key"
-      :schema="field.schema"
-      :path="field.path"
-      :disabled="options.disabled"
-      :readonly="options.readonly"
-    />
+    <!-- Loading overlay (shown until form is ready) -->
+    <div v-if="!isReady" class="quickform-loading-overlay">
+      <slot name="loading">
+        <div class="quickform-loading-default">
+          <div class="quickform-spinner"></div>
+        </div>
+      </slot>
+    </div>
+
+    <!-- Form content (always rendered, but hidden until ready) -->
+    <div 
+      ref="formContentRef" 
+      class="quickform-content"
+      :class="{ 'quickform-content-hidden': !isReady }"
+    >
+      <!-- Single field schema (e.g., JSON editor, single object field) -->
+      <FieldRenderer
+        v-if="isSingleField"
+        :schema="schema"
+        :path="SINGLE_FIELD_PATH"
+        :disabled="options.disabled"
+        :readonly="options.readonly"
+      />
+      <!-- Multiple fields (normal form) -->
+      <FieldRenderer
+        v-else
+        v-for="field in properties"
+        :key="field.key"
+        :schema="field.schema"
+        :path="field.path"
+        :disabled="options.disabled"
+        :readonly="options.readonly"
+      />
+    </div>
   </form>
 </template>
 
@@ -200,5 +332,52 @@ const properties = computed(() => {
 
 .quickform {
   max-width: 100%;
+  position: relative;
+}
+
+.quickform-loading-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  min-height: 100px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--quickform-input-bg, #ffffff);
+  z-index: 10;
+  transition: opacity 0.15s ease;
+}
+
+.quickform-loading-default {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+}
+
+.quickform-spinner {
+  width: 32px;
+  height: 32px;
+  border: 3px solid var(--quickform-color-border, #e5e7eb);
+  border-top-color: var(--quickform-color-primary, #3b82f6);
+  border-radius: 50%;
+  animation: quickform-spin 0.8s linear infinite;
+}
+
+@keyframes quickform-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.quickform-content {
+  transition: opacity 0.2s ease;
+}
+
+.quickform-content-hidden {
+  opacity: 0;
+  pointer-events: none;
 }
 </style>

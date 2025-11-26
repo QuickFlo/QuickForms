@@ -441,7 +441,7 @@ const schema: JSONSchema = {
     },
 
     // === KEY-VALUE EDITOR (BOTTOM-RIGHT) ===
-    metadata: {
+    metadata2: {
       type: "object",
       title: "Custom Metadata (bottom-right)",
       description: "Right-aligned button",
