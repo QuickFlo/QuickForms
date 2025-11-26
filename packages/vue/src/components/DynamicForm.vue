@@ -148,10 +148,14 @@ watch(
         Object.keys(newValue as Record<string, any>).length > 0
           ? (newValue as Record<string, any>)
           : props.options.useDefaults !== false
-          ? (schemaUtils.getDefaultValue(props.schema) as Record<string, any>)
-          : ({} as Record<string, any>);
+            ? (schemaUtils.getDefaultValue(props.schema) as Record<string, any>)
+            : ({} as Record<string, any>);
 
-      setFieldValue(SINGLE_FIELD_PATH, targetValue);
+      // Only update if actually different to prevent loops
+      const currentValue = values[SINGLE_FIELD_PATH];
+      if (JSON.stringify(currentValue) !== JSON.stringify(targetValue)) {
+        setFieldValue(SINGLE_FIELD_PATH, targetValue);
+      }
     } else {
       if (newValue && JSON.stringify(newValue) !== JSON.stringify(values)) {
         setValues(newValue as Record<string, any>);
@@ -166,7 +170,10 @@ if (isSingleField.value) {
   watch(
     () => values[SINGLE_FIELD_PATH],
     (newValue) => {
-      emit("update:modelValue", newValue as Record<string, any>);
+      // Only emit if different from current modelValue to prevent loops
+      if (JSON.stringify(newValue) !== JSON.stringify(props.modelValue)) {
+        emit("update:modelValue", newValue as Record<string, any>);
+      }
     },
     { deep: true }
   );
@@ -174,7 +181,10 @@ if (isSingleField.value) {
   watch(
     values,
     (newValues) => {
-      emit("update:modelValue", newValues as Record<string, any>);
+      // Only emit if different from current modelValue to prevent loops
+      if (JSON.stringify(newValues) !== JSON.stringify(props.modelValue)) {
+        emit("update:modelValue", newValues as Record<string, any>);
+      }
     },
     { deep: true }
   );
