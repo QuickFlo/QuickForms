@@ -4,7 +4,7 @@ import { QInput, QPopupProxy, QTime } from 'quasar';
 import { useFormField, useFormContext } from '@quickflo/quickforms-vue';
 import { generateFieldId } from '@quickflo/quickforms-vue';
 import type { FieldProps } from '@quickflo/quickforms-vue';
-import { mergeQuasarProps } from '../utils';
+import { mergeQuasarProps, getFieldGapStyle } from '../utils';
 
 const props = withDefaults(defineProps<FieldProps>(), {
   disabled: false,
@@ -32,11 +32,14 @@ const quasarProps = computed(() => {
     'datetime'
   );
 });
+
+const fieldGap = computed(() => getFieldGapStyle(formContext?.componentDefaults));
 </script>
 
 <template>
-  <QInput
-    :id="fieldId"
+  <div :style="{ marginBottom: fieldGap }">
+    <QInput
+      :id="fieldId"
     v-model="value"
     :label="label"
     :hint="hint"
@@ -60,6 +63,7 @@ const quasarProps = computed(() => {
     </template>
     <template v-if="schema.required" #label>
       {{ label }} <span style="color: red">*</span>
-    </template>
-  </QInput>
+      </template>
+    </QInput>
+  </div>
 </template>

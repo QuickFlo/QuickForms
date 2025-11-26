@@ -1,11 +1,12 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, watch } from 'vue';
-import { QCard, QCardSection, QSelect } from 'quasar';
+import { QCard, QCardSection, QSelect, QTabs, QTab, QTabPanels, QTabPanel } from 'quasar';
 import { useFormField, useFormContext } from '@quickflo/quickforms-vue';
 import { generateFieldId } from '@quickflo/quickforms-vue';
 import { FieldRenderer } from '@quickflo/quickforms-vue';
 import type { FieldProps } from '@quickflo/quickforms-vue';
 import { schemaUtils } from '../schema-utils-singleton';
+import { getFieldGapStyle } from '../utils';
 
 const props = withDefaults(defineProps<FieldProps>(), {
   disabled: false,
@@ -49,10 +50,49 @@ onMounted(() => {
 
 const activeSchema = computed(() => options.value[selectedIndex.value]);
 
-// Compute display labels for the dropdown
+// Get properties from active schema for direct rendering (avoids nested expansion panel)
+const activeProperties = computed(() => {
+  const schema = activeSchema.value;
+  if (!schema || !schema.properties) {
+    return [];
+  }
+  return Object.entries(schema.properties).map(([key, propSchema]) => ({
+    key,
+    schema: propSchema,
+    path: props.path ? `${props.path}.${key}` : key,
+  }));
+});
+
+// Check if active schema is a simple object with properties (render inline)
+// vs something more complex that needs its own renderer
+const shouldRenderPropertiesInline = computed(() => {
+  const schema = activeSchema.value;
+  return schema && schema.properties && !schema.oneOf && !schema.anyOf && !schema.allOf;
+});
+
+// Get display style: 'tabs' | 'dropdown' (default based on option count)
+const displayStyle = computed(() => {
+  const xOneofStyle = (props.schema as any)['x-oneof-style'];
+  if (xOneofStyle) {
+    return xOneofStyle;
+  }
+  // Default: tabs for 2-4 options, dropdown for more
+  return options.value.length <= 4 ? 'tabs' : 'dropdown';
+});
+
+// Get custom labels from x-oneof-labels or fall back to option titles
+const getOptionLabel = (option: any, index: number): string => {
+  const xOneofLabels = (props.schema as any)['x-oneof-labels'] as string[] | undefined;
+  if (xOneofLabels && xOneofLabels[index]) {
+    return xOneofLabels[index];
+  }
+  return option.title || `Option ${index + 1}`;
+};
+
+// Compute display labels for the dropdown/tabs
 const allSelectOptions = computed(() => {
   return options.value.map((option, index) => ({
-    label: option.title || `Option ${index + 1}`,
+    label: getOptionLabel(option, index),
     value: index,
   }));
 });
@@ -101,10 +141,13 @@ const handleOptionChange = (newIndex: number) => {
   selectedIndex.value = newIndex;
   // Keep existing value to allow common fields to persist
 };
+
+const fieldGap = computed(() => getFieldGapStyle(formContext?.componentDefaults));
 </script>
 
 <template>
-  <QCard flat bordered>
+  <div :style="{ marginBottom: fieldGap }">
+    <QCard flat bordered>
     <QCardSection>
       <div v-if="label" style="font-weight: 500; margin-bottom: 0.5rem">
         {{ label }}
@@ -115,37 +158,96 @@ const handleOptionChange = (newIndex: number) => {
         {{ hint }}
       </div>
 
-      <QSelect
-        v-model="selectedIndex"
-        :options="filteredOptions"
-        label="Select Option"
-        :disable="disabled || readonly"
-        :use-input="useFilter"
-        :input-debounce="0"
-        :fill-input="useFilter"
-        :hide-selected="useFilter"
-        outlined
-        clearable
-        emit-value
-        map-options
-        @update:model-value="handleOptionChange"
-        @filter="filterFn"
-        v-bind="quasarProps"
-      />
+      <!-- Tabs display mode -->
+      <template v-if="displayStyle === 'tabs'">
+        <QTabs
+          v-model="selectedIndex"
+          dense
+          class="text-grey"
+          active-color="primary"
+          indicator-color="primary"
+          align="left"
+          narrow-indicator
+        >
+          <QTab
+            v-for="option in allSelectOptions"
+            :key="option.value"
+            :name="option.value"
+            :label="option.label"
+            :disable="disabled || readonly"
+          />
+        </QTabs>
 
-      <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px dashed #ddd">
-        <FieldRenderer
-          v-if="activeSchema"
-          :schema="activeSchema"
-          :path="path"
-          :disabled="disabled"
-          :readonly="readonly"
+        <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid #eee">
+          <!-- Render object properties directly to avoid nested expansion panel -->
+          <template v-if="shouldRenderPropertiesInline">
+            <FieldRenderer
+              v-for="prop in activeProperties"
+              :key="prop.key"
+              :schema="prop.schema"
+              :path="prop.path"
+              :disabled="disabled"
+              :readonly="readonly"
+            />
+          </template>
+          <!-- Fallback for non-object schemas -->
+          <FieldRenderer
+            v-else-if="activeSchema"
+            :schema="activeSchema"
+            :path="path"
+            :disabled="disabled"
+            :readonly="readonly"
+          />
+        </div>
+      </template>
+
+      <!-- Dropdown display mode -->
+      <template v-else>
+        <QSelect
+          v-model="selectedIndex"
+          :options="filteredOptions"
+          label="Select Option"
+          :disable="disabled || readonly"
+          :use-input="useFilter"
+          :input-debounce="0"
+          :fill-input="useFilter"
+          :hide-selected="useFilter"
+          outlined
+          clearable
+          emit-value
+          map-options
+          @update:model-value="handleOptionChange"
+          @filter="filterFn"
+          v-bind="quasarProps"
         />
-      </div>
+
+        <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px dashed #ddd">
+          <!-- Render object properties directly to avoid nested expansion panel -->
+          <template v-if="shouldRenderPropertiesInline">
+            <FieldRenderer
+              v-for="prop in activeProperties"
+              :key="prop.key"
+              :schema="prop.schema"
+              :path="prop.path"
+              :disabled="disabled"
+              :readonly="readonly"
+            />
+          </template>
+          <!-- Fallback for non-object schemas -->
+          <FieldRenderer
+            v-else-if="activeSchema"
+            :schema="activeSchema"
+            :path="path"
+            :disabled="disabled"
+            :readonly="readonly"
+          />
+        </div>
+      </template>
 
       <div v-if="errorMessage" style="color: red; font-size: 0.875rem; margin-top: 0.5rem">
         {{ errorMessage }}
-      </div>
-    </QCardSection>
-  </QCard>
+        </div>
+      </QCardSection>
+    </QCard>
+  </div>
 </template>

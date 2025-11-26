@@ -4,14 +4,14 @@ import { QCheckbox } from "quasar";
 import { useFormField, useFormContext } from "@quickflo/quickforms-vue";
 import { generateFieldId } from "@quickflo/quickforms-vue";
 import type { FieldProps } from "@quickflo/quickforms-vue";
-import { mergeQuasarProps } from "../utils";
+import { mergeQuasarProps, getFieldGapStyle } from "../utils";
 
 const props = withDefaults(defineProps<FieldProps>(), {
   disabled: false,
   readonly: false,
 });
 
-const { value, errorMessage, label } = useFormField(props.path, props.schema, {
+const { value, errorMessage, label, hint } = useFormField(props.path, props.schema, {
   label: props.label,
 });
 
@@ -30,9 +30,11 @@ const quasarProps = computed(() => {
     "checkbox"
   );
 });
+
+const fieldGap = computed(() => getFieldGapStyle(formContext?.componentDefaults));
 </script>
 <template>
-  <div>
+  <div :style="{ marginBottom: fieldGap }">
     <QCheckbox
       :id="fieldId"
       v-model="value"
@@ -48,6 +50,12 @@ const quasarProps = computed(() => {
         >
       </template>
     </QCheckbox>
+    <div
+      v-if="schema.description"
+      style="font-size: 0.875rem; color: #666; margin-left: 2rem; margin-top: 0.25rem"
+    >
+      {{ schema.description }}
+    </div>
     <div
       v-if="errorMessage"
       style="color: red; font-size: 0.875rem; margin-top: 0.25rem"

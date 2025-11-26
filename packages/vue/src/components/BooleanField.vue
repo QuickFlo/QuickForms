@@ -61,7 +61,7 @@ const showHint = computed(() => {
 
 <style scoped>
 .quickform-field {
-  margin-bottom: 1rem;
+  margin-bottom: var(--quickform-field-margin-bottom, 1rem);
 }
 
 .quickform-checkbox-label {

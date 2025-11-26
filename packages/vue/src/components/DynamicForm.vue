@@ -84,6 +84,9 @@ const defaultLabels = {
 
 // Default component configurations
 const defaultComponentDefaults = {
+  layout: {
+    fieldGap: '1rem',
+  },
   select: {
     autocomplete: true, // Enable autocomplete by default (Quasar uses this)
     autocompleteThreshold: 5,
@@ -123,6 +126,10 @@ const formContext = reactive({
     // Start with all custom component defaults from options
     ...props.options.componentDefaults,
     // Then merge in the built-in defaults
+    layout: {
+      ...defaultComponentDefaults.layout,
+      ...props.options.componentDefaults?.layout,
+    },
     select: {
       ...defaultComponentDefaults.select,
       ...props.options.componentDefaults?.select,
@@ -260,10 +267,26 @@ const properties = computed(() => {
     path: key,
   }));
 });
+
+// Compute field gap - convert Quasar sizes to CSS values
+const fieldGapStyle = computed(() => {
+  const gap = props.options.componentDefaults?.layout?.fieldGap ?? '1rem';
+  
+  // Map Quasar size names to CSS values
+  const sizeMap: Record<string, string> = {
+    'xs': '4px',
+    'sm': '8px',
+    'md': '16px',
+    'lg': '24px',
+    'xl': '32px',
+  };
+  
+  return sizeMap[gap] ?? gap;
+});
 </script>
 
 <template>
-  <form class="quickform" @submit="onSubmit">
+  <form class="quickform" :style="{ '--quickform-field-margin-bottom': fieldGapStyle }" @submit="onSubmit">
     <!-- Loading overlay (shown until form is ready) -->
     <div
       v-if="showLoadingOverlay && !isReady"

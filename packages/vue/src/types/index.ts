@@ -70,6 +70,16 @@ export interface FormLabels {
  * Component-specific default configurations
  */
 export interface ComponentDefaults {
+  /** Layout configuration for field spacing */
+  layout?: {
+    /** 
+     * Vertical gap between form fields.
+     * For Vue package: accepts CSS value (e.g., '1rem', '24px')
+     * For Quasar package: accepts 'xs' | 'sm' | 'md' | 'lg' | 'xl' or CSS value
+     * Default: '1rem'
+     */
+    fieldGap?: string;
+  };
   select?: {
     /** Enable datalist autocomplete for enum fields. Default: false */
     autocomplete?: boolean;
@@ -81,6 +91,17 @@ export interface ComponentDefaults {
     collapsible?: boolean;
     /** Start with items collapsed. Default: false */
     defaultCollapsed?: boolean;
+  };
+  object?: {
+    /** 
+     * Default expanded state for object fields. 
+     * 'required-only' = required fields expanded, optional collapsed (default)
+     * 'all' = all fields expanded
+     * 'none' = all fields collapsed
+     */
+    defaultExpanded?: 'required-only' | 'all' | 'none';
+    /** Show "(optional)" indicator for optional object fields. Default: true */
+    showOptionalIndicator?: boolean;
   };
   number?: {
     /** Prefix for number display (e.g., "$"). Default: undefined */

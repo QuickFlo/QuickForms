@@ -4,7 +4,7 @@ import { QInput, QIcon } from 'quasar';
 import { useFormField, useFormContext } from '@quickflo/quickforms-vue';
 import { generateFieldId } from '@quickflo/quickforms-vue';
 import type { FieldProps } from '@quickflo/quickforms-vue';
-import { mergeQuasarProps, mergeQuickFormsQuasarFeatures } from '../utils';
+import { mergeQuasarProps, mergeQuickFormsQuasarFeatures, getFieldGapStyle } from '../utils';
 import type { QuasarFormOptions } from '../types';
 
 const props = withDefaults(defineProps<FieldProps>(), {
@@ -75,49 +75,54 @@ const showPrependIcon = computed(() => !!quickformsFeatures.value.prependIcon);
 const showAppendIcon = computed(() => 
   !isPasswordField.value && !!quickformsFeatures.value.appendIcon
 );
+
+// Field gap style
+const fieldGap = computed(() => getFieldGapStyle(formContext?.componentDefaults));
 </script>
 
 <template>
-  <QInput
-    :id="fieldId"
-    v-model="value"
-    :label="label"
-    :hint="hint"
-    :type="isTextarea ? 'textarea' : inputType"
-    :error="!!errorMessage"
-    :error-message="errorMessage || undefined"
-    :disable="disabled"
-    :readonly="readonly"
-    :required="schema.required"
-    v-bind="quasarProps"
-  >
-    <template v-if="schema.required" #label>
-      {{ label }} <span style="color: red">*</span>
-    </template>
-    
-    <!-- Prepend icon slot -->
-    <template v-if="showPrependIcon" #prepend>
-      <QIcon
-        :name="quickformsFeatures.prependIcon!"
-        :color="iconConfig.color"
-        :size="iconConfig.size"
-      />
-    </template>
-    
-    <!-- Append slot: password toggle takes precedence over custom icons -->
-    <template v-if="isPasswordField" #append>
-      <QIcon
-        :name="isPasswordVisible ? 'visibility_off' : 'visibility'"
-        class="cursor-pointer"
-        @click="isPasswordVisible = !isPasswordVisible"
-      />
-    </template>
-    <template v-else-if="showAppendIcon" #append>
-      <QIcon
-        :name="quickformsFeatures.appendIcon!"
-        :color="iconConfig.color"
-        :size="iconConfig.size"
-      />
-    </template>
-  </QInput>
+  <div :style="{ marginBottom: fieldGap }">
+    <QInput
+      :id="fieldId"
+      v-model="value"
+      :label="label"
+      :hint="hint"
+      :type="isTextarea ? 'textarea' : inputType"
+      :error="!!errorMessage"
+      :error-message="errorMessage || undefined"
+      :disable="disabled"
+      :readonly="readonly"
+      :required="schema.required"
+      v-bind="quasarProps"
+    >
+      <template v-if="schema.required" #label>
+        {{ label }} <span style="color: red">*</span>
+      </template>
+      
+      <!-- Prepend icon slot -->
+      <template v-if="showPrependIcon" #prepend>
+        <QIcon
+          :name="quickformsFeatures.prependIcon!"
+          :color="iconConfig.color"
+          :size="iconConfig.size"
+        />
+      </template>
+      
+      <!-- Append slot: password toggle takes precedence over custom icons -->
+      <template v-if="isPasswordField" #append>
+        <QIcon
+          :name="isPasswordVisible ? 'visibility_off' : 'visibility'"
+          class="cursor-pointer"
+          @click="isPasswordVisible = !isPasswordVisible"
+        />
+      </template>
+      <template v-else-if="showAppendIcon" #append>
+        <QIcon
+          :name="quickformsFeatures.appendIcon!"
+          :color="iconConfig.color"
+          :size="iconConfig.size"
+        />
+      </template>
+    </QInput>
+  </div>
 </template>
