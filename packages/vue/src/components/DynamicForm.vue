@@ -290,8 +290,8 @@ const properties = computed(() => {
 
 <template>
   <form class="quickform" @submit="onSubmit">
-    <!-- Loading state (shown until form is ready) -->
-    <div v-if="!isReady" class="quickform-loading">
+    <!-- Loading overlay (shown until form is ready) -->
+    <div v-if="!isReady" class="quickform-loading-overlay">
       <slot name="loading">
         <div class="quickform-loading-default">
           <div class="quickform-spinner"></div>
@@ -299,8 +299,12 @@ const properties = computed(() => {
       </slot>
     </div>
 
-    <!-- Form content (shown when ready) -->
-    <div ref="formContentRef" v-show="isReady" class="quickform-content">
+    <!-- Form content (always rendered, but hidden until ready) -->
+    <div 
+      ref="formContentRef" 
+      class="quickform-content"
+      :class="{ 'quickform-content-hidden': !isReady }"
+    >
       <!-- Single field schema (e.g., JSON editor, single object field) -->
       <FieldRenderer
         v-if="isSingleField"
@@ -328,13 +332,22 @@ const properties = computed(() => {
 
 .quickform {
   max-width: 100%;
+  position: relative;
 }
 
-.quickform-loading {
+.quickform-loading-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
   min-height: 100px;
   display: flex;
   align-items: center;
   justify-content: center;
+  background: var(--quickform-input-bg, #ffffff);
+  z-index: 10;
+  transition: opacity 0.15s ease;
 }
 
 .quickform-loading-default {
@@ -360,6 +373,11 @@ const properties = computed(() => {
 }
 
 .quickform-content {
-  /* Container for form fields */
+  transition: opacity 0.2s ease;
+}
+
+.quickform-content-hidden {
+  opacity: 0;
+  pointer-events: none;
 }
 </style>
