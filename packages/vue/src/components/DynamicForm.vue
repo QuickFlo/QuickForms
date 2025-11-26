@@ -10,16 +10,17 @@ import FieldRenderer from "./FieldRenderer.vue";
 
 interface Props {
   schema: JSONSchema;
+  modelValue?: Record<string, any>;
   options?: FormOptions;
 }
 
 const props = withDefaults(defineProps<Props>(), {
+  modelValue: () => ({}),
   options: () => ({}),
 });
 
-const model = defineModel<Record<string, any>>({ default: () => ({}) });
-
 const emit = defineEmits<{
+  "update:modelValue": [value: Record<string, any>];
   submit: [value: Record<string, any>];
   validation: [
     result: { valid: boolean; errors: Record<string, string | undefined> }
@@ -35,8 +36,8 @@ const registry = props.options.registry || createDefaultRegistry();
 const { handleSubmit, values, setValues, errors, meta } = useForm({
   initialValues:
     props.options.useDefaults !== false
-      ? { ...schemaUtils.getDefaultValue(props.schema), ...model.value }
-      : { ...model.value },
+      ? { ...schemaUtils.getDefaultValue(props.schema), ...props.modelValue }
+      : { ...props.modelValue },
   validateOnMount: props.options.validateOnMount ?? false,
 });
 
@@ -108,9 +109,9 @@ const formContext = reactive({
 
 provideFormContext(formContext as any);
 
-// Sync between VeeValidate's values and v-model
+// Watch for external model value changes (parent updating v-model)
 watch(
-  model,
+  () => props.modelValue,
   (newValue) => {
     if (newValue && JSON.stringify(newValue) !== JSON.stringify(values)) {
       setValues(newValue);
@@ -119,10 +120,11 @@ watch(
   { deep: true }
 );
 
+// Watch for internal form value changes (user editing form fields)
 watch(
   values,
   (newValues) => {
-    model.value = newValues;
+    emit("update:modelValue", newValues);
   },
   { deep: true }
 );
