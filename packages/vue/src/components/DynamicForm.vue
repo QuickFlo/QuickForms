@@ -139,13 +139,34 @@ provideFormContext(formContext as any);
 
 // Track form ready state
 const isReady = ref(false);
+const formContentRef = ref<HTMLDivElement | null>(null);
+
+// Mark form as ready after fields are actually rendered
+function checkIfReady() {
+  // Use requestAnimationFrame to wait for DOM updates
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      // Check if form content has children (fields have rendered)
+      if (formContentRef.value) {
+        const hasFields = formContentRef.value.children.length > 0;
+        if (hasFields) {
+          isReady.value = true;
+          emit("ready");
+        } else {
+          // Retry if no fields yet
+          setTimeout(checkIfReady, 10);
+        }
+      } else {
+        // Form content ref not available yet, retry
+        setTimeout(checkIfReady, 10);
+      }
+    });
+  });
+}
 
 // Mark form as ready after initial render
 onMounted(() => {
-  nextTick(() => {
-    isReady.value = true;
-    emit("ready");
-  });
+  checkIfReady();
 });
 
 // Reset ready state when schema changes
@@ -154,8 +175,7 @@ watch(
   () => {
     isReady.value = false;
     nextTick(() => {
-      isReady.value = true;
-      emit("ready");
+      checkIfReady();
     });
   }
 );
@@ -280,7 +300,7 @@ const properties = computed(() => {
     </div>
 
     <!-- Form content (shown when ready) -->
-    <div v-show="isReady" class="quickform-content">
+    <div ref="formContentRef" v-show="isReady" class="quickform-content">
       <!-- Single field schema (e.g., JSON editor, single object field) -->
       <FieldRenderer
         v-if="isSingleField"
