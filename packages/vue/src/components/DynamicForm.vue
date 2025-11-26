@@ -146,35 +146,16 @@ const formContext = reactive({
 
 provideFormContext(formContext as any);
 
-// Track form ready state
+// Track form ready state for loading overlay
 const isReady = ref(false);
-const formContentRef = ref<HTMLDivElement | null>(null);
 
-// Mark form as ready after the initial DOM render
-function markReady() {
+// Emit ready event after initial render
+onMounted(() => {
   nextTick(() => {
-    if (isReady.value) {
-      return;
-    }
-
     isReady.value = true;
     emit("ready");
   });
-}
-
-// Mark form as ready after initial render
-onMounted(() => {
-  markReady();
 });
-
-// Reset ready state when schema changes
-watch(
-  () => props.schema,
-  () => {
-    isReady.value = false;
-    markReady();
-  }
-);
 
 // Flag to prevent circular updates
 let isUpdatingFromModel = false;
@@ -297,7 +278,6 @@ const properties = computed(() => {
 
     <!-- Form content (always rendered, but hidden until ready if overlay is enabled) -->
     <div
-      ref="formContentRef"
       class="quickform-content"
       :class="{ 'quickform-content-hidden': showLoadingOverlay && !isReady }"
     >
