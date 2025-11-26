@@ -32,14 +32,36 @@ const schemaUtils = new SchemaUtils();
 // Use provided registry or create default
 const registry = props.options.registry || createDefaultRegistry();
 
-// Initialize form with VeeValidate
-const { handleSubmit, values, setValues, errors, meta } = useForm({
-  initialValues:
-    props.options.useDefaults !== false
-      ? { ...schemaUtils.getDefaultValue(props.schema), ...props.modelValue }
-      : { ...props.modelValue },
-  validateOnMount: props.options.validateOnMount ?? false,
+// Single-field support: use a synthetic root path to avoid empty field names
+const SINGLE_FIELD_PATH = "__root__";
+
+// Determine if this schema represents a single logical field
+const isSingleField = computed(() => {
+  return props.schema.type === "object" && !props.schema.properties;
 });
+
+// Compute initial values for the form
+const initialValues = isSingleField.value
+  ? {
+      [SINGLE_FIELD_PATH]:
+        props.modelValue &&
+        typeof props.modelValue === "object" &&
+        Object.keys(props.modelValue).length > 0
+          ? props.modelValue
+          : props.options.useDefaults !== false
+          ? schemaUtils.getDefaultValue(props.schema)
+          : {},
+    }
+  : props.options.useDefaults !== false
+  ? { ...schemaUtils.getDefaultValue(props.schema), ...props.modelValue }
+  : { ...props.modelValue };
+
+// Initialize form with VeeValidate
+const { handleSubmit, values, setValues, setFieldValue, errors, meta } =
+  useForm({
+    initialValues,
+    validateOnMount: props.options.validateOnMount ?? false,
+  });
 
 // Default labels for i18n
 const defaultLabels = {
@@ -80,7 +102,13 @@ const formContext = reactive({
   errorMessages: props.options.errorMessages,
   validators: props.options.validators,
   validatorDebounce: props.options.validatorDebounce,
-  formValues: () => toRaw(values),
+  formValues: () => {
+    if (isSingleField.value) {
+      return toRaw(values[SINGLE_FIELD_PATH] as Record<string, any>);
+    }
+
+    return toRaw(values);
+  },
   labels: { ...defaultLabels, ...props.options.labels },
   componentDefaults: {
     // Start with all custom component defaults from options
@@ -113,22 +141,44 @@ provideFormContext(formContext as any);
 watch(
   () => props.modelValue,
   (newValue) => {
-    if (newValue && JSON.stringify(newValue) !== JSON.stringify(values)) {
-      setValues(newValue);
+    if (isSingleField.value) {
+      const targetValue =
+        newValue &&
+        typeof newValue === "object" &&
+        Object.keys(newValue as Record<string, any>).length > 0
+          ? (newValue as Record<string, any>)
+          : props.options.useDefaults !== false
+          ? (schemaUtils.getDefaultValue(props.schema) as Record<string, any>)
+          : ({} as Record<string, any>);
+
+      setFieldValue(SINGLE_FIELD_PATH, targetValue);
+    } else {
+      if (newValue && JSON.stringify(newValue) !== JSON.stringify(values)) {
+        setValues(newValue as Record<string, any>);
+      }
     }
   },
   { deep: true }
 );
 
 // Watch for internal form value changes (user editing form fields)
-watch(
-  values,
-  (newValues) => {
-    console.log('[DynamicForm] values changed', newValues)
-    emit("update:modelValue", newValues);
-  },
-  { deep: true }
-);
+if (isSingleField.value) {
+  watch(
+    () => values[SINGLE_FIELD_PATH],
+    (newValue) => {
+      emit("update:modelValue", newValue as Record<string, any>);
+    },
+    { deep: true }
+  );
+} else {
+  watch(
+    values,
+    (newValues) => {
+      emit("update:modelValue", newValues as Record<string, any>);
+    },
+    { deep: true }
+  );
+}
 
 // Emit validation state changes
 watch(
@@ -144,19 +194,18 @@ watch(
 
 // Handle form submission
 const onSubmit = handleSubmit((submittedValues) => {
+  const logicalValues = isSingleField.value
+    ? (submittedValues[SINGLE_FIELD_PATH] as Record<string, any>)
+    : (submittedValues as Record<string, any>);
+
   // Validate against JSON Schema
-  const validation = schemaUtils.validate(props.schema, submittedValues);
+  const validation = schemaUtils.validate(props.schema, logicalValues);
 
   if (validation.valid) {
-    emit("submit", submittedValues);
+    emit("submit", logicalValues);
   } else {
     console.error("Form validation failed:", validation.errors);
   }
-});
-
-// Check if schema is a single field (not a form with multiple properties)
-const isSingleField = computed(() => {
-  return props.schema.type === "object" && !props.schema.properties;
 });
 
 // Get all top-level properties from schema
@@ -179,7 +228,7 @@ const properties = computed(() => {
     <FieldRenderer
       v-if="isSingleField"
       :schema="schema"
-      path=""
+      :path="SINGLE_FIELD_PATH"
       :disabled="options.disabled"
       :readonly="options.readonly"
     />
