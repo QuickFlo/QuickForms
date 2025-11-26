@@ -281,6 +281,8 @@ export function useFormField(
   // Computed label from override or schema
   const label = computed(() => {
     if (options.label !== undefined) return options.label;
+    // Hide label for synthetic root path
+    if (path === "__root__") return schema.title || "";
     return schema.title || path;
   });
 
