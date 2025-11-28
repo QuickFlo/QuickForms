@@ -4,7 +4,7 @@ import { Codemirror } from 'vue-codemirror';
 import { json, jsonParseLinter } from '@codemirror/lang-json';
 import { oneDark } from '@codemirror/theme-one-dark';
 import { linter, lintGutter } from '@codemirror/lint';
-import { keymap } from '@codemirror/view';
+import { keymap, lineNumbers, EditorView as CMEditorView } from '@codemirror/view';
 import { useFormField } from '../composables/useFormField.js';
 import { generateFieldId } from '../composables/utils.js';
 import type { FieldProps } from '../types/index.js';
@@ -86,12 +86,31 @@ function formatJSON(view: EditorView) {
   }
 }
 
+// Get CodeMirror configuration options
+const showLineNumbers = computed(() => {
+  const xLineNumbers = (props.schema as any)['x-json-line-numbers'];
+  return xLineNumbers ?? true;
+});
+
+const showLintGutter = computed(() => {
+  const xLintGutter = (props.schema as any)['x-json-lint-gutter'];
+  return xLintGutter ?? true;
+});
+
+const tabSize = computed(() => {
+  const xTabSize = (props.schema as any)['x-json-tab-size'];
+  return xTabSize ?? 2;
+});
+
+const indentWithTab = computed(() => {
+  const xIndentWithTab = (props.schema as any)['x-json-indent-with-tab'];
+  return xIndentWithTab ?? true;
+});
+
 // CodeMirror extensions
 const extensions = computed(() => {
   const exts = [
     json(),
-    linter(jsonParseLinter()),
-    lintGutter(),
     // Add keyboard shortcut for formatting: Cmd+Shift+F (Mac) or Ctrl+Shift+F (Windows/Linux)
     keymap.of([{
       key: 'Mod-Shift-f',
@@ -99,6 +118,25 @@ const extensions = computed(() => {
     }])
   ];
   
+  // Add line numbers if enabled, or explicitly hide gutters if disabled
+  if (showLineNumbers.value) {
+    exts.push(lineNumbers());
+  } else {
+    // Explicitly hide ALL gutters including basicSetup's default line numbers
+    exts.push(CMEditorView.theme({
+      ".cm-gutters": {
+        display: "none !important"
+      }
+    }));
+  }
+  
+  // Add linting if enabled
+  if (showLintGutter.value) {
+    exts.push(linter(jsonParseLinter()));
+    exts.push(lintGutter());
+  }
+  
+  // Add dark theme if enabled
   if (useDarkTheme.value) {
     exts.push(oneDark);
   }
@@ -107,6 +145,12 @@ const extensions = computed(() => {
 });
 
 const displayError = computed(() => parseError.value || errorMessage.value);
+
+// Create a key that changes when extensions configuration changes
+// This forces CodeMirror to remount with new extensions
+const editorKey = computed(() => 
+  `${showLineNumbers.value}-${showLintGutter.value}-${useDarkTheme.value}`
+);
 
 // Handle changes from CodeMirror
 function handleChange(newCode: string, update: ViewUpdate) {
@@ -149,13 +193,14 @@ function handleChange(newCode: string, update: ViewUpdate) {
 
     <div class="quickform-json-editor-wrapper">
       <Codemirror
+        :key="editorKey"
         :id="fieldId"
         v-model="code"
         :style="{ height: editorHeight }"
         :extensions="extensions"
         :disabled="disabled || readonly"
-        :indent-with-tab="true"
-        :tab-size="2"
+        :indent-with-tab="indentWithTab"
+        :tab-size="tabSize"
         placeholder="{}"
         :aria-describedby="hint ? `${fieldId}-hint` : undefined"
         :aria-invalid="!!displayError"

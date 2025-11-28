@@ -369,6 +369,10 @@ A lightweight JSON code editor powered by [CodeMirror 6](https://codemirror.net/
 |-----------|------|---------|-------------|
 | `x-json-height` | `string` | `'300px'` | Editor height (CSS value: '300px', '20rem', etc.) |
 | `x-json-dark-theme` | `boolean` | `false` | Use dark theme (Quasar: auto-detects from Dark mode) |
+| `x-json-line-numbers` | `boolean` | `true` | Show line numbers in gutter |
+| `x-json-lint-gutter` | `boolean` | `true` | Show linting gutter with error indicators |
+| `x-json-tab-size` | `number` | `2` | Number of spaces for tab indentation |
+| `x-json-indent-with-tab` | `boolean` | `true` | Enable Tab key for indentation |
 
 ### Configuration
 
@@ -388,17 +392,21 @@ const formOptions = {
   quickformsDefaults: {
     jsoneditor: {
       height: '400px',
-      darkTheme: false  // Or omit to auto-detect from Quasar Dark mode
+      darkTheme: false,      // Or omit to auto-detect from Quasar Dark mode
+      lineNumbers: true,     // Show line numbers
+      lintGutter: true,      // Show error indicators
+      tabSize: 2,            // Spaces per tab
+      indentWithTab: true    // Enable Tab key
     }
   }
 }
 ```
 
 **Priority order (highest to lowest):**
-1. Schema `x-json-height` / `x-json-dark-theme`
-2. `quickformsDefaults.jsoneditor`
+1. Schema `x-json-*` properties
+2. `quickformsDefaults.jsoneditor` (Quasar only)
 3. Auto-detect from `$q.dark.isActive` (Quasar only, for darkTheme)
-4. Defaults: `{ height: '300px', darkTheme: false }`
+4. Defaults: `{ height: '300px', darkTheme: false, lineNumbers: true, lintGutter: true, tabSize: 2, indentWithTab: true }`
 
 ---
 

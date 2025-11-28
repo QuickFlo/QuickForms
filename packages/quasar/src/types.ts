@@ -211,6 +211,14 @@ export interface QuickFormsQuasarDefaults {
     height?: string;
     /** Use dark theme. Default: false */
     darkTheme?: boolean;
+    /** Show line numbers. Default: true */
+    lineNumbers?: boolean;
+    /** Show lint gutter. Default: true */
+    lintGutter?: boolean;
+    /** Tab size for indentation. Default: 2 */
+    tabSize?: number;
+    /** Enable indent with tab key. Default: true */
+    indentWithTab?: boolean;
   };
 }
 
