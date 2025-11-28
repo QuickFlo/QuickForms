@@ -33,6 +33,7 @@
   "author": "",
   "license": "MIT",
   "peerDependencies": {
+    "codemirror": "^6.0.0",
     "quasar": "^2.0.0",
     "vue": "^3.3.0"
   },
