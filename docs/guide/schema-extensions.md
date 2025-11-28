@@ -330,6 +330,168 @@ All `x-*` attributes are optional. QuickForms works perfectly with standard JSON
 
 ---
 
+## `x-oneof-labels`
+
+**Purpose:** Custom display labels for `oneOf`/`anyOf` options
+
+**Type:** `string[]`
+
+**Example:**
+```typescript
+{
+  groupBy: {
+    oneOf: [
+      { type: 'string', title: 'Single Field' },
+      { type: 'array', title: 'Multiple Fields', items: { type: 'string' } }
+    ],
+    'x-oneof-labels': ['Single Field Name', 'Multiple Field Names']
+  }
+}
+```
+
+**Use Cases:**
+- User-friendly labels for oneOf/anyOf options
+- When the underlying schema titles are too technical
+- Overriding default "Option 1", "Option 2" labels
+
+---
+
+## `x-oneof-style`
+
+**Purpose:** Control the display style for `oneOf`/`anyOf` selectors
+
+**Type:** `'tabs' | 'dropdown'`
+
+**Default:** `'tabs'` for 2-4 options, `'dropdown'` for more
+
+**Example:**
+```typescript
+{
+  configuration: {
+    oneOf: [
+      { type: 'object', title: 'Simple', properties: { ... } },
+      { type: 'object', title: 'Advanced', properties: { ... } }
+    ],
+    'x-oneof-style': 'tabs'  // Force tabs display
+  }
+}
+```
+
+**Global Configuration via componentDefaults:**
+```typescript
+<DynamicForm
+  :schema="schema"
+  v-model="data"
+  :options="{
+    componentDefaults: {
+      oneOf: {
+        displayStyle: 'dropdown'  // Force all oneOf fields to use dropdown
+      }
+    }
+  }"
+/>
+```
+
+**Use Cases:**
+- Force tabs for visual clarity even with many options
+- Force dropdown for space-constrained layouts
+- Set a consistent display style across all oneOf fields in a form
+
+---
+
+## `x-oneof-select-label`
+
+**Purpose:** Customize the label for the oneOf/anyOf dropdown selector
+
+**Type:** `string`
+
+**Default:** `'Select Option'`
+
+**Example:**
+```typescript
+{
+  groupBy: {
+    oneOf: [
+      { type: 'string', title: 'Single Field' },
+      { type: 'array', title: 'Multiple Fields', items: { type: 'string' } }
+    ],
+    'x-oneof-select-label': 'Choose grouping type',
+    'x-oneof-style': 'dropdown'
+  }
+}
+```
+
+**Global Configuration via componentDefaults:**
+```typescript
+<DynamicForm
+  :schema="schema"
+  v-model="data"
+  :options="{
+    componentDefaults: {
+      oneOf: {
+        selectLabel: 'Choose an option'
+      }
+    }
+  }"
+/>
+```
+
+**Use Cases:**
+- More descriptive labels for dropdown selectors
+- Localization/internationalization
+- Context-specific guidance (e.g., "Select workflow type")
+
+**Note:** Only applies when `x-oneof-style` is `'dropdown'` or defaults to dropdown (5+ options)
+
+---
+
+## `x-default-expanded`
+
+**Purpose:** Control whether a specific object field starts expanded or collapsed
+
+**Type:** `boolean`
+
+**Default:** Determined by `componentDefaults.object.defaultExpanded` (see below)
+
+**Example:**
+```typescript
+{
+  advancedSettings: {
+    type: 'object',
+    title: 'Advanced Settings',
+    'x-default-expanded': false,  // Start collapsed even if required
+    properties: { ... }
+  }
+}
+```
+
+**Global Configuration via componentDefaults:**
+```typescript
+<DynamicForm
+  :schema="schema"
+  v-model="data"
+  :options="{
+    componentDefaults: {
+      object: {
+        // 'required-only' = required expanded, optional collapsed (default)
+        // 'all' = all objects expanded
+        // 'none' = all objects collapsed
+        defaultExpanded: 'required-only',
+        // Show "(optional)" label for optional objects
+        showOptionalIndicator: true
+      }
+    }
+  }"
+/>
+```
+
+**Use Cases:**
+- Keep forms clean by collapsing rarely-used sections
+- Force expansion of important optional fields
+- Progressive disclosure UX patterns
+
+---
+
 ## `x-render`
 
 **Purpose:** Force a specific renderer for a field

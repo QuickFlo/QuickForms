@@ -7,7 +7,7 @@ import {
   useFormContext,
 } from "@quickflo/quickforms-vue";
 import type { FieldProps } from "@quickflo/quickforms-vue";
-import { mergeQuasarProps } from "../utils";
+import { mergeQuasarProps, getFieldGapStyle } from "../utils";
 
 const props = withDefaults(defineProps<FieldProps>(), {
   disabled: false,
@@ -172,10 +172,12 @@ function addPair() {
 function removePair(id: number) {
   pairs.value = pairs.value.filter((p) => p.id !== id);
 }
+
+const fieldGap = computed(() => getFieldGapStyle(formContext?.componentDefaults));
 </script>
 
 <template>
-  <div class="quickform-keyvalue-field">
+  <div class="quickform-keyvalue-field" :style="{ marginBottom: fieldGap }">
     <!-- Label with optional top-right button -->
     <div
       v-if="label"

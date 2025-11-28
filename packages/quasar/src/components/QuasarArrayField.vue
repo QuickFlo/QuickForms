@@ -5,7 +5,7 @@ import { useFormField, useFormContext } from "@quickflo/quickforms-vue";
 import { generateFieldId } from "@quickflo/quickforms-vue";
 import { FieldRenderer } from "@quickflo/quickforms-vue";
 import type { FieldProps } from "@quickflo/quickforms-vue";
-import { mergeQuasarProps } from "../utils";
+import { mergeQuasarProps, getFieldGapStyle } from "../utils";
 import { schemaUtils } from "../schema-utils-singleton.js";
 
 const props = withDefaults(defineProps<FieldProps>(), {
@@ -175,10 +175,12 @@ const getItemLabel = (index: number) => {
   const title = itemsSchema.value?.title || "Item";
   return `${title} ${index + 1}`;
 };
+
+const fieldGap = computed(() => getFieldGapStyle(formContext?.componentDefaults));
 </script>
 
 <template>
-  <div :id="fieldId">
+  <div :id="fieldId" :style="{ marginBottom: fieldGap }">
     <!-- Label (always shows if present) -->
     <div
       v-if="label"

@@ -150,55 +150,62 @@ const showHint = computed(() => {
 </template>
 
 <style scoped>
+@import "../styles/variables.css";
+
 .quickform-field {
-  margin-bottom: 1rem;
+  margin-bottom: var(--quickform-field-margin-bottom);
 }
 
 .quickform-label {
   display: block;
-  margin-bottom: 0.25rem;
-  font-weight: 500;
+  margin-bottom: var(--quickform-label-margin-bottom);
+  font-weight: var(--quickform-label-font-weight);
+  font-size: var(--quickform-label-font-size);
+  color: var(--quickform-label-color);
 }
 
 .quickform-required {
-  color: #dc2626;
-  margin-left: 0.125rem;
+  color: var(--quickform-required-color);
+  margin-left: var(--quickform-required-margin-left);
 }
 
 .quickform-select {
   width: 100%;
-  padding: 0.5rem;
-  border: 1px solid #d1d5db;
-  border-radius: 0.375rem;
-  font-size: 1rem;
-  background-color: white;
+  padding: var(--quickform-input-padding-y) var(--quickform-input-padding-x);
+  border: var(--quickform-input-border-width) var(--quickform-input-border-style) var(--quickform-color-border);
+  border-radius: var(--quickform-radius-md);
+  font-size: var(--quickform-input-font-size);
+  background-color: var(--quickform-color-bg);
+  color: var(--quickform-color-text);
   cursor: pointer;
 }
 
 .quickform-select:focus {
   outline: none;
-  border-color: #3b82f6;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  border-color: var(--quickform-color-border-focus);
+  box-shadow: var(--quickform-shadow-focus);
 }
 
 .quickform-select[aria-invalid="true"] {
-  border-color: #dc2626;
+  border-color: var(--quickform-color-error);
+  background-color: var(--quickform-color-error-bg);
 }
 
 .quickform-hint {
-  margin-top: 0.25rem;
-  font-size: 0.875rem;
-  color: #6b7280;
+  margin-top: var(--quickform-hint-margin-top);
+  font-size: var(--quickform-hint-font-size);
+  color: var(--quickform-hint-color);
 }
 
 .quickform-error {
-  margin-top: 0.25rem;
-  font-size: 0.875rem;
-  color: #dc2626;
+  margin-top: var(--quickform-error-margin-top);
+  font-size: var(--quickform-error-font-size);
+  color: var(--quickform-error-color);
 }
 
 .quickform-select:disabled {
-  background-color: #f3f4f6;
+  background-color: var(--quickform-color-bg-disabled);
+  color: var(--quickform-color-text-disabled);
   cursor: not-allowed;
 }
 </style>

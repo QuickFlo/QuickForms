@@ -6,6 +6,7 @@ import {
   generateFieldId,
   useFormContext,
 } from "@quickflo/quickforms-vue";
+import { getFieldGapStyle } from "../utils";
 import type { FieldProps } from "@quickflo/quickforms-vue";
 import type { QuasarFormOptions } from "../types";
 
@@ -149,10 +150,12 @@ const rows = computed(() => {
   const xRows = (props.schema as any)["x-rows"];
   return xRows !== undefined ? xRows : 8;
 });
+
+const fieldGap = computed(() => getFieldGapStyle(formContext?.componentDefaults));
 </script>
 
 <template>
-  <div class="quickform-json-field-wrapper">
+  <div class="quickform-json-field-wrapper" :style="{ marginBottom: fieldGap }">
     <div v-if="label" class="quickform-label-header">
       <span class="quickform-label-text">
         {{ label }}

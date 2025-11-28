@@ -4,7 +4,7 @@ import { QSelect } from "quasar";
 import { useFormField, useFormContext } from "@quickflo/quickforms-vue";
 import { generateFieldId } from "@quickflo/quickforms-vue";
 import type { FieldProps } from "@quickflo/quickforms-vue";
-import { mergeQuasarProps } from "../utils";
+import { mergeQuasarProps, getFieldGapStyle } from "../utils";
 
 const props = withDefaults(defineProps<FieldProps>(), {
   disabled: false,
@@ -106,32 +106,36 @@ const filterFn = (val: string, update: (fn: () => void) => void) => {
     }
   });
 };
+
+const fieldGap = computed(() => getFieldGapStyle(formContext?.componentDefaults));
 </script>
 
 <template>
-  <QSelect
-    :id="fieldId"
-    v-model="value"
-    :label="label"
-    :hint="hint"
-    :options="filteredOptions"
-    :error="!!errorMessage"
-    :error-message="errorMessage || undefined"
-    :disable="disabled"
-    :readonly="readonly"
-    :required="schema.required"
-    :use-input="useFilter"
-    :input-debounce="0"
-    :fill-input="useFilter"
-    :hide-selected="useFilter"
-    clearable
-    emit-value
-    map-options
-    v-bind="quasarProps"
-    @filter="filterFn"
-  >
-    <template v-if="schema.required" #label>
-      {{ label }} <span style="color: red">*</span>
-    </template>
-  </QSelect>
+  <div :style="{ marginBottom: fieldGap }">
+    <QSelect
+      :id="fieldId"
+      v-model="value"
+      :label="label"
+      :hint="hint"
+      :options="filteredOptions"
+      :error="!!errorMessage"
+      :error-message="errorMessage || undefined"
+      :disable="disabled"
+      :readonly="readonly"
+      :required="schema.required"
+      :use-input="useFilter"
+      :input-debounce="0"
+      :fill-input="useFilter"
+      :hide-selected="useFilter"
+      clearable
+      emit-value
+      map-options
+      v-bind="quasarProps"
+      @filter="filterFn"
+    >
+      <template v-if="schema.required" #label>
+        {{ label }} <span style="color: red">*</span>
+      </template>
+    </QSelect>
+  </div>
 </template>

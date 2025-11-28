@@ -4,7 +4,7 @@ import { QSelect } from 'quasar';
 import { useFormField, useFormContext } from '@quickflo/quickforms-vue';
 import { generateFieldId } from '@quickflo/quickforms-vue';
 import type { FieldProps } from '@quickflo/quickforms-vue';
-import { mergeQuasarProps } from '../utils';
+import { mergeQuasarProps, getFieldGapStyle } from '../utils';
 
 const props = withDefaults(defineProps<FieldProps>(), {
   disabled: false,
@@ -118,11 +118,14 @@ const filterFn = (val: string, update: (fn: () => void) => void) => {
     }
   });
 };
+
+const fieldGap = computed(() => getFieldGapStyle(formContext?.componentDefaults));
 </script>
 
 <template>
-  <QSelect
-    :id="fieldId"
+  <div :style="{ marginBottom: fieldGap }">
+    <QSelect
+      :id="fieldId"
     v-model="value"
     :label="label"
     :hint="hint"
@@ -144,6 +147,7 @@ const filterFn = (val: string, update: (fn: () => void) => void) => {
   >
     <template v-if="schema.required" #label>
       {{ label }} <span style="color: red">*</span>
-    </template>
-  </QSelect>
+      </template>
+    </QSelect>
+  </div>
 </template>

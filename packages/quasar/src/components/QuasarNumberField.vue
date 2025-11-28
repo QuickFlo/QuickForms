@@ -4,7 +4,7 @@ import { QInput } from "quasar";
 import { useFormField, useFormContext } from "@quickflo/quickforms-vue";
 import { generateFieldId } from "@quickflo/quickforms-vue";
 import type { FieldProps } from "@quickflo/quickforms-vue";
-import { mergeQuasarProps } from "../utils";
+import { mergeQuasarProps, getFieldGapStyle } from "../utils";
 
 const props = withDefaults(defineProps<FieldProps>(), {
   disabled: false,
@@ -33,25 +33,28 @@ const step = computed(() => {
   return props.schema.type === "integer" ? 1 : undefined;
 });
 
+const fieldGap = computed(() => getFieldGapStyle(formContext?.componentDefaults));
 </script>
 
 <template>
-  <QInput
-    :id="fieldId"
-    v-model.number="value"
-    :label="label"
-    :hint="hint"
-    type="number"
-    :error="!!errorMessage"
-    :error-message="errorMessage || undefined"
-    :disable="disabled"
-    :readonly="readonly"
-    :required="schema.required"
-    :step="step"
-    v-bind="quasarProps"
-  >
-    <template v-if="schema.required" #label>
-      {{ label }} <span style="color: red">*</span>
-    </template>
-  </QInput>
+  <div :style="{ marginBottom: fieldGap }">
+    <QInput
+      :id="fieldId"
+      v-model.number="value"
+      :label="label"
+      :hint="hint"
+      type="number"
+      :error="!!errorMessage"
+      :error-message="errorMessage || undefined"
+      :disable="disabled"
+      :readonly="readonly"
+      :required="schema.required"
+      :step="step"
+      v-bind="quasarProps"
+    >
+      <template v-if="schema.required" #label>
+        {{ label }} <span style="color: red">*</span>
+      </template>
+    </QInput>
+  </div>
 </template>

@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, computed, watch, onMounted } from 'vue';
 import { useFormField } from '../composables/useFormField.js';
+import { useFormContext } from '../composables/useFormContext.js';
 import { generateFieldId } from '../composables/utils.js';
 import FieldRenderer from './FieldRenderer.vue';
 import type { FieldProps } from '../types/index.js';
@@ -13,6 +14,7 @@ const props = withDefaults(defineProps<FieldProps>(), {
 
 const { value, label, hint, errorMessage } = useFormField(props.path, props.schema, { label: props.label });
 const fieldId = generateFieldId(props.path);
+const formContext = useFormContext();
 
 // Get the sub-schemas
 const options = computed(() => props.schema.oneOf || props.schema.anyOf || []);
@@ -37,11 +39,27 @@ onMounted(() => {
 
 const activeSchema = computed(() => options.value[selectedIndex.value]);
 
+// Get custom labels from x-oneof-labels or fall back to option titles
+const getOptionLabel = (option: any, index: number): string => {
+  const xOneofLabels = (props.schema as any)['x-oneof-labels'] as string[] | undefined;
+  if (xOneofLabels && xOneofLabels[index]) {
+    return xOneofLabels[index];
+  }
+  return option.title || `Option ${index + 1}`;
+};
+
 // Compute display labels for the dropdown
 const optionLabels = computed(() => {
-  return options.value.map((option, index) => {
-    return option.title || `Option ${index + 1}`;
-  });
+  return options.value.map((option, index) => getOptionLabel(option, index));
+});
+
+// Get select label from x-oneof-select-label or componentDefaults
+const selectLabel = computed(() => {
+  const xOneofSelectLabel = (props.schema as any)['x-oneof-select-label'] as string | undefined;
+  if (xOneofSelectLabel) {
+    return xOneofSelectLabel;
+  }
+  return formContext?.componentDefaults?.oneOf?.selectLabel || 'Select Option';
 });
 
 // Handle manual switch
@@ -68,7 +86,11 @@ const handleOptionChange = (event: Event) => {
       </div>
 
       <div class="quickform-oneof-selector">
+        <label v-if="selectLabel" :for="`${fieldId}-select`" class="quickform-select-label">
+          {{ selectLabel }}
+        </label>
         <select 
+          :id="`${fieldId}-select`"
           :value="selectedIndex" 
           @change="handleOptionChange"
           class="quickform-select"
@@ -99,7 +121,7 @@ const handleOptionChange = (event: Event) => {
 
 <style scoped>
 .quickform-field {
-  margin-bottom: 1rem;
+  margin-bottom: var(--quickform-field-margin-bottom, 1rem);
 }
 
 .quickform-fieldset {
@@ -124,6 +146,14 @@ const handleOptionChange = (event: Event) => {
 
 .quickform-oneof-selector {
   margin-bottom: var(--quickform-spacing-md);
+}
+
+.quickform-select-label {
+  display: block;
+  font-size: var(--quickform-label-font-size, 0.875rem);
+  font-weight: var(--quickform-label-font-weight, 500);
+  color: var(--quickform-label-color, #374151);
+  margin-bottom: 0.25rem;
 }
 
 .quickform-select {

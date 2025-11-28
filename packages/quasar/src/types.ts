@@ -21,6 +21,15 @@ interface VueComponentAttributes {
 
 // We'll define our own base since ComponentDefaults isn't exported from Vue
 interface VueComponentDefaults {
+  layout?: {
+    /** 
+     * Vertical gap between form fields.
+     * Accepts Quasar sizes: 'xs' | 'sm' | 'md' | 'lg' | 'xl' 
+     * Or CSS value: '1rem', '24px', etc.
+     * Default: 'md' (16px)
+     */
+    fieldGap?: 'xs' | 'sm' | 'md' | 'lg' | 'xl' | string;
+  };
   select?: {
     autocomplete?: boolean;
     autocompleteThreshold?: number;
@@ -29,12 +38,29 @@ interface VueComponentDefaults {
     collapsible?: boolean;
     defaultCollapsed?: boolean;
   };
+  object?: {
+    /** 
+     * Default expanded state for object fields. 
+     * 'required-only' = required fields expanded, optional collapsed (default)
+     * 'all' = all fields expanded
+     * 'none' = all fields collapsed
+     */
+    defaultExpanded?: 'required-only' | 'all' | 'none';
+    /** Show "(optional)" indicator for optional object fields. Default: true */
+    showOptionalIndicator?: boolean;
+  };
   number?: {
     prefix?: string;
     suffix?: string;
   };
   hints?: {
     showMode?: "always" | "focus" | "hover";
+  };
+  oneOf?: {
+    /** Label for the dropdown selector in oneOf fields. Default: "Select Option" */
+    selectLabel?: string;
+    /** Default display style for oneOf/anyOf fields. Default: 'tabs' for 2-4 options, 'dropdown' for more */
+    displayStyle?: 'tabs' | 'dropdown';
   };
 }
 

@@ -1,21 +1,52 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import { QExpansionItem } from 'quasar';
-import { useFormField } from '@quickflo/quickforms-vue';
+import { useFormField, useFormContext } from '@quickflo/quickforms-vue';
 import { generateFieldId } from '@quickflo/quickforms-vue';
 import { FieldRenderer } from '@quickflo/quickforms-vue';
 import type { FieldProps } from '@quickflo/quickforms-vue';
+import { getFieldGapStyle } from '../utils';
 
 const props = withDefaults(defineProps<FieldProps>(), {
   disabled: false,
   readonly: false,
 });
 
-const { label, hint, errorMessage } = useFormField(
+const formContext = useFormContext();
+
+const { label, hint, errorMessage, required } = useFormField(
   props.path,
   props.schema,
   { label: props.label }
 );
+
+// Determine default expanded state
+const defaultOpened = computed(() => {
+  // 1. Check x-default-expanded schema override first
+  const xDefaultExpanded = (props.schema as any)['x-default-expanded'];
+  if (xDefaultExpanded !== undefined) {
+    return xDefaultExpanded;
+  }
+  
+  // 2. Check componentDefaults.object.defaultExpanded
+  const objectDefaults = formContext?.componentDefaults?.object;
+  const defaultExpandedMode = objectDefaults?.defaultExpanded ?? 'required-only';
+  
+  if (defaultExpandedMode === 'all') {
+    return true;
+  }
+  if (defaultExpandedMode === 'none') {
+    return false;
+  }
+  // 'required-only': expand required fields, collapse optional
+  return required.value;
+});
+
+// Show "(optional)" indicator
+const showOptionalIndicator = computed(() => {
+  const objectDefaults = formContext?.componentDefaults?.object;
+  return objectDefaults?.showOptionalIndicator ?? true;
+});
 
 const fieldId = generateFieldId(props.path);
 
@@ -35,20 +66,24 @@ const properties = computed(() => {
     path: props.path ? `${props.path}.${key}` : key,
   }));
 });
+
+const fieldGap = computed(() => getFieldGapStyle(formContext?.componentDefaults));
 </script>
 
 <template>
-  <QExpansionItem
-    :id="fieldId"
+  <div :style="{ marginBottom: fieldGap }">
+    <QExpansionItem
+      :id="fieldId"
     :label="label"
     :caption="hint"
-    default-opened
+    :default-opened="defaultOpened"
     v-bind="quasarProps"
   >
     <template #header>
       <div class="text-subtitle1">
         {{ label }}
-        <span v-if="schema.required" style="color: red; margin-left: 0.25rem">*</span>
+        <span v-if="required" style="color: red; margin-left: 0.25rem">*</span>
+        <span v-if="!required && showOptionalIndicator" style="color: #888; font-size: 0.75rem; margin-left: 0.5rem">(optional)</span>
       </div>
     </template>
 
@@ -64,7 +99,8 @@ const properties = computed(() => {
 
       <div v-if="errorMessage" style="color: red; font-size: 0.875rem; margin-top: 0.5rem">
         {{ errorMessage }}
+        </div>
       </div>
-    </div>
-  </QExpansionItem>
+    </QExpansionItem>
+  </div>
 </template>

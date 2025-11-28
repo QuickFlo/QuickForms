@@ -6,6 +6,29 @@ import type {
 import type { JSONSchema } from "@quickflo/quickforms";
 
 /**
+ * Map Quasar size names to CSS margin values
+ */
+const FIELD_GAP_MAP: Record<string, string> = {
+  'xs': '4px',
+  'sm': '8px', 
+  'md': '16px',
+  'lg': '24px',
+  'xl': '32px',
+};
+
+/**
+ * Get the field gap CSS value from componentDefaults
+ * Returns a CSS-compatible margin-bottom value
+ */
+export function getFieldGapStyle(componentDefaults: any): string {
+  const gap = componentDefaults?.layout?.fieldGap;
+  if (!gap) {
+    return '16px'; // Default to 'md'
+  }
+  return FIELD_GAP_MAP[gap] ?? gap;
+}
+
+/**
  * Merges Quasar component defaults with schema-level props
  * Priority (lowest to highest): global defaults -> component-specific defaults -> x-component-props -> x-quasar-props
  *
