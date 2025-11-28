@@ -6,6 +6,7 @@ import { oneDark } from '@codemirror/theme-one-dark';
 import { linter, lintGutter } from '@codemirror/lint';
 import { keymap, lineNumbers, EditorView as CMEditorView } from '@codemirror/view';
 import { useFormField } from '../composables/useFormField.js';
+import { useFormContext } from '../composables/useFormContext.js';
 import { generateFieldId } from '../composables/utils.js';
 import type { FieldProps } from '../types/index.js';
 import type { ViewUpdate, EditorView } from '@codemirror/view';
@@ -21,6 +22,7 @@ const { value, setValue, label, hint, errorMessage, required } = useFormField(
   { label: props.label }
 );
 
+const formContext = useFormContext();
 const fieldId = generateFieldId(props.path);
 
 // CodeMirror text content
@@ -107,13 +109,19 @@ const indentWithTab = computed(() => {
   return xIndentWithTab ?? true;
 });
 
+const formatKey = computed(() => {
+  const xFormatKey = (props.schema as any)['x-json-format-key'];
+  if (xFormatKey !== undefined) return xFormatKey;
+  return formContext?.componentDefaults?.jsonEditor?.formatKey ?? 'Ctrl-.';
+});
+
 // CodeMirror extensions
 const extensions = computed(() => {
   const exts = [
     json(),
-    // Add keyboard shortcut for formatting: Cmd+Shift+F (Mac) or Ctrl+Shift+F (Windows/Linux)
+    // Add keyboard shortcut for formatting
     keymap.of([{
-      key: 'Mod-Shift-f',
+      key: formatKey.value,
       run: formatJSON
     }])
   ];
@@ -149,7 +157,7 @@ const displayError = computed(() => parseError.value || errorMessage.value);
 // Create a key that changes when extensions configuration changes
 // This forces CodeMirror to remount with new extensions
 const editorKey = computed(() => 
-  `${showLineNumbers.value}-${showLintGutter.value}-${useDarkTheme.value}`
+  `${showLineNumbers.value}-${showLintGutter.value}-${useDarkTheme.value}-${formatKey.value}`
 );
 
 // Handle changes from CodeMirror
@@ -188,7 +196,7 @@ function handleChange(newCode: string, update: ViewUpdate) {
     </div>
     
     <div class="quickform-json-format-hint">
-      Press <kbd>Cmd+Shift+F</kbd> (Mac) or <kbd>Ctrl+Shift+F</kbd> to format
+      Press <kbd>{{ formatKey }}</kbd> to format
     </div>
 
     <div class="quickform-json-editor-wrapper">

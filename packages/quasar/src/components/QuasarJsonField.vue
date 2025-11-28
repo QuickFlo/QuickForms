@@ -136,25 +136,13 @@ const showLineNumbers = computed(() => {
   const xLineNumbers = (props.schema as any)["x-json-line-numbers"];
   if (xLineNumbers !== undefined) return xLineNumbers;
 
-  const result =
-    (formContext as any)?.quickformsDefaults?.jsoneditor?.lineNumbers ?? true;
-  console.log("[JSON Editor] showLineNumbers:", {
-    fromSchema: xLineNumbers,
-    fromDefaults: (formContext as any)?.quickformsDefaults?.jsoneditor
-      ?.lineNumbers,
-    formContext: formContext,
-    quickformsDefaults: (formContext as any)?.quickformsDefaults,
-    jsoneditorDefaults: (formContext as any)?.quickformsDefaults?.jsoneditor,
-    result,
-  });
-
-  return result;
+  return formContext?.quickformsDefaults?.jsoneditor?.lineNumbers ?? false;
 });
 
 const showLintGutter = computed(() => {
   const xLintGutter = (props.schema as any)["x-json-lint-gutter"];
   if (xLintGutter !== undefined) return xLintGutter;
-  return formContext?.quickformsDefaults?.jsoneditor?.lintGutter ?? true;
+  return formContext?.quickformsDefaults?.jsoneditor?.lintGutter ?? false;
 });
 
 const tabSize = computed(() => {
@@ -169,6 +157,12 @@ const indentWithTab = computed(() => {
   return formContext?.quickformsDefaults?.jsoneditor?.indentWithTab ?? true;
 });
 
+const formatKey = computed(() => {
+  const xFormatKey = (props.schema as any)["x-json-format-key"];
+  if (xFormatKey !== undefined) return xFormatKey;
+  return formContext?.quickformsDefaults?.jsoneditor?.formatKey ?? "Ctrl-.";
+});
+
 // CodeMirror extensions
 const extensions = computed(() => {
   console.log('[JSON Editor] Building extensions:', {
@@ -179,10 +173,10 @@ const extensions = computed(() => {
   
   const exts = [
     json(),
-    // Add keyboard shortcut for formatting: Cmd+Shift+F (Mac) or Ctrl+Shift+F (Windows/Linux)
+    // Add keyboard shortcut for formatting
     keymap.of([
       {
-        key: "Mod-Shift-f",
+        key: formatKey.value,
         run: formatJSON,
       },
     ]),
@@ -229,7 +223,7 @@ const fieldGap = computed(() =>
 // Create a key that changes when extensions configuration changes
 // This forces CodeMirror to remount with new extensions
 const editorKey = computed(() => 
-  `${showLineNumbers.value}-${showLintGutter.value}-${useDarkTheme.value}`
+  `${showLineNumbers.value}-${showLintGutter.value}-${useDarkTheme.value}-${formatKey.value}`
 );
 
 // Watch for key changes and force re-initialization
@@ -275,7 +269,7 @@ function handleChange(newCode: string, update: ViewUpdate) {
     </div>
 
     <div class="quickform-json-format-hint">
-      Press <kbd>Cmd+Shift+F</kbd> (Mac) or <kbd>Ctrl+Shift+F</kbd> to format
+      Press <kbd>{{ formatKey }}</kbd> to format
     </div>
 
     <div 

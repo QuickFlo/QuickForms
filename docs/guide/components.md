@@ -350,16 +350,16 @@ A lightweight JSON code editor powered by [CodeMirror 6](https://codemirror.net/
 ### Features
 
 - **Syntax highlighting**: JSON-specific color coding
-- **Real-time linting**: Inline error indicators with descriptive messages
-- **Line numbers**: Gutter with line numbers for easy reference
+- **Real-time linting**: Optional inline error indicators with descriptive messages
+- **Line numbers**: Optional gutter with line numbers (disabled by default)
 - **Tab indentation**: Press Tab to insert 2 spaces
-- **Format shortcut**: Cmd+Shift+F (Mac) or Ctrl+Shift+F (Windows/Linux) to auto-format
+- **Format shortcut**: Ctrl+. (customizable) to auto-format JSON
 - **Cursor preservation**: Format command maintains cursor position
 - **Dark mode**: Optional dark theme (Quasar version auto-detects from Quasar Dark mode)
 
 ### Keyboard Shortcuts
 
-- **Cmd+Shift+F / Ctrl+Shift+F**: Format JSON with proper indentation (preserves cursor position)
+- **Ctrl+.** (default, customizable): Format JSON with proper indentation (preserves cursor position)
 - **Tab**: Insert 2 spaces for indentation
 - **Enter**: Insert new line (does not submit form)
 
@@ -369,10 +369,11 @@ A lightweight JSON code editor powered by [CodeMirror 6](https://codemirror.net/
 |-----------|------|---------|-------------|
 | `x-json-height` | `string` | `'300px'` | Editor height (CSS value: '300px', '20rem', etc.) |
 | `x-json-dark-theme` | `boolean` | `false` | Use dark theme (Quasar: auto-detects from Dark mode) |
-| `x-json-line-numbers` | `boolean` | `true` | Show line numbers in gutter |
-| `x-json-lint-gutter` | `boolean` | `true` | Show linting gutter with error indicators |
+| `x-json-line-numbers` | `boolean` | `false` | Show line numbers in gutter |
+| `x-json-lint-gutter` | `boolean` | `false` | Show linting gutter with error indicators |
 | `x-json-tab-size` | `number` | `2` | Number of spaces for tab indentation |
 | `x-json-indent-with-tab` | `boolean` | `true` | Enable Tab key for indentation |
+| `x-json-format-key` | `string` | `'Ctrl-.'` | Keyboard shortcut for formatting (e.g., 'Ctrl-f', 'Alt-Shift-f') |
 
 ### Configuration
 
@@ -393,10 +394,22 @@ const formOptions = {
     jsoneditor: {
       height: '400px',
       darkTheme: false,      // Or omit to auto-detect from Quasar Dark mode
-      lineNumbers: true,     // Show line numbers
-      lintGutter: true,      // Show error indicators
+      lineNumbers: false,    // Show line numbers (disabled by default)
+      lintGutter: false,     // Show error indicators (disabled by default)
       tabSize: 2,            // Spaces per tab
-      indentWithTab: true    // Enable Tab key
+      indentWithTab: true,   // Enable Tab key
+      formatKey: 'Ctrl-.'    // Format shortcut (default)
+    }
+  }
+}
+```
+
+**Global defaults (Vue):**
+```typescript
+const formOptions = {
+  componentDefaults: {
+    jsonEditor: {
+      formatKey: 'Ctrl-.'    // Customize format shortcut
     }
   }
 }
@@ -404,9 +417,9 @@ const formOptions = {
 
 **Priority order (highest to lowest):**
 1. Schema `x-json-*` properties
-2. `quickformsDefaults.jsoneditor` (Quasar only)
+2. `quickformsDefaults.jsoneditor` (Quasar) or `componentDefaults.jsonEditor` (Vue)
 3. Auto-detect from `$q.dark.isActive` (Quasar only, for darkTheme)
-4. Defaults: `{ height: '300px', darkTheme: false, lineNumbers: true, lintGutter: true, tabSize: 2, indentWithTab: true }`
+4. Defaults: `{ height: '300px', darkTheme: false, lineNumbers: false, lintGutter: false, tabSize: 2, indentWithTab: true, formatKey: 'Ctrl-.' }`
 
 ---
 

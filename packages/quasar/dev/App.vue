@@ -65,10 +65,7 @@ const formOptions: QuasarFormOptions = {
     keyvalue: {
       addButton: {},
     },
-    jsoneditor: {
-      lineNumbers: false,
-      darkTheme: true,
-    },
+    jsoneditor: {},
   },
 };
 

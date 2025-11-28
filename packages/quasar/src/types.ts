@@ -211,14 +211,16 @@ export interface QuickFormsQuasarDefaults {
     height?: string;
     /** Use dark theme. Default: false */
     darkTheme?: boolean;
-    /** Show line numbers. Default: true */
+    /** Show line numbers. Default: false */
     lineNumbers?: boolean;
-    /** Show lint gutter. Default: true */
+    /** Show lint gutter. Default: false */
     lintGutter?: boolean;
     /** Tab size for indentation. Default: 2 */
     tabSize?: number;
     /** Enable indent with tab key. Default: true */
     indentWithTab?: boolean;
+    /** Keyboard shortcut for formatting. Default: 'Ctrl-.' */
+    formatKey?: string;
   };
 }
 
