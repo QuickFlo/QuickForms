@@ -71,6 +71,16 @@ The Quasar package provides pre-built Quasar-wrapped components:
 
 ## Configuration Options
 
+### Understanding `componentDefaults` vs `quickformsDefaults`
+
+**`componentDefaults`** - Native Quasar component props that get passed directly via `v-bind`:
+- ✅ `outlined`, `dense`, `color`, `clearable` → These are native Quasar props
+- Example: Any prop you'd find in [Quasar's QInput docs](https://quasar.dev/vue-components/input)
+
+**`quickformsDefaults`** - QuickForms features that we implement:
+- ✅ `autocomplete`, `dateMask`, `timeMask`, `height`, `darkTheme` → These are our custom features
+- Example: Features we add on top of Quasar components
+
 ### Global Defaults
 
 Set defaults that apply to all components via `componentDefaults`. The values available are just a passthrough of the respective Quasar component's props. For example, the `input` accepts any valid property from `QInputProps`:
@@ -212,9 +222,13 @@ Or globally:
 {
   componentDefaults: {
     datetime: {
-      format24h: true,
-      dateMask: 'MM/DD/YYYY',
-      timeMask: 'HH:mm'
+      format24h: true  // Native QDate/QTime prop
+    }
+  },
+  quickformsDefaults: {
+    datetime: {
+      dateMask: 'MM/DD/YYYY',  // QuickForms feature
+      timeMask: 'HH:mm'        // QuickForms feature
     }
   }
 }
@@ -268,10 +282,21 @@ interface QuasarFormOptions extends FormOptions {
       iconColor?: string
       iconSize?: string
     }
+    select?: {
+      autocomplete?: boolean       // Enable/disable autocomplete filtering
+    }
+    datetime?: {
+      dateMask?: string           // Date mask format
+      timeMask?: string           // Time mask format
+    }
     array?: {
       addButtonPosition?: string
       addButton?: Record<string, any>
       removeButton?: Record<string, any>
+    }
+    jsoneditor?: {
+      height?: string             // Editor height
+      darkTheme?: boolean         // Use dark theme
     }
   }
 }

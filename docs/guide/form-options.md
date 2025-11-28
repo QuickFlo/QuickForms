@@ -253,10 +253,6 @@ Configure default behavior for all components of a given type.
 
 ```typescript
 interface ComponentDefaults {
-  select?: {
-    autocomplete?: boolean
-    autocompleteThreshold?: number
-  }
   array?: {
     collapsible?: boolean
     defaultCollapsed?: boolean
@@ -272,25 +268,9 @@ interface ComponentDefaults {
 ```typescript
 {
   componentDefaults: {
-    select: {
-      autocomplete: true,
-      autocompleteThreshold: 10
-    },
     number: {
       prefix: '$'
     }
-  }
-}
-```
-
-Override per-field using `x-component-props`:
-
-```typescript
-{
-  type: 'string',
-  enum: ['option1', 'option2'],
-  'x-component-props': {
-    autocomplete: false  // Override default
   }
 }
 ```
@@ -340,8 +320,8 @@ const options = {
   },
   
   componentDefaults: {
-    select: {
-      autocompleteThreshold: 5
+    number: {
+      prefix: '$'
     }
   }
 }

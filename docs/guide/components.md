@@ -307,14 +307,14 @@ Renders nested object fields.
 
 ## JsonField
 
-Renders a JSON editor for freeform object configuration.
+A lightweight JSON code editor powered by [CodeMirror 6](https://codemirror.net/) with syntax highlighting, linting, and auto-formatting.
 
 ### Handles
 
 - `type: 'object'` with `additionalProperties` but no defined `properties`
 - Any field with `x-render: 'jsoneditor'`
 
-### Example Schema
+### Example Schemas
 
 **Auto-detected (freeform object):**
 ```typescript
@@ -326,81 +326,79 @@ Renders a JSON editor for freeform object configuration.
 }
 ```
 
-**Explicit via x-render:**
+**Basic with height:**
 ```typescript
 {
   type: 'object',
   title: 'API Settings',
-  description: 'Configuration in JSON format',
   'x-render': 'jsoneditor',
-  'x-rows': 10  // Control textarea height
+  'x-json-height': '400px'
 }
 ```
 
-**With custom props (Quasar):**
+**Dark theme:**
 ```typescript
 {
   type: 'object',
-  title: 'Metadata',
+  title: 'Config (Dark)',
   'x-render': 'jsoneditor',
-  'x-rows': 8,
-  'x-quasar-props': {
-    dense: false,
-    color: 'secondary'
-  },
-  'x-quickforms-quasar': {
-    prependIcon: 'settings',
-    iconColor: 'primary',
-    showFormatHint: false  // Hide info icon
-  }
-}
-```
-
-**Hide format hint (Vue):**
-```typescript
-{
-  type: 'object',
-  'x-render': 'jsoneditor',
-  'x-show-format-hint': false  // Hide info icon
+  'x-json-height': '500px',
+  'x-json-dark-theme': true
 }
 ```
 
 ### Features
 
+- **Syntax highlighting**: JSON-specific color coding
+- **Real-time linting**: Inline error indicators with descriptive messages
+- **Line numbers**: Gutter with line numbers for easy reference
 - **Tab indentation**: Press Tab to insert 2 spaces
-- **Format shortcut**: Press Ctrl+Space to auto-format JSON
-- **Real-time validation**: Shows parse errors as you type
-- **Monospace font**: Better readability for JSON
-- **Info icon**: Hover tooltip showing format shortcut (can be hidden)
-- **No auto-formatting**: Only formats on initial load or manual trigger
+- **Format shortcut**: Cmd+Shift+F (Mac) or Ctrl+Shift+F (Windows/Linux) to auto-format
+- **Cursor preservation**: Format command maintains cursor position
+- **Dark mode**: Optional dark theme (Quasar version auto-detects from Quasar Dark mode)
 
 ### Keyboard Shortcuts
 
-- **Ctrl+Space**: Format JSON with proper indentation
+- **Cmd+Shift+F / Ctrl+Shift+F**: Format JSON with proper indentation (preserves cursor position)
 - **Tab**: Insert 2 spaces for indentation
 - **Enter**: Insert new line (does not submit form)
 
+### Schema Extensions
+
+| Extension | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `x-json-height` | `string` | `'300px'` | Editor height (CSS value: '300px', '20rem', etc.) |
+| `x-json-dark-theme` | `boolean` | `false` | Use dark theme (Quasar: auto-detects from Dark mode) |
+
 ### Configuration
+
+**Per-field (schema):**
+```typescript
+{
+  type: 'object',
+  'x-render': 'jsoneditor',
+  'x-json-height': '450px',
+  'x-json-dark-theme': true
+}
+```
 
 **Global defaults (Quasar):**
 ```typescript
 const formOptions = {
-  componentDefaults: {
-    jsoneditor: {
-      dense: true,
-      color: 'primary',
-      rows: 12
-    }
-  },
   quickformsDefaults: {
     jsoneditor: {
-      prependIcon: 'code',
-      iconColor: 'grey-7',
-      showFormatHint: true  // Default: true
+      height: '400px',
+      darkTheme: false  // Or omit to auto-detect from Quasar Dark mode
     }
   }
 }
 ```
+
+**Priority order (highest to lowest):**
+1. Schema `x-json-height` / `x-json-dark-theme`
+2. `quickformsDefaults.jsoneditor`
+3. Auto-detect from `$q.dark.isActive` (Quasar only, for darkTheme)
+4. Defaults: `{ height: '300px', darkTheme: false }`
 
 ---
 
