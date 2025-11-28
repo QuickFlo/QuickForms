@@ -332,27 +332,34 @@ All `x-*` attributes are optional. QuickForms works perfectly with standard JSON
 
 ## `x-oneof-labels`
 
-**Purpose:** Custom display labels for `oneOf`/`anyOf` options
+**Purpose:** Custom display labels for each **option** in the `oneOf`/`anyOf` array
 
 **Type:** `string[]`
 
 **Example:**
 ```typescript
 {
-  groupBy: {
+  paymentMethod: {
     oneOf: [
-      { type: 'string', title: 'Single Field' },
-      { type: 'array', title: 'Multiple Fields', items: { type: 'string' } }
+      { title: 'Credit Card', properties: { cardNumber: { type: 'string' } } },
+      { title: 'Bank Transfer', properties: { accountNumber: { type: 'string' } } },
+      { title: 'PayPal', properties: { email: { type: 'string' } } }
     ],
-    'x-oneof-labels': ['Single Field Name', 'Multiple Field Names']
+    // Customize the label shown for each option
+    'x-oneof-labels': ['💳 Credit Card', '🏦 Bank Transfer', '📧 PayPal']
   }
 }
 ```
 
+**What it changes:**
+- The text displayed for each selectable option in the dropdown or tabs
+- Overrides the `title` property of each oneOf schema
+- Falls back to `title` or "Option N" if not provided
+
 **Use Cases:**
-- User-friendly labels for oneOf/anyOf options
-- When the underlying schema titles are too technical
-- Overriding default "Option 1", "Option 2" labels
+- Add icons or emojis to option labels
+- Provide more descriptive labels than schema titles
+- Localization/internationalization of option names
 
 ---
 
@@ -401,24 +408,38 @@ All `x-*` attributes are optional. QuickForms works perfectly with standard JSON
 
 ## `x-oneof-select-label`
 
-**Purpose:** Customize the label for the oneOf/anyOf dropdown selector
+**Purpose:** Customize the **label/placeholder** of the dropdown selector itself (not the options)
 
 **Type:** `string`
 
 **Default:** `'Select Option'`
 
+**Important:** This is different from `x-oneof-labels`:
+- `x-oneof-labels` - Customizes the labels for each **option** (e.g., "Credit Card", "PayPal")
+- `x-oneof-select-label` - Customizes the **dropdown label** (e.g., "Choose payment method")
+
 **Example:**
 ```typescript
 {
-  groupBy: {
+  shippingMethod: {
     oneOf: [
-      { type: 'string', title: 'Single Field' },
-      { type: 'array', title: 'Multiple Fields', items: { type: 'string' } }
+      { properties: { method: { const: 'standard' } } },
+      { properties: { method: { const: 'express' } } },
+      { properties: { method: { const: 'overnight' } } }
     ],
-    'x-oneof-select-label': 'Choose grouping type',
-    'x-oneof-style': 'dropdown'
+    'x-oneof-style': 'dropdown',
+    'x-oneof-select-label': 'Choose shipping option',  // Dropdown label
+    'x-oneof-labels': ['Standard (5-7 days)', 'Express (2-3 days)', 'Overnight']  // Option labels
   }
 }
+```
+
+**Visual representation:**
+```
+[Choose shipping option ▼]  ← x-oneof-select-label (was "Select Option")
+  - Standard (5-7 days)     ← x-oneof-labels[0]
+  - Express (2-3 days)      ← x-oneof-labels[1]
+  - Overnight               ← x-oneof-labels[2]
 ```
 
 **Global Configuration via componentDefaults:**
@@ -429,7 +450,7 @@ All `x-*` attributes are optional. QuickForms works perfectly with standard JSON
   :options="{
     componentDefaults: {
       oneOf: {
-        selectLabel: 'Choose an option'
+        selectLabel: 'Choose an option'  // Default for all oneOf dropdowns
       }
     }
   }"
@@ -437,9 +458,9 @@ All `x-*` attributes are optional. QuickForms works perfectly with standard JSON
 ```
 
 **Use Cases:**
-- More descriptive labels for dropdown selectors
+- Context-specific guidance (e.g., "Select workflow type", "Choose payment method")
 - Localization/internationalization
-- Context-specific guidance (e.g., "Select workflow type")
+- More descriptive prompts than the generic "Select Option"
 
 **Note:** Only applies when `x-oneof-style` is `'dropdown'` or defaults to dropdown (5+ options)
 
