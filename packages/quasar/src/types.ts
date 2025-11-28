@@ -56,6 +56,12 @@ interface VueComponentDefaults {
   hints?: {
     showMode?: "always" | "focus" | "hover";
   };
+  oneOf?: {
+    /** Label for the dropdown selector in oneOf fields. Default: "Select Option" */
+    selectLabel?: string;
+    /** Default display style for oneOf/anyOf fields. Default: 'tabs' for 2-4 options, 'dropdown' for more */
+    displayStyle?: 'tabs' | 'dropdown';
+  };
 }
 
 /**

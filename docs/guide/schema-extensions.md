@@ -377,9 +377,71 @@ All `x-*` attributes are optional. QuickForms works perfectly with standard JSON
 }
 ```
 
+**Global Configuration via componentDefaults:**
+```typescript
+<DynamicForm
+  :schema="schema"
+  v-model="data"
+  :options="{
+    componentDefaults: {
+      oneOf: {
+        displayStyle: 'dropdown'  // Force all oneOf fields to use dropdown
+      }
+    }
+  }"
+/>
+```
+
 **Use Cases:**
 - Force tabs for visual clarity even with many options
 - Force dropdown for space-constrained layouts
+- Set a consistent display style across all oneOf fields in a form
+
+---
+
+## `x-oneof-select-label`
+
+**Purpose:** Customize the label for the oneOf/anyOf dropdown selector
+
+**Type:** `string`
+
+**Default:** `'Select Option'`
+
+**Example:**
+```typescript
+{
+  groupBy: {
+    oneOf: [
+      { type: 'string', title: 'Single Field' },
+      { type: 'array', title: 'Multiple Fields', items: { type: 'string' } }
+    ],
+    'x-oneof-select-label': 'Choose grouping type',
+    'x-oneof-style': 'dropdown'
+  }
+}
+```
+
+**Global Configuration via componentDefaults:**
+```typescript
+<DynamicForm
+  :schema="schema"
+  v-model="data"
+  :options="{
+    componentDefaults: {
+      oneOf: {
+        selectLabel: 'Choose an option'
+      }
+    }
+  }"
+/>
+```
+
+**Use Cases:**
+- More descriptive labels for dropdown selectors
+- Localization/internationalization
+- Context-specific guidance (e.g., "Select workflow type")
+
+**Note:** Only applies when `x-oneof-style` is `'dropdown'` or defaults to dropdown (5+ options)
 
 ---
 

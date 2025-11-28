@@ -76,6 +76,11 @@ const displayStyle = computed(() => {
   if (xOneofStyle) {
     return xOneofStyle;
   }
+  // Check componentDefaults
+  const defaultStyle = formContext?.componentDefaults?.oneOf?.displayStyle;
+  if (defaultStyle) {
+    return defaultStyle;
+  }
   // Default: tabs for 2-4 options, dropdown for more
   return options.value.length <= 4 ? 'tabs' : 'dropdown';
 });
@@ -95,6 +100,15 @@ const allSelectOptions = computed(() => {
     label: getOptionLabel(option, index),
     value: index,
   }));
+});
+
+// Get select label from x-oneof-select-label or componentDefaults
+const selectLabel = computed(() => {
+  const xOneofSelectLabel = (props.schema as any)['x-oneof-select-label'] as string | undefined;
+  if (xOneofSelectLabel) {
+    return xOneofSelectLabel;
+  }
+  return formContext?.componentDefaults?.oneOf?.selectLabel || 'Select Option';
 });
 
 // Filtered options for autocomplete
@@ -206,7 +220,7 @@ const fieldGap = computed(() => getFieldGapStyle(formContext?.componentDefaults)
         <QSelect
           v-model="selectedIndex"
           :options="filteredOptions"
-          label="Select Option"
+          :label="selectLabel"
           :disable="disabled || readonly"
           :use-input="useFilter"
           :input-debounce="0"

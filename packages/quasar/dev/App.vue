@@ -663,6 +663,7 @@ const schema: JSONSchema = {
       title: "Shipping Method",
       // Force dropdown mode (useful for many options)
       'x-oneof-style': 'dropdown',
+      'x-oneof-select-label': 'Choose shipping option',
       'x-oneof-labels': ['Standard (5-7 days)', 'Express (2-3 days)', 'Overnight', 'Store Pickup', 'International'],
       oneOf: [
         {
