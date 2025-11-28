@@ -18,15 +18,15 @@ const formOptions: QuasarFormOptions = {
     layout: {
       // Quasar sizes: 'xs' (4px), 'sm' (8px), 'md' (16px), 'lg' (24px), 'xl' (32px)
       // Or any CSS value: '1.5rem', '20px', etc.
-      fieldGap: 'lg',  // More spacious form layout
+      fieldGap: "lg", // More spacious form layout
     },
     // Object field behavior
     object: {
       // 'required-only' = required expanded, optional collapsed (default)
       // 'all' = all objects expanded
       // 'none' = all objects collapsed
-      defaultExpanded: 'required-only',
-      showOptionalIndicator: true,  // Show "(optional)" on optional objects
+      defaultExpanded: "required-only",
+      showOptionalIndicator: true, // Show "(optional)" on optional objects
     },
     global: {
       outlined: true, // Apply outlined style to ALL Quasar components
@@ -65,6 +65,7 @@ const formOptions: QuasarFormOptions = {
     keyvalue: {
       addButton: {},
     },
+    jsoneditor: {},
   },
 };
 
@@ -606,9 +607,9 @@ const schema: JSONSchema = {
       type: "object",
       title: "Payment Method",
       // Custom labels for tabs (overrides option titles)
-      'x-oneof-labels': ['💳 Credit Card', '🏦 Bank Transfer', '📧 PayPal'],
+      "x-oneof-labels": ["💳 Credit Card", "🏦 Bank Transfer", "📧 PayPal"],
       // Force tabs display (default for 2-4 options anyway)
-      'x-oneof-style': 'tabs',
+      "x-oneof-style": "tabs",
       oneOf: [
         {
           title: "Credit Card",
@@ -662,9 +663,15 @@ const schema: JSONSchema = {
       type: "object",
       title: "Shipping Method",
       // Force dropdown mode (useful for many options)
-      'x-oneof-style': 'dropdown',
-      'x-oneof-select-label': 'Choose shipping option',
-      'x-oneof-labels': ['Standard (5-7 days)', 'Express (2-3 days)', 'Overnight', 'Store Pickup', 'International'],
+      "x-oneof-style": "dropdown",
+      "x-oneof-select-label": "Choose shipping option",
+      "x-oneof-labels": [
+        "Standard (5-7 days)",
+        "Express (2-3 days)",
+        "Overnight",
+        "Store Pickup",
+        "International",
+      ],
       oneOf: [
         {
           title: "Standard",
@@ -686,14 +693,22 @@ const schema: JSONSchema = {
           properties: {
             method: { const: "overnight" },
             address: { type: "string", title: "Shipping Address" },
-            deliveryTime: { type: "string", title: "Preferred Delivery Time", enum: ["Morning", "Afternoon", "Evening"] },
+            deliveryTime: {
+              type: "string",
+              title: "Preferred Delivery Time",
+              enum: ["Morning", "Afternoon", "Evening"],
+            },
           },
         },
         {
           title: "Store Pickup",
           properties: {
             method: { const: "pickup" },
-            storeId: { type: "string", title: "Store Location", enum: ["store-1", "store-2", "store-3"] },
+            storeId: {
+              type: "string",
+              title: "Store Location",
+              enum: ["store-1", "store-2", "store-3"],
+            },
           },
         },
         {
@@ -701,7 +716,11 @@ const schema: JSONSchema = {
           properties: {
             method: { const: "international" },
             address: { type: "string", title: "International Address" },
-            customsInfo: { type: "string", title: "Customs Declaration", format: "textarea" },
+            customsInfo: {
+              type: "string",
+              title: "Customs Declaration",
+              format: "textarea",
+            },
           },
         },
       ],
@@ -745,13 +764,15 @@ const handleSubmit = () => {
                     <q-icon name="info" color="blue" />
                   </template>
                   <div class="text-caption">
-                    <strong>Features shown:</strong> 
+                    <strong>Features shown:</strong>
                     <strong>Layout:</strong> fieldGap spacing (lg = 24px) |
-                    <strong>Objects:</strong> optional fields collapse with "(optional)" indicator |
-                    <strong>OneOf:</strong> tabs with custom labels (x-oneof-labels), dropdown mode |
+                    <strong>Objects:</strong> optional fields collapse with
+                    "(optional)" indicator | <strong>OneOf:</strong> tabs with
+                    custom labels (x-oneof-labels), dropdown mode |
                     <strong>Icons:</strong> prepend/append |
                     <strong>Arrays:</strong> button positioning, custom labels |
-                    <strong>And more:</strong> date/time pickers, password toggle, autocomplete, nested objects
+                    <strong>And more:</strong> date/time pickers, password
+                    toggle, autocomplete, nested objects
                   </div>
                 </q-banner>
               </q-card-section>

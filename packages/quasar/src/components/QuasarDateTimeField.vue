@@ -41,13 +41,19 @@ const quasarProps = computed(() => {
   );
 });
 
-// Allow customization of mask via x-quasar-props or default to ISO-like format
+// Get mask values from quickformsDefaults or schema, with fallbacks
 const dateMask = computed(() => {
-  return quasarProps.value.dateMask || "YYYY-MM-DD";
+  const xProps = (props.schema as any)['x-component-props'];
+  return xProps?.dateMask || 
+    (formContext as any)?.quickformsDefaults?.datetime?.dateMask || 
+    "YYYY-MM-DD";
 });
 
 const timeMask = computed(() => {
-  return quasarProps.value.timeMask || "hh:mm A"; // Human-readable 12-hour default
+  const xProps = (props.schema as any)['x-component-props'];
+  return xProps?.timeMask || 
+    (formContext as any)?.quickformsDefaults?.datetime?.timeMask || 
+    "hh:mm A"; // Human-readable 12-hour default
 });
 
 const fullMask = computed(() => {

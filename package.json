@@ -37,6 +37,8 @@
     "vue": "^3.5.24"
   },
   "dependencies": {
+    "@codemirror/lint": "^6.9.2",
+    "@codemirror/view": "^6.38.8",
     "@quickflo/quickforms": "^0.3.0",
     "@quickflo/quickforms-quasar": "^0.3.0",
     "@quickflo/quickforms-vue": "^0.3.0"

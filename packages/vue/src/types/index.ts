@@ -119,6 +119,10 @@ export interface ComponentDefaults {
     /** Default display style for oneOf/anyOf fields. Default: 'tabs' for 2-4 options, 'dropdown' for more */
     displayStyle?: 'tabs' | 'dropdown';
   };
+  jsonEditor?: {
+    /** Keyboard shortcut for formatting JSON. Default: 'Ctrl-.' */
+    formatKey?: string;
+  };
 }
 
 /**

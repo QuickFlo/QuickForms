@@ -96,9 +96,9 @@ const useFilter = computed(() => {
     return xComponentProps.autocomplete;
   }
 
-  // Check componentDefaults
-  if (formContext?.componentDefaults?.select?.autocomplete !== undefined) {
-    return formContext.componentDefaults.select.autocomplete;
+  // Check quickformsDefaults for autocomplete
+  if ((formContext as any)?.quickformsDefaults?.select?.autocomplete !== undefined) {
+    return (formContext as any).quickformsDefaults.select.autocomplete;
   }
 
   // Default: enabled

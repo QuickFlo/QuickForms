@@ -161,32 +161,19 @@ export interface QuasarComponentDefaults extends VueComponentDefaults {
   input?: Partial<QInputProps>;
 
   /** QSelect-specific defaults (for enum fields) */
-  select?: {
-    /** Enable/disable autocomplete filtering. Default: true (QuickForms feature, not Quasar) */
-    autocomplete?: boolean;
-  } & Partial<QSelectProps>;
+  select?: Partial<QSelectProps>;
 
   /** QCheckbox-specific defaults (for boolean fields) */
   checkbox?: Partial<QCheckboxProps>;
 
   /** QDate/QTime-specific defaults (for date/datetime fields) */
-  datetime?: Partial<QDateProps> & {
-    /** Date mask format. Default: 'YYYY-MM-DD' */
-    dateMask?: string;
-    /** Time mask format. Default: 'HH:mm:ss' */
-    timeMask?: string;
-    /** DateTime mask format. Default: 'YYYY-MM-DD HH:mm:ss' */
-    dateTimeMask?: string;
-  };
+  datetime?: Partial<QDateProps>;
 
   /** QCard-specific defaults (for arrays/objects) */
   card?: Partial<QCardProps>;
 
   /** QExpansionItem-specific defaults (for objects) */
   expansion?: Partial<QExpansionItemProps>;
-
-  /** QInput textarea-specific defaults (for JSON editor) */
-  jsoneditor?: Partial<QInputProps>;
 
   /** QInput defaults for key-value field inputs (affects both key and value inputs) */
   keyvalue?: Partial<QInputProps>;
@@ -203,17 +190,37 @@ export interface QuickFormsQuasarDefaults {
   /** Input-specific QuickForms features */
   input?: QuickFormsQuasarFeatures;
   /** Select-specific QuickForms features (no appendIcon since dropdown uses it) */
-  select?: Omit<QuickFormsQuasarFeatures, "appendIcon">;
+  select?: Omit<QuickFormsQuasarFeatures, "appendIcon"> & {
+    /** Enable/disable autocomplete filtering. Default: true */
+    autocomplete?: boolean;
+  };
   /** DateTime-specific QuickForms features */
-  datetime?: QuickFormsQuasarFeatures;
+  datetime?: QuickFormsQuasarFeatures & {
+    /** Date mask format. Default: 'YYYY-MM-DD' */
+    dateMask?: string;
+    /** Time mask format. Default: 'hh:mm A' (12-hour with AM/PM) */
+    timeMask?: string;
+  };
   /** Array-specific QuickForms features */
   array?: QuickFormsQuasarArrayFeatures;
   /** Key-value specific QuickForms features */
   keyvalue?: QuickFormsQuasarKeyValueFeatures;
   /** JSON editor-specific QuickForms features */
-  jsoneditor?: QuickFormsQuasarFeatures & {
-    /** Show the info icon with format shortcut hint. Default: true */
-    showFormatHint?: boolean;
+  jsoneditor?: {
+    /** Editor height. Default: '300px' */
+    height?: string;
+    /** Use dark theme. Default: false */
+    darkTheme?: boolean;
+    /** Show line numbers. Default: false */
+    lineNumbers?: boolean;
+    /** Show lint gutter. Default: false */
+    lintGutter?: boolean;
+    /** Tab size for indentation. Default: 2 */
+    tabSize?: number;
+    /** Enable indent with tab key. Default: true */
+    indentWithTab?: boolean;
+    /** Keyboard shortcut for formatting. Default: 'Ctrl-.' */
+    formatKey?: string;
   };
 }
 
