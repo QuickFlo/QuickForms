@@ -295,8 +295,13 @@ interface QuasarFormOptions extends FormOptions {
       removeButton?: Record<string, any>
     }
     jsoneditor?: {
-      height?: string             // Editor height
-      darkTheme?: boolean         // Use dark theme
+      height?: string             // Editor height (default: '300px')
+      darkTheme?: boolean         // Use dark theme (default: false, auto-detects from Quasar Dark)
+      lineNumbers?: boolean       // Show line numbers (default: false)
+      lintGutter?: boolean        // Show lint gutter (default: false)
+      tabSize?: number            // Tab size (default: 2)
+      indentWithTab?: boolean     // Enable Tab key (default: true)
+      formatKey?: string          // Format shortcut (default: 'Ctrl-.')
     }
   }
 }

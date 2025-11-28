@@ -531,11 +531,24 @@ All `x-*` attributes are optional. QuickForms works perfectly with standard JSON
 ```
 
 **Available Renderers:**
-- `'jsoneditor'` - JSON textarea editor with formatting support
+- `'jsoneditor'` - JSON code editor with syntax highlighting, linting, and formatting
 
 **Use Cases:**
 - Force JSON editor for object fields that would normally render as nested fields
 - Override automatic component selection
+- Enable freeform JSON input with validation
+
+**Customization:**
+```typescript
+{
+  type: 'object',
+  'x-render': 'jsoneditor',
+  'x-json-height': '400px',
+  'x-json-dark-theme': true,
+  'x-json-line-numbers': true,
+  'x-json-format-key': 'Ctrl-f'  // Custom format shortcut
+}
+```
 
 **Related:** [JsonField Component](/guide/components#jsonfield)
 
