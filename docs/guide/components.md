@@ -575,6 +575,181 @@ Note: `componentDefaults.keyvalue` and `x-quasar-props` accept any native Quasar
 
 ---
 
+## JsonLogicBuilderField
+
+A visual condition builder for [JSONLogic](https://jsonlogic.com/) expressions. Enables users to build complex conditions with AND/OR grouping through an intuitive UI.
+
+### Handles
+
+- Any field with `x-render: 'condition-builder'` or `x-render: 'jsonlogic-builder'`
+
+### Example Schema
+
+**Basic condition:**
+```typescript
+{
+  type: 'object',
+  title: 'Trigger Condition',
+  description: 'When should this action execute?',
+  'x-render': 'condition-builder'
+}
+```
+
+**Filter rules:**
+```typescript
+{
+  type: 'object',
+  title: 'Filter Rules',
+  description: 'Define filtering criteria',
+  'x-render': 'jsonlogic-builder'
+}
+```
+
+### Features
+
+- **Visual condition rows**: `[left value] [operator] [right value]`
+- **AND/OR grouping**: Toggle between match ALL or match ANY
+- **Nested groups**: Create complex nested AND/OR logic
+- **14 operators**: equals, not equals, greater than, less than, contains, starts with, ends with, in list, matches regex, is true, is false, is empty, is not empty
+- **Advanced mode**: Toggle to raw JSON editor for complex expressions
+- **Bidirectional**: Converts between visual UI and JSONLogic format automatically
+- **Slot support**: Custom value inputs via `#left-input` and `#right-input` slots
+
+### Supported Operators
+
+| Operator | Symbol | Description | Right Value |
+|----------|--------|-------------|-------------|
+| `==` | = | Equals | Required |
+| `!=` | ≠ | Not equals | Required |
+| `>` | > | Greater than | Required |
+| `>=` | ≥ | Greater or equal | Required |
+| `<` | < | Less than | Required |
+| `<=` | ≤ | Less or equal | Required |
+| `contains` | - | String contains | Required |
+| `startsWith` | - | Starts with | Required |
+| `endsWith` | - | Ends with | Required |
+| `in` | - | Value in list | Required (comma-separated) |
+| `matches` | - | Regex match | Required (pattern) |
+| `isTrue` | - | Is true | Not needed |
+| `isFalse` | - | Is false | Not needed |
+| `isEmpty` | - | Is empty/null | Not needed |
+| `isNotEmpty` | - | Has value | Not needed |
+
+### UI Layout
+
+```
+Match: [ALL] [ANY] of these conditions
+
+┌─────────────┐  ┌────────────┐  ┌─────────────┐
+│ user.age    │  │ > greater  │  │ 18          │  [×]
+└─────────────┘  └────────────┘  └─────────────┘
+                      AND
+┌─────────────┐  ┌────────────┐  ┌─────────────┐
+│ user.status │  │ = equals   │  │ active      │  [×]
+└─────────────┘  └────────────┘  └─────────────┘
+
+[+ Add condition]  [+ Add group]
+```
+
+### JSONLogic Output
+
+The visual builder produces standard JSONLogic:
+
+```json
+{
+  "and": [
+    { ">": [{ "var": "user.age" }, 18] },
+    { "==": [{ "var": "user.status" }, "active"] }
+  ]
+}
+```
+
+### Nested Groups
+
+Click "Add group" to create nested AND/OR logic:
+
+```
+Match: [ALL] of these conditions
+
+│ order.total │ │ > │ │ 100 │
+
+┌─ ANY ────────────────────────────────┐
+│  │ user.role │ │ = │ │ admin │       │
+│  │ user.role │ │ = │ │ manager │     │
+│                          [+ Add]     │
+└──────────────────────────────────────┘
+```
+
+Produces:
+```json
+{
+  "and": [
+    { ">": [{ "var": "order.total" }, 100] },
+    {
+      "or": [
+        { "==": [{ "var": "user.role" }, "admin"] },
+        { "==": [{ "var": "user.role" }, "manager"] }
+      ]
+    }
+  ]
+}
+```
+
+### Custom Value Inputs (Slots)
+
+Provide custom input components for left/right values:
+
+```vue
+<QuasarJsonLogicBuilderField :schema="schema" :path="path">
+  <template #left-input="{ value, onChange, disabled, readonly }">
+    <MyCustomInput
+      :model-value="value"
+      @update:model-value="onChange"
+      :disable="disabled"
+    />
+  </template>
+  
+  <template #right-input="{ value, onChange, disabled, readonly, operator }">
+    <MyCustomInput
+      :model-value="value"
+      @update:model-value="onChange"
+      :disable="disabled"
+    />
+  </template>
+</QuasarJsonLogicBuilderField>
+```
+
+### Utilities
+
+The package exports utilities for working with JSONLogic:
+
+```typescript
+import {
+  toJsonLogic,        // Convert visual conditions → JSONLogic
+  fromJsonLogic,      // Convert JSONLogic → visual conditions
+  createEmptyCondition,
+  createEmptyGroup,
+  createEmptyRoot,
+  OPERATORS,          // List of supported operators
+  getOperatorInfo,    // Get operator metadata
+} from '@quickflo/quickforms-quasar'
+```
+
+### Types
+
+```typescript
+import type {
+  ComparisonOperator,
+  SimpleCondition,
+  ConditionGroup,
+  ConditionItem,
+  ConditionRoot,
+  JsonLogic,
+} from '@quickflo/quickforms-quasar'
+```
+
+---
+
 ## ArrayField
 
 Renders dynamic array fields with add/remove buttons.

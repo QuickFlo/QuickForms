@@ -658,6 +658,24 @@ const schema: JSONSchema = {
       ],
     },
 
+    // === JSONLOGIC CONDITION BUILDER ===
+    triggerCondition: {
+      type: "object",
+      title: "Trigger Condition",
+      description:
+        "Visual JSONLogic condition builder with AND/OR support. Use x-render: 'condition-builder' or 'jsonlogic-builder'",
+      "x-render": "condition-builder",
+    },
+
+    // === JSONLOGIC CONDITION BUILDER (Complex Example) ===
+    filterRules: {
+      type: "object",
+      title: "Filter Rules",
+      description:
+        "Complex filtering with multiple conditions. Try adding nested AND/OR groups!",
+      "x-render": "jsonlogic-builder",
+    },
+
     // === ONEOF WITH DROPDOWN (Many options) ===
     shippingMethod: {
       type: "object",
@@ -771,8 +789,9 @@ const handleSubmit = () => {
                     custom labels (x-oneof-labels), dropdown mode |
                     <strong>Icons:</strong> prepend/append |
                     <strong>Arrays:</strong> button positioning, custom labels |
-                    <strong>And more:</strong> date/time pickers, password
-                    toggle, autocomplete, nested objects
+                    <strong>JSONLogic:</strong> visual condition builder with
+                    AND/OR groups | <strong>And more:</strong> date/time pickers,
+                    password toggle, autocomplete, nested objects
                   </div>
                 </q-banner>
               </q-card-section>

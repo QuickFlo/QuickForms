@@ -1,39 +1,31 @@
 <script setup lang="ts">
 import { computed } from "vue";
 import { QInput } from "quasar";
-import { useFormField, useFormContext } from "@quickflo/quickforms-vue";
-import { generateFieldId } from "@quickflo/quickforms-vue";
 import type { FieldProps } from "@quickflo/quickforms-vue";
-import { mergeQuasarProps, getFieldGapStyle } from "../utils";
+import { useQuasarFormField } from "../composables/useQuasarFormField";
 
 const props = withDefaults(defineProps<FieldProps>(), {
   disabled: false,
   readonly: false,
 });
 
-const { value, errorMessage, label, hint } = useFormField(
-  props.path,
-  props.schema,
-  { label: props.label }
-);
-
-const formContext = useFormContext();
-const fieldId = generateFieldId(props.path);
-
-const quasarProps = computed(() => {
-  return mergeQuasarProps(
-    props.schema,
-    formContext?.componentDefaults as any,
-    "input"
-  );
+const {
+  value,
+  label,
+  hint,
+  errorMessage,
+  fieldId,
+  quasarProps,
+  fieldGap,
+} = useQuasarFormField(props.path, props.schema, {
+  label: props.label,
+  componentType: 'input',
 });
 
 const step = computed(() => {
   if (props.schema.multipleOf) return props.schema.multipleOf;
   return props.schema.type === "integer" ? 1 : undefined;
 });
-
-const fieldGap = computed(() => getFieldGapStyle(formContext?.componentDefaults));
 </script>
 
 <template>

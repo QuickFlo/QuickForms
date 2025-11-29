@@ -1,4 +1,7 @@
-import type { FormOptions as VueFormOptions } from "@quickflo/quickforms-vue";
+import type {
+  FormContext,
+  FormOptions as VueFormOptions,
+} from "@quickflo/quickforms-vue";
 import type { StyleValue } from "vue";
 import type {
   QInputProps,
@@ -233,6 +236,17 @@ export interface QuasarFormOptions
   extends Omit<VueFormOptions, "componentDefaults"> {
   /** Native Quasar component defaults (passed via v-bind) */
   componentDefaults?: QuasarComponentDefaults;
+  /** QuickForms convenience features (interpreted by our components) */
+  quickformsDefaults?: QuickFormsQuasarDefaults;
+}
+
+/**
+ * Quasar-specific form context
+ * Extends Vue FormContext with Quasar-specific properties
+ */
+export interface QuasarFormContext extends Omit<FormContext, "componentDefaults"> {
+  /** Native Quasar component defaults (passed via v-bind) */
+  componentDefaults: QuasarComponentDefaults;
   /** QuickForms convenience features (interpreted by our components) */
   quickformsDefaults?: QuickFormsQuasarDefaults;
 }
