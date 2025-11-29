@@ -22,13 +22,13 @@ interface VueComponentAttributes {
 // We'll define our own base since ComponentDefaults isn't exported from Vue
 interface VueComponentDefaults {
   layout?: {
-    /** 
+    /**
      * Vertical gap between form fields.
-     * Accepts Quasar sizes: 'xs' | 'sm' | 'md' | 'lg' | 'xl' 
+     * Accepts Quasar sizes: 'xs' | 'sm' | 'md' | 'lg' | 'xl'
      * Or CSS value: '1rem', '24px', etc.
      * Default: 'md' (16px)
      */
-    fieldGap?: 'xs' | 'sm' | 'md' | 'lg' | 'xl' | string;
+    fieldGap?: "xs" | "sm" | "md" | "lg" | "xl" | string;
   };
   select?: {
     autocomplete?: boolean;
@@ -39,13 +39,13 @@ interface VueComponentDefaults {
     defaultCollapsed?: boolean;
   };
   object?: {
-    /** 
-     * Default expanded state for object fields. 
+    /**
+     * Default expanded state for object fields.
      * 'required-only' = required fields expanded, optional collapsed (default)
      * 'all' = all fields expanded
      * 'none' = all fields collapsed
      */
-    defaultExpanded?: 'required-only' | 'all' | 'none';
+    defaultExpanded?: "required-only" | "all" | "none";
     /** Show "(optional)" indicator for optional object fields. Default: true */
     showOptionalIndicator?: boolean;
   };
@@ -60,7 +60,7 @@ interface VueComponentDefaults {
     /** Label for the dropdown selector in oneOf fields. Default: "Select Option" */
     selectLabel?: string;
     /** Default display style for oneOf/anyOf fields. Default: 'tabs' for 2-4 options, 'dropdown' for more */
-    displayStyle?: 'tabs' | 'dropdown';
+    displayStyle?: "tabs" | "dropdown";
   };
 }
 
@@ -138,7 +138,8 @@ export interface QuickFormsQuasarKeyValueFeatures {
  * Uses native Quasar component prop types - these get passed through via v-bind
  * All properties here are NATIVE Quasar props from the official Quasar type definitions
  */
-export interface QuasarComponentDefaults extends VueComponentDefaults {
+export interface QuasarComponentDefaults
+  extends Omit<VueComponentDefaults, "select"> {
   /**
    * Global defaults applied to ALL Quasar field components (QInput, QSelect, etc)
    * Uses common props that exist across multiple Quasar components
