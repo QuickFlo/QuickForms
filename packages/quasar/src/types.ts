@@ -1,4 +1,7 @@
-import type { FormOptions as VueFormOptions } from "@quickflo/quickforms-vue";
+import type {
+  FormContext,
+  FormOptions as VueFormOptions,
+} from "@quickflo/quickforms-vue";
 import type { StyleValue } from "vue";
 import type {
   QInputProps,
