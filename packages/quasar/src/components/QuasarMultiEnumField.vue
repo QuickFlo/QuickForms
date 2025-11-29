@@ -1,25 +1,28 @@
 <script setup lang="ts">
 import { computed, ref, watch } from "vue";
 import { QSelect } from "quasar";
-import { useFormField } from "@quickflo/quickforms-vue";
-import { useQuasarFormContext } from "../composables/useQuasarFormContext";
-import { generateFieldId } from "@quickflo/quickforms-vue";
 import type { FieldProps } from "@quickflo/quickforms-vue";
-import { mergeQuasarProps, getFieldGapStyle } from "../utils";
+import { useQuasarFormField } from "../composables/useQuasarFormField";
+import { mergeQuasarProps } from "../utils";
 
 const props = withDefaults(defineProps<FieldProps>(), {
   disabled: false,
   readonly: false,
 });
 
-const { value, errorMessage, label, hint, setValue } = useFormField(
-  props.path,
-  props.schema,
-  { label: props.label }
-);
-
-const formContext = useQuasarFormContext();
-const fieldId = generateFieldId(props.path);
+const {
+  value,
+  setValue,
+  label,
+  hint,
+  errorMessage,
+  fieldId,
+  fieldGap,
+  formContext,
+} = useQuasarFormField(props.path, props.schema, {
+  label: props.label,
+  componentType: 'select',
+});
 
 // Ensure value is an array (initialize without triggering validation)
 if (!Array.isArray(value.value)) {
@@ -27,6 +30,7 @@ if (!Array.isArray(value.value)) {
   setValue([], false);
 }
 
+// Custom quasarProps handling for select - need to strip some props we control
 const quasarProps = computed(() => {
   const merged = mergeQuasarProps(
     props.schema,
@@ -119,9 +123,6 @@ const filterFn = (val: string, update: (fn: () => void) => void) => {
   });
 };
 
-const fieldGap = computed(() =>
-  getFieldGapStyle(formContext?.componentDefaults)
-);
 </script>
 
 <template>

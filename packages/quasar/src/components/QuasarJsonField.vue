@@ -10,28 +10,31 @@ import {
   lineNumbers,
   EditorView as CMEditorView,
 } from "@codemirror/view";
-import { useFormField, generateFieldId } from "@quickflo/quickforms-vue";
-import { getFieldGapStyle } from "../utils";
 import type { FieldProps } from "@quickflo/quickforms-vue";
-import type { QuasarFormOptions } from "../types";
 import type { ViewUpdate, EditorView } from "@codemirror/view";
-import { useQuasarFormContext } from "../composables/useQuasarFormContext";
+import { useQuasarFormField } from "../composables/useQuasarFormField";
 
 const props = withDefaults(defineProps<FieldProps>(), {
   disabled: false,
   readonly: false,
 });
 
-const { value, setValue, label, hint, errorMessage, required } = useFormField(
-  props.path,
-  props.schema,
-  { label: props.label }
-);
+const {
+  value,
+  setValue,
+  label,
+  hint,
+  errorMessage,
+  required,
+  fieldId,
+  fieldGap,
+  formContext,
+} = useQuasarFormField(props.path, props.schema, {
+  label: props.label,
+  componentType: 'jsoneditor',
+});
 
-const formContext = useQuasarFormContext() as QuasarFormOptions | undefined;
 const $q = useQuasar();
-
-const fieldId = generateFieldId(props.path);
 
 // CodeMirror text content
 const code = ref("");
@@ -218,10 +221,6 @@ const extensions = computed(() => {
 });
 
 const displayError = computed(() => parseError.value || errorMessage.value);
-
-const fieldGap = computed(() =>
-  getFieldGapStyle(formContext?.componentDefaults)
-);
 
 // Create a key that changes when extensions configuration changes
 // This forces CodeMirror to remount with new extensions

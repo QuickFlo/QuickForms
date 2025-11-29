@@ -11,14 +11,8 @@
  */
 import { computed, ref, watch } from "vue";
 import { QBtn, QSelect, QInput, QIcon, QToggle, QTooltip } from "quasar";
-import {
-  useFormField,
-  generateFieldId,
-  useFormContext,
-} from "@quickflo/quickforms-vue";
 import type { FieldProps } from "@quickflo/quickforms-vue";
-import { useQuasarFormContext } from "../composables/useQuasarFormContext";
-import { getFieldGapStyle } from "../utils";
+import { useQuasarFormField } from "../composables/useQuasarFormField";
 import {
   OPERATORS,
   type ComparisonOperator,
@@ -39,14 +33,18 @@ const props = withDefaults(defineProps<FieldProps>(), {
   readonly: false,
 });
 
-const { value, setValue, label, hint, errorMessage, required } = useFormField(
-  props.path,
-  props.schema,
-  { label: props.label }
-);
-
-const formContext = useQuasarFormContext();
-const fieldId = generateFieldId(props.path);
+const {
+  value,
+  setValue,
+  label,
+  hint,
+  errorMessage,
+  required,
+  fieldId,
+  fieldGap,
+} = useQuasarFormField(props.path, props.schema, {
+  label: props.label,
+});
 
 // ============================================================================
 // State
@@ -187,13 +185,6 @@ const operatorOptions = computed(() =>
   }))
 );
 
-// ============================================================================
-// Styles
-// ============================================================================
-
-const fieldGap = computed(() =>
-  getFieldGapStyle(formContext?.componentDefaults)
-);
 </script>
 
 <template>

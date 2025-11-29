@@ -9,27 +9,28 @@ import {
   QTabPanels,
   QTabPanel,
 } from "quasar";
-import { useFormField } from "@quickflo/quickforms-vue";
-import { useQuasarFormContext } from "../composables/useQuasarFormContext";
-import { generateFieldId } from "@quickflo/quickforms-vue";
 import { FieldRenderer } from "@quickflo/quickforms-vue";
 import type { FieldProps } from "@quickflo/quickforms-vue";
+import { useQuasarFormField } from "../composables/useQuasarFormField";
 import { schemaUtils } from "../schema-utils-singleton";
-import { getFieldGapStyle } from "../utils";
 
 const props = withDefaults(defineProps<FieldProps>(), {
   disabled: false,
   readonly: false,
 });
 
-const { value, label, hint, errorMessage } = useFormField(
-  props.path,
-  props.schema,
-  { label: props.label }
-);
-
-const fieldId = generateFieldId(props.path);
-const formContext = useQuasarFormContext();
+const {
+  value,
+  label,
+  hint,
+  errorMessage,
+  fieldId,
+  fieldGap,
+  formContext,
+} = useQuasarFormField(props.path, props.schema, {
+  label: props.label,
+  componentType: 'card',
+});
 
 const quasarProps = computed(() => {
   const xQuasarProps = (props.schema as any)["x-quasar-props"] || {};
@@ -179,9 +180,6 @@ const handleOptionChange = (newIndex: number) => {
   // Keep existing value to allow common fields to persist
 };
 
-const fieldGap = computed(() =>
-  getFieldGapStyle(formContext?.componentDefaults)
-);
 </script>
 
 <template>

@@ -1,36 +1,28 @@
 <script setup lang="ts">
 import { ref, watch, computed } from "vue";
 import { QInput, QBtn, QIcon } from "quasar";
-import {
-  useFormField,
-  generateFieldId,
-  useFormContext,
-} from "@quickflo/quickforms-vue";
 import type { FieldProps } from "@quickflo/quickforms-vue";
-import { mergeQuasarProps, getFieldGapStyle } from "../utils";
-import { useQuasarFormContext } from "../composables/useQuasarFormContext";
+import { useQuasarFormField } from "../composables/useQuasarFormField";
 
 const props = withDefaults(defineProps<FieldProps>(), {
   disabled: false,
   readonly: false,
 });
 
-const { value, setValue, label, hint, errorMessage, required } = useFormField(
-  props.path,
-  props.schema,
-  { label: props.label }
-);
-
-const formContext = useQuasarFormContext();
-const fieldId = generateFieldId(props.path);
-
-// Merge native Quasar QInput props for key/value inputs
-const inputProps = computed(() => {
-  return mergeQuasarProps(
-    props.schema,
-    formContext?.componentDefaults,
-    "keyvalue"
-  );
+const {
+  value,
+  setValue,
+  label,
+  hint,
+  errorMessage,
+  required,
+  fieldId,
+  quasarProps: inputProps,
+  fieldGap,
+  formContext,
+} = useQuasarFormField(props.path, props.schema, {
+  label: props.label,
+  componentType: 'keyvalue',
 });
 
 // Merge QuickForms convenience features for button customization
@@ -166,9 +158,6 @@ function removePair(id: number) {
   pairs.value = pairs.value.filter((p) => p.id !== id);
 }
 
-const fieldGap = computed(() =>
-  getFieldGapStyle(formContext?.componentDefaults)
-);
 </script>
 
 <template>

@@ -1,24 +1,23 @@
 <script setup lang="ts">
-import { computed } from 'vue';
-import { useFormField } from '@quickflo/quickforms-vue';
-import { useQuasarFormContext } from '../composables/useQuasarFormContext';
-import { SchemaUtils } from '@quickflo/quickforms';
-import { FieldRenderer } from '@quickflo/quickforms-vue';
-import { useQuasarFormContext } from '../composables/useQuasarFormContext';
-import type { FieldProps } from '@quickflo/quickforms-vue';
-import { useQuasarFormContext } from '../composables/useQuasarFormContext';
-import { getFieldGapStyle } from '../utils';
+import { computed } from "vue";
+import { SchemaUtils } from "@quickflo/quickforms";
+import { FieldRenderer } from "@quickflo/quickforms-vue";
+import type { FieldProps } from "@quickflo/quickforms-vue";
+import { useQuasarFormField } from "../composables/useQuasarFormField";
 
 const props = withDefaults(defineProps<FieldProps>(), {
   disabled: false,
   readonly: false,
 });
 
-const formContext = useQuasarFormContext();
-const { label } = useFormField(props.path, props.schema, { label: props.label });
-const schemaUtils = new SchemaUtils();
+const {
+  label,
+  fieldGap,
+} = useQuasarFormField(props.path, props.schema, {
+  label: props.label,
+});
 
-const fieldGap = computed(() => getFieldGapStyle(formContext?.componentDefaults));
+const schemaUtils = new SchemaUtils();
 
 // Merge all schemas in allOf
 const mergedSchema = computed(() => {

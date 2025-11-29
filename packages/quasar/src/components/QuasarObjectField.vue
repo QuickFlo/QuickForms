@@ -1,25 +1,27 @@
 <script setup lang="ts">
 import { computed } from "vue";
 import { QExpansionItem } from "quasar";
-import { useFormField } from "@quickflo/quickforms-vue";
-import { useQuasarFormContext } from "../composables/useQuasarFormContext";
-import { generateFieldId } from "@quickflo/quickforms-vue";
 import { FieldRenderer } from "@quickflo/quickforms-vue";
 import type { FieldProps } from "@quickflo/quickforms-vue";
-import { getFieldGapStyle } from "../utils";
+import { useQuasarFormField } from "../composables/useQuasarFormField";
 
 const props = withDefaults(defineProps<FieldProps>(), {
   disabled: false,
   readonly: false,
 });
 
-const formContext = useQuasarFormContext();
-
-const { label, hint, errorMessage, required } = useFormField(
-  props.path,
-  props.schema,
-  { label: props.label }
-);
+const {
+  label,
+  hint,
+  errorMessage,
+  required,
+  fieldId,
+  fieldGap,
+  formContext,
+} = useQuasarFormField(props.path, props.schema, {
+  label: props.label,
+  componentType: 'expansion',
+});
 
 // Determine default expanded state
 const defaultOpened = computed(() => {
@@ -50,8 +52,6 @@ const showOptionalIndicator = computed(() => {
   return objectDefaults?.showOptionalIndicator ?? true;
 });
 
-const fieldId = generateFieldId(props.path);
-
 const quasarProps = computed(() => {
   const xQuasarProps = (props.schema as any)["x-quasar-props"] || {};
   const xComponentProps = (props.schema as any)["x-component-props"] || {};
@@ -69,9 +69,6 @@ const properties = computed(() => {
   }));
 });
 
-const fieldGap = computed(() =>
-  getFieldGapStyle(formContext?.componentDefaults)
-);
 </script>
 
 <template>

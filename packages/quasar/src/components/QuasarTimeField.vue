@@ -1,42 +1,30 @@
 <script setup lang="ts">
-import { computed } from "vue";
 import { QInput, QPopupProxy, QTime } from "quasar";
-import { useFormField } from "@quickflo/quickforms-vue";
-import { useQuasarFormContext } from "../composables/useQuasarFormContext";
-import { generateFieldId } from "@quickflo/quickforms-vue";
 import type { FieldProps } from "@quickflo/quickforms-vue";
-import { mergeQuasarProps, getFieldGapStyle } from "../utils";
+import { useQuasarFormField } from "../composables/useQuasarFormField";
 
 const props = withDefaults(defineProps<FieldProps>(), {
   disabled: false,
   readonly: false,
 });
 
-const { value, errorMessage, label, hint } = useFormField(
-  props.path,
-  props.schema,
-  { label: props.label }
-);
+const {
+  value,
+  label,
+  hint,
+  errorMessage,
+  fieldId,
+  quasarProps,
+  fieldGap,
+} = useQuasarFormField(props.path, props.schema, {
+  label: props.label,
+  componentType: 'datetime',
+});
 
 // Initialize undefined to null for Quasar compatibility
 if (value.value === undefined) {
   value.value = null;
 }
-
-const formContext = useQuasarFormContext();
-const fieldId = generateFieldId(props.path);
-
-const quasarProps = computed(() => {
-  return mergeQuasarProps(
-    props.schema,
-    formContext?.componentDefaults,
-    "datetime"
-  );
-});
-
-const fieldGap = computed(() =>
-  getFieldGapStyle(formContext?.componentDefaults)
-);
 </script>
 
 <template>

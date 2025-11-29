@@ -49,7 +49,10 @@ export function mergeQuasarProps(
     | "keyvalue"
 ): Record<string, any> {
   const globalDefaults = componentDefaults?.global || {};
-  const typeDefaults = componentDefaults?.[componentType] || {};
+  // jsoneditor doesn't have native Quasar props (uses CodeMirror)
+  const typeDefaults = componentType !== 'jsoneditor' 
+    ? (componentDefaults?.[componentType as keyof Omit<QuasarComponentDefaults, 'global' | 'layout' | 'array' | 'object' | 'number' | 'hints' | 'oneOf'>] || {})
+    : {};
   const xComponentProps = (schema as any)["x-component-props"] || {};
   const xQuasarProps = (schema as any)["x-quasar-props"] || {};
 

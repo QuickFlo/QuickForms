@@ -1,11 +1,26 @@
 // Registry
 export { createQuasarRegistry } from './registry.js';
 
-// Quasar-specific form context
+// Quasar-specific composables
 export {
   useQuasarFormContext,
   provideQuasarFormContext,
 } from './composables/useQuasarFormContext.js';
+
+export {
+  useQuasarFormField,
+  type QuasarComponentType,
+  type QuickFormsFeatureType,
+  type UseQuasarFormFieldOptions,
+  type UseQuasarFormFieldReturn,
+} from './composables/useQuasarFormField.js';
+
+// Utility functions for custom components
+export {
+  mergeQuasarProps,
+  mergeQuickFormsQuasarFeatures,
+  getFieldGapStyle,
+} from './utils.js';
 
 // Quasar Components
 export { default as QuasarStringField } from './components/QuasarStringField.vue';

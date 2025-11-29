@@ -1,41 +1,26 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue';
 import { QInput, QIcon } from 'quasar';
-import { useFormField, generateFieldId } from '@quickflo/quickforms-vue';
 import type { FieldProps } from '@quickflo/quickforms-vue';
-import { useQuasarFormContext } from '../composables/useQuasarFormContext';
-import { mergeQuasarProps, mergeQuickFormsQuasarFeatures, getFieldGapStyle } from '../utils';
+import { useQuasarFormField } from '../composables/useQuasarFormField';
 
 const props = withDefaults(defineProps<FieldProps>(), {
   disabled: false,
   readonly: false,
 });
 
-const { value, errorMessage, label, hint } = useFormField(
-  props.path,
-  props.schema,
-  { label: props.label }
-);
-
-const formContext = useQuasarFormContext();
-const fieldId = generateFieldId(props.path);
-
-// Merge native Quasar props
-const quasarProps = computed(() => {
-  return mergeQuasarProps(
-    props.schema,
-    formContext?.componentDefaults,
-    'input'
-  );
-});
-
-// Merge QuickForms convenience features
-const quickformsFeatures = computed(() => {
-  return mergeQuickFormsQuasarFeatures(
-    props.schema,
-    formContext?.quickformsDefaults,
-    'input'
-  );
+const {
+  value,
+  label,
+  hint,
+  errorMessage,
+  fieldId,
+  quasarProps,
+  quickformsFeatures,
+  fieldGap,
+} = useQuasarFormField(props.path, props.schema, {
+  label: props.label,
+  componentType: 'input',
 });
 
 // Password visibility toggle
@@ -74,9 +59,6 @@ const showPrependIcon = computed(() => !!quickformsFeatures.value.prependIcon);
 const showAppendIcon = computed(() => 
   !isPasswordField.value && !!quickformsFeatures.value.appendIcon
 );
-
-// Field gap style
-const fieldGap = computed(() => getFieldGapStyle(formContext?.componentDefaults));
 </script>
 
 <template>
