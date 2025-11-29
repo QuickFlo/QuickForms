@@ -39,6 +39,7 @@ export default defineConfig(({ command }) => {
       })
     ],
     build: {
+      cssCodeSplit: false,
       lib: {
         entry: resolve(__dirname, 'src/index.ts'),
         name: 'QuickformsQuasar',
