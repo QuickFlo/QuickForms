@@ -8,6 +8,7 @@ import {
 } from "@quickflo/quickforms-vue";
 import type { FieldProps } from "@quickflo/quickforms-vue";
 import { mergeQuasarProps, getFieldGapStyle } from "../utils";
+import { useQuasarFormContext } from "../composables/useQuasarFormContext";
 
 const props = withDefaults(defineProps<FieldProps>(), {
   disabled: false,
@@ -20,22 +21,21 @@ const { value, setValue, label, hint, errorMessage, required } = useFormField(
   { label: props.label }
 );
 
-const formContext = useFormContext();
+const formContext = useQuasarFormContext();
 const fieldId = generateFieldId(props.path);
 
 // Merge native Quasar QInput props for key/value inputs
 const inputProps = computed(() => {
   return mergeQuasarProps(
     props.schema,
-    formContext?.componentDefaults as any,
+    formContext?.componentDefaults,
     "keyvalue"
   );
 });
 
 // Merge QuickForms convenience features for button customization
 const quickformsFeatures = computed(() => {
-  const globalDefaults =
-    (formContext as any)?.quickformsDefaults?.keyvalue || {};
+  const globalDefaults = formContext?.quickformsDefaults?.keyvalue || {};
   const schemaFeatures = (props.schema as any)["x-quickforms-quasar"] || {};
 
   // Position is custom (not a QBtn prop)
@@ -46,19 +46,12 @@ const quickformsFeatures = computed(() => {
 
   // Header display options
   const showHeaders =
-    schemaFeatures.showHeaders ??
-    globalDefaults.showHeaders ??
-    false;
+    schemaFeatures.showHeaders ?? globalDefaults.showHeaders ?? false;
 
-  const keyLabel =
-    schemaFeatures.keyLabel ??
-    globalDefaults.keyLabel ??
-    "Key";
+  const keyLabel = schemaFeatures.keyLabel ?? globalDefaults.keyLabel ?? "Key";
 
   const valueLabel =
-    schemaFeatures.valueLabel ??
-    globalDefaults.valueLabel ??
-    "Value";
+    schemaFeatures.valueLabel ?? globalDefaults.valueLabel ?? "Value";
 
   // Merge QBtn props: defaults -> global -> schema (schema has highest priority)
   const addButtonDefaults = {
@@ -173,7 +166,9 @@ function removePair(id: number) {
   pairs.value = pairs.value.filter((p) => p.id !== id);
 }
 
-const fieldGap = computed(() => getFieldGapStyle(formContext?.componentDefaults));
+const fieldGap = computed(() =>
+  getFieldGapStyle(formContext?.componentDefaults)
+);
 </script>
 
 <template>
@@ -219,9 +214,16 @@ const fieldGap = computed(() => getFieldGapStyle(formContext?.componentDefaults)
     </div>
 
     <div class="rounded-borders">
-      <div v-if="quickformsFeatures.showHeaders && pairs.length" class="row items-center q-gutter-sm q-mb-sm">
-        <div class="col text-weight-medium text-caption">{{ quickformsFeatures.keyLabel }}</div>
-        <div class="col text-weight-medium text-caption">{{ quickformsFeatures.valueLabel }}</div>
+      <div
+        v-if="quickformsFeatures.showHeaders && pairs.length"
+        class="row items-center q-gutter-sm q-mb-sm"
+      >
+        <div class="col text-weight-medium text-caption">
+          {{ quickformsFeatures.keyLabel }}
+        </div>
+        <div class="col text-weight-medium text-caption">
+          {{ quickformsFeatures.valueLabel }}
+        </div>
         <div style="width: 40px"></div>
       </div>
 

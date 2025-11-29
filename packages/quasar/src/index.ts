@@ -1,6 +1,12 @@
 // Registry
 export { createQuasarRegistry } from './registry.js';
 
+// Quasar-specific form context
+export {
+  useQuasarFormContext,
+  provideQuasarFormContext,
+} from './composables/useQuasarFormContext.js';
+
 // Quasar Components
 export { default as QuasarStringField } from './components/QuasarStringField.vue';
 export { default as QuasarNumberField } from './components/QuasarNumberField.vue';
@@ -43,6 +49,7 @@ export type {
 export type {
   QuasarComponentDefaults,
   QuasarFormOptions,
+  QuasarFormContext,
   QuickFormsQuasarFeatures,
   QuickFormsQuasarArrayFeatures,
   QuickFormsQuasarKeyValueFeatures,

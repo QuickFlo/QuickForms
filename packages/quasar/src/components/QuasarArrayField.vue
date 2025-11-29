@@ -1,12 +1,13 @@
 <script setup lang="ts">
 import { computed } from "vue";
 import { QCard, QCardSection, QBtn } from "quasar";
-import { useFormField, useFormContext } from "@quickflo/quickforms-vue";
+import { useFormField } from "@quickflo/quickforms-vue";
 import { generateFieldId } from "@quickflo/quickforms-vue";
 import { FieldRenderer } from "@quickflo/quickforms-vue";
 import type { FieldProps } from "@quickflo/quickforms-vue";
 import { mergeQuasarProps, getFieldGapStyle } from "../utils";
 import { schemaUtils } from "../schema-utils-singleton.js";
+import { useQuasarFormContext } from "../composables/useQuasarFormContext";
 
 const props = withDefaults(defineProps<FieldProps>(), {
   disabled: false,
@@ -19,22 +20,18 @@ const { value, errorMessage, label, hint } = useFormField(
   { label: props.label }
 );
 
-const formContext = useFormContext();
+const formContext = useQuasarFormContext();
 const fieldId = generateFieldId(props.path);
 
 // Merge native Quasar props for the card
 const quasarProps = computed(() => {
-  return mergeQuasarProps(
-    props.schema,
-    formContext?.componentDefaults as any,
-    "card"
-  );
+  return mergeQuasarProps(props.schema, formContext?.componentDefaults, "card");
 });
 
 // Merge QuickForms convenience features for button customization
 // Respects quickformsDefaults.array from form options
 const quickformsFeatures = computed(() => {
-  const globalDefaults = (formContext as any)?.quickformsDefaults?.array || {};
+  const globalDefaults = formContext?.quickformsDefaults?.array || {};
   const schemaFeatures = (props.schema as any)["x-quickforms-quasar"] || {};
 
   // Position is custom (not a QBtn prop)
@@ -176,7 +173,9 @@ const getItemLabel = (index: number) => {
   return `${title} ${index + 1}`;
 };
 
-const fieldGap = computed(() => getFieldGapStyle(formContext?.componentDefaults));
+const fieldGap = computed(() =>
+  getFieldGapStyle(formContext?.componentDefaults)
+);
 </script>
 
 <template>

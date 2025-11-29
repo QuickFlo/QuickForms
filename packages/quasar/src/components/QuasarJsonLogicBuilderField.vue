@@ -9,11 +9,16 @@
  * - Custom value input via slots
  * - Toggle to raw JSON editor for advanced use
  */
-import { computed, ref, watch } from 'vue'
-import { QBtn, QSelect, QInput, QIcon, QToggle, QTooltip } from 'quasar'
-import { useFormField, generateFieldId, useFormContext } from '@quickflo/quickforms-vue'
-import type { FieldProps } from '@quickflo/quickforms-vue'
-import { getFieldGapStyle } from '../utils'
+import { computed, ref, watch } from "vue";
+import { QBtn, QSelect, QInput, QIcon, QToggle, QTooltip } from "quasar";
+import {
+  useFormField,
+  generateFieldId,
+  useFormContext,
+} from "@quickflo/quickforms-vue";
+import type { FieldProps } from "@quickflo/quickforms-vue";
+import { useQuasarFormContext } from "../composables/useQuasarFormContext";
+import { getFieldGapStyle } from "../utils";
 import {
   OPERATORS,
   type ComparisonOperator,
@@ -27,34 +32,34 @@ import {
   createEmptyGroup,
   createEmptyRoot,
   getOperatorInfo,
-} from '../utils/jsonlogic'
+} from "../utils/jsonlogic";
 
 const props = withDefaults(defineProps<FieldProps>(), {
   disabled: false,
   readonly: false,
-})
+});
 
 const { value, setValue, label, hint, errorMessage, required } = useFormField(
   props.path,
   props.schema,
   { label: props.label }
-)
+);
 
-const formContext = useFormContext()
-const fieldId = generateFieldId(props.path)
+const formContext = useQuasarFormContext();
+const fieldId = generateFieldId(props.path);
 
 // ============================================================================
 // State
 // ============================================================================
 
 // Internal condition state
-const conditionRoot = ref<ConditionRoot>(createEmptyRoot())
-const isAdvancedMode = ref(false)
-const jsonText = ref('')
-const jsonParseError = ref<string | null>(null)
+const conditionRoot = ref<ConditionRoot>(createEmptyRoot());
+const isAdvancedMode = ref(false);
+const jsonText = ref("");
+const jsonParseError = ref<string | null>(null);
 
 // Track if we're updating internally to avoid loops
-const isInternalUpdate = ref(false)
+const isInternalUpdate = ref(false);
 
 // ============================================================================
 // Sync with form value
@@ -65,27 +70,27 @@ watch(
   () => value.value,
   (newValue) => {
     if (isInternalUpdate.value) {
-      isInternalUpdate.value = false
-      return
+      isInternalUpdate.value = false;
+      return;
     }
 
-    if (newValue && typeof newValue === 'object') {
-      conditionRoot.value = fromJsonLogic(newValue as Record<string, unknown>)
-      jsonText.value = JSON.stringify(newValue, null, 2)
+    if (newValue && typeof newValue === "object") {
+      conditionRoot.value = fromJsonLogic(newValue as Record<string, unknown>);
+      jsonText.value = JSON.stringify(newValue, null, 2);
     } else {
-      conditionRoot.value = createEmptyRoot()
-      jsonText.value = '{}'
+      conditionRoot.value = createEmptyRoot();
+      jsonText.value = "{}";
     }
   },
   { immediate: true }
-)
+);
 
 // Sync changes back to form
 function syncToValue() {
-  isInternalUpdate.value = true
-  const logic = toJsonLogic(conditionRoot.value)
-  setValue(logic)
-  jsonText.value = JSON.stringify(logic, null, 2)
+  isInternalUpdate.value = true;
+  const logic = toJsonLogic(conditionRoot.value);
+  setValue(logic);
+  jsonText.value = JSON.stringify(logic, null, 2);
 }
 
 // ============================================================================
@@ -93,41 +98,47 @@ function syncToValue() {
 // ============================================================================
 
 function addCondition(parentConditions: ConditionItem[]) {
-  parentConditions.push(createEmptyCondition())
-  syncToValue()
+  parentConditions.push(createEmptyCondition());
+  syncToValue();
 }
 
 function addGroup(parentConditions: ConditionItem[]) {
-  parentConditions.push(createEmptyGroup())
-  syncToValue()
+  parentConditions.push(createEmptyGroup());
+  syncToValue();
 }
 
 function removeCondition(parentConditions: ConditionItem[], id: string) {
-  const index = parentConditions.findIndex((c) => c.id === id)
+  const index = parentConditions.findIndex((c) => c.id === id);
   if (index !== -1) {
-    parentConditions.splice(index, 1)
-    syncToValue()
+    parentConditions.splice(index, 1);
+    syncToValue();
   }
 }
 
 function updateConditionLeft(condition: SimpleCondition, value: string) {
-  condition.left = value
-  syncToValue()
+  condition.left = value;
+  syncToValue();
 }
 
-function updateConditionOperator(condition: SimpleCondition, operator: ComparisonOperator) {
-  condition.operator = operator
-  syncToValue()
+function updateConditionOperator(
+  condition: SimpleCondition,
+  operator: ComparisonOperator
+) {
+  condition.operator = operator;
+  syncToValue();
 }
 
 function updateConditionRight(condition: SimpleCondition, value: string) {
-  condition.right = value
-  syncToValue()
+  condition.right = value;
+  syncToValue();
 }
 
-function updateGroupLogic(group: ConditionGroup | ConditionRoot, logic: 'and' | 'or') {
-  group.logic = logic
-  syncToValue()
+function updateGroupLogic(
+  group: ConditionGroup | ConditionRoot,
+  logic: "and" | "or"
+) {
+  group.logic = logic;
+  syncToValue();
 }
 
 // ============================================================================
@@ -138,29 +149,30 @@ function toggleAdvancedMode() {
   if (isAdvancedMode.value) {
     // Switching from advanced to visual
     try {
-      const parsed = JSON.parse(jsonText.value)
-      conditionRoot.value = fromJsonLogic(parsed)
-      jsonParseError.value = null
-      isAdvancedMode.value = false
+      const parsed = JSON.parse(jsonText.value);
+      conditionRoot.value = fromJsonLogic(parsed);
+      jsonParseError.value = null;
+      isAdvancedMode.value = false;
     } catch (err: any) {
-      jsonParseError.value = 'Invalid JSON. Fix errors before switching to visual mode.'
+      jsonParseError.value =
+        "Invalid JSON. Fix errors before switching to visual mode.";
     }
   } else {
     // Switching from visual to advanced
-    jsonText.value = JSON.stringify(toJsonLogic(conditionRoot.value), null, 2)
-    isAdvancedMode.value = true
+    jsonText.value = JSON.stringify(toJsonLogic(conditionRoot.value), null, 2);
+    isAdvancedMode.value = true;
   }
 }
 
 function handleJsonChange(newJson: string) {
-  jsonText.value = newJson
+  jsonText.value = newJson;
   try {
-    const parsed = JSON.parse(newJson)
-    jsonParseError.value = null
-    isInternalUpdate.value = true
-    setValue(parsed)
+    const parsed = JSON.parse(newJson);
+    jsonParseError.value = null;
+    isInternalUpdate.value = true;
+    setValue(parsed);
   } catch (err: any) {
-    jsonParseError.value = err.message
+    jsonParseError.value = err.message;
   }
 }
 
@@ -173,13 +185,15 @@ const operatorOptions = computed(() =>
     value: op.value,
     label: op.symbol ? `${op.symbol} ${op.label}` : op.label,
   }))
-)
+);
 
 // ============================================================================
 // Styles
 // ============================================================================
 
-const fieldGap = computed(() => getFieldGapStyle(formContext?.componentDefaults))
+const fieldGap = computed(() =>
+  getFieldGapStyle(formContext?.componentDefaults)
+);
 </script>
 
 <template>
@@ -199,7 +213,9 @@ const fieldGap = computed(() => getFieldGapStyle(formContext?.componentDefaults)
           :color="isAdvancedMode ? 'primary' : 'grey-7'"
           @click="toggleAdvancedMode"
         >
-          <QTooltip>{{ isAdvancedMode ? 'Visual mode' : 'Advanced (JSON)' }}</QTooltip>
+          <QTooltip>{{
+            isAdvancedMode ? "Visual mode" : "Advanced (JSON)"
+          }}</QTooltip>
         </QBtn>
       </div>
     </div>
@@ -233,12 +249,17 @@ const fieldGap = computed(() => getFieldGapStyle(formContext?.componentDefaults)
           label="ANY"
           @click="updateGroupLogic(conditionRoot, 'or')"
         />
-        <span class="text-caption text-grey-7 q-ml-sm">of these conditions</span>
+        <span class="text-caption text-grey-7 q-ml-sm"
+          >of these conditions</span
+        >
       </div>
 
       <!-- Conditions list -->
       <div class="conditions-container">
-        <template v-for="(item, index) in conditionRoot.conditions" :key="item.id">
+        <template
+          v-for="(item, index) in conditionRoot.conditions"
+          :key="item.id"
+        >
           <!-- Simple condition row -->
           <div v-if="item.type === 'condition'" class="condition-row">
             <div class="condition-inputs">
@@ -259,7 +280,9 @@ const fieldGap = computed(() => getFieldGapStyle(formContext?.componentDefaults)
                   class="condition-input"
                   :disable="disabled"
                   :readonly="readonly"
-                  @update:model-value="(v) => updateConditionLeft(item, String(v ?? ''))"
+                  @update:model-value="
+                    (v) => updateConditionLeft(item, String(v ?? ''))
+                  "
                 />
               </slot>
 
@@ -296,7 +319,9 @@ const fieldGap = computed(() => getFieldGapStyle(formContext?.componentDefaults)
                     class="condition-input"
                     :disable="disabled"
                     :readonly="readonly"
-                    @update:model-value="(v) => updateConditionRight(item, String(v ?? ''))"
+                    @update:model-value="
+                      (v) => updateConditionRight(item, String(v ?? ''))
+                    "
                   />
                 </slot>
               </template>
@@ -359,7 +384,10 @@ const fieldGap = computed(() => getFieldGapStyle(formContext?.componentDefaults)
 
             <div class="group-conditions">
               <template v-for="subItem in item.conditions" :key="subItem.id">
-                <div v-if="subItem.type === 'condition'" class="condition-row condition-row--nested">
+                <div
+                  v-if="subItem.type === 'condition'"
+                  class="condition-row condition-row--nested"
+                >
                   <div class="condition-inputs">
                     <slot
                       name="left-input"
@@ -377,7 +405,9 @@ const fieldGap = computed(() => getFieldGapStyle(formContext?.componentDefaults)
                         class="condition-input"
                         :disable="disabled"
                         :readonly="readonly"
-                        @update:model-value="(v) => updateConditionLeft(subItem, String(v ?? ''))"
+                        @update:model-value="
+                          (v) => updateConditionLeft(subItem, String(v ?? ''))
+                        "
                       />
                     </slot>
 
@@ -391,10 +421,14 @@ const fieldGap = computed(() => getFieldGapStyle(formContext?.componentDefaults)
                       class="condition-operator"
                       :disable="disabled"
                       :readonly="readonly"
-                      @update:model-value="(v) => updateConditionOperator(subItem, v)"
+                      @update:model-value="
+                        (v) => updateConditionOperator(subItem, v)
+                      "
                     />
 
-                    <template v-if="getOperatorInfo(subItem.operator)?.rightRequired">
+                    <template
+                      v-if="getOperatorInfo(subItem.operator)?.rightRequired"
+                    >
                       <slot
                         name="right-input"
                         :value="subItem.right"
@@ -412,7 +446,10 @@ const fieldGap = computed(() => getFieldGapStyle(formContext?.componentDefaults)
                           class="condition-input"
                           :disable="disabled"
                           :readonly="readonly"
-                          @update:model-value="(v) => updateConditionRight(subItem, String(v ?? ''))"
+                          @update:model-value="
+                            (v) =>
+                              updateConditionRight(subItem, String(v ?? ''))
+                          "
                         />
                       </slot>
                     </template>
@@ -456,7 +493,9 @@ const fieldGap = computed(() => getFieldGapStyle(formContext?.componentDefaults)
             v-if="index < conditionRoot.conditions.length - 1"
             class="logic-connector"
           >
-            <span class="logic-connector-text">{{ conditionRoot.logic.toUpperCase() }}</span>
+            <span class="logic-connector-text">{{
+              conditionRoot.logic.toUpperCase()
+            }}</span>
           </div>
         </template>
       </div>
@@ -645,7 +684,7 @@ const fieldGap = computed(() => getFieldGapStyle(formContext?.componentDefaults)
 }
 
 .builder-advanced .json-editor :deep(.json-textarea) {
-  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', 'Consolas', monospace;
+  font-family: "Monaco", "Menlo", "Ubuntu Mono", "Consolas", monospace;
   font-size: 13px;
   line-height: 1.5;
 }

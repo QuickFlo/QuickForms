@@ -1,10 +1,11 @@
 <script setup lang="ts">
 import { computed, ref, watch } from "vue";
 import { QSelect } from "quasar";
-import { useFormField, useFormContext } from "@quickflo/quickforms-vue";
+import { useFormField } from "@quickflo/quickforms-vue";
 import { generateFieldId } from "@quickflo/quickforms-vue";
 import type { FieldProps } from "@quickflo/quickforms-vue";
 import { mergeQuasarProps, getFieldGapStyle } from "../utils";
+import { useQuasarFormContext } from "../composables/useQuasarFormContext";
 
 const props = withDefaults(defineProps<FieldProps>(), {
   disabled: false,
@@ -17,13 +18,13 @@ const { value, errorMessage, label, hint } = useFormField(
   { label: props.label }
 );
 
-const formContext = useFormContext();
+const formContext = useQuasarFormContext();
 const fieldId = generateFieldId(props.path);
 
 const quasarProps = computed(() => {
   const merged = mergeQuasarProps(
     props.schema,
-    formContext?.componentDefaults as any,
+    formContext?.componentDefaults,
     "select"
   );
   // Remove QuickForms-specific properties and props we control internally
@@ -83,7 +84,7 @@ const useFilter = computed(() => {
   }
 
   // Check quickformsDefaults for autocomplete
-  if ((formContext as any)?.quickformsDefaults?.select?.autocomplete !== undefined) {
+  if (formContext?.quickformsDefaults?.select?.autocomplete !== undefined) {
     return (formContext as any).quickformsDefaults.select.autocomplete;
   }
 
@@ -107,7 +108,9 @@ const filterFn = (val: string, update: (fn: () => void) => void) => {
   });
 };
 
-const fieldGap = computed(() => getFieldGapStyle(formContext?.componentDefaults));
+const fieldGap = computed(() =>
+  getFieldGapStyle(formContext?.componentDefaults)
+);
 </script>
 
 <template>

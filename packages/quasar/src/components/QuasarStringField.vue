@@ -1,11 +1,10 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue';
 import { QInput, QIcon } from 'quasar';
-import { useFormField, useFormContext } from '@quickflo/quickforms-vue';
-import { generateFieldId } from '@quickflo/quickforms-vue';
+import { useFormField, generateFieldId } from '@quickflo/quickforms-vue';
 import type { FieldProps } from '@quickflo/quickforms-vue';
+import { useQuasarFormContext } from '../composables/useQuasarFormContext';
 import { mergeQuasarProps, mergeQuickFormsQuasarFeatures, getFieldGapStyle } from '../utils';
-import type { QuasarFormOptions } from '../types';
 
 const props = withDefaults(defineProps<FieldProps>(), {
   disabled: false,
@@ -18,14 +17,14 @@ const { value, errorMessage, label, hint } = useFormField(
   { label: props.label }
 );
 
-const formContext = useFormContext();
+const formContext = useQuasarFormContext();
 const fieldId = generateFieldId(props.path);
 
 // Merge native Quasar props
 const quasarProps = computed(() => {
   return mergeQuasarProps(
     props.schema,
-    formContext?.componentDefaults as any,
+    formContext?.componentDefaults,
     'input'
   );
 });
@@ -34,7 +33,7 @@ const quasarProps = computed(() => {
 const quickformsFeatures = computed(() => {
   return mergeQuickFormsQuasarFeatures(
     props.schema,
-    (formContext as any)?.quickformsDefaults,
+    formContext?.quickformsDefaults,
     'input'
   );
 });

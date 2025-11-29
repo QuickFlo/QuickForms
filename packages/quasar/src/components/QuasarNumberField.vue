@@ -1,10 +1,11 @@
 <script setup lang="ts">
 import { computed } from "vue";
 import { QInput } from "quasar";
-import { useFormField, useFormContext } from "@quickflo/quickforms-vue";
+import { useFormField } from "@quickflo/quickforms-vue";
 import { generateFieldId } from "@quickflo/quickforms-vue";
 import type { FieldProps } from "@quickflo/quickforms-vue";
 import { mergeQuasarProps, getFieldGapStyle } from "../utils";
+import { useQuasarFormContext } from "../composables/useQuasarFormContext";
 
 const props = withDefaults(defineProps<FieldProps>(), {
   disabled: false,
@@ -17,13 +18,13 @@ const { value, errorMessage, label, hint } = useFormField(
   { label: props.label }
 );
 
-const formContext = useFormContext();
+const formContext = useQuasarFormContext();
 const fieldId = generateFieldId(props.path);
 
 const quasarProps = computed(() => {
   return mergeQuasarProps(
     props.schema,
-    formContext?.componentDefaults as any,
+    formContext?.componentDefaults,
     "input"
   );
 });
@@ -33,7 +34,9 @@ const step = computed(() => {
   return props.schema.type === "integer" ? 1 : undefined;
 });
 
-const fieldGap = computed(() => getFieldGapStyle(formContext?.componentDefaults));
+const fieldGap = computed(() =>
+  getFieldGapStyle(formContext?.componentDefaults)
+);
 </script>
 
 <template>

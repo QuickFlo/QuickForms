@@ -1,10 +1,11 @@
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue';
-import { QSelect } from 'quasar';
-import { useFormField, useFormContext } from '@quickflo/quickforms-vue';
-import { generateFieldId } from '@quickflo/quickforms-vue';
-import type { FieldProps } from '@quickflo/quickforms-vue';
-import { mergeQuasarProps, getFieldGapStyle } from '../utils';
+import { computed, ref, watch } from "vue";
+import { QSelect } from "quasar";
+import { useFormField } from "@quickflo/quickforms-vue";
+import { useQuasarFormContext } from "../composables/useQuasarFormContext";
+import { generateFieldId } from "@quickflo/quickforms-vue";
+import type { FieldProps } from "@quickflo/quickforms-vue";
+import { mergeQuasarProps, getFieldGapStyle } from "../utils";
 
 const props = withDefaults(defineProps<FieldProps>(), {
   disabled: false,
@@ -17,7 +18,7 @@ const { value, errorMessage, label, hint, setValue } = useFormField(
   { label: props.label }
 );
 
-const formContext = useFormContext();
+const formContext = useQuasarFormContext();
 const fieldId = generateFieldId(props.path);
 
 // Ensure value is an array (initialize without triggering validation)
@@ -29,8 +30,8 @@ if (!Array.isArray(value.value)) {
 const quasarProps = computed(() => {
   const merged = mergeQuasarProps(
     props.schema,
-    formContext?.componentDefaults as any,
-    'select'
+    formContext?.componentDefaults,
+    "select"
   );
   // Remove QuickForms-specific properties and props we control internally
   const {
@@ -47,16 +48,16 @@ const quasarProps = computed(() => {
 // Get enum values from items.enum
 const allOptions = computed(() => {
   const itemsSchema = props.schema.items;
-  if (!itemsSchema || typeof itemsSchema === 'boolean') return [];
-  
-  const enumValues = Array.isArray(itemsSchema) 
-    ? itemsSchema[0]?.enum 
+  if (!itemsSchema || typeof itemsSchema === "boolean") return [];
+
+  const enumValues = Array.isArray(itemsSchema)
+    ? itemsSchema[0]?.enum
     : itemsSchema.enum;
-    
+
   if (!enumValues) return [];
 
   // Support x-enum-labels for custom display text
-  const enumLabels = (itemsSchema as any)['x-enum-labels'] as
+  const enumLabels = (itemsSchema as any)["x-enum-labels"] as
     | Record<string, string>
     | undefined;
 
@@ -87,17 +88,16 @@ watch(
   { immediate: true }
 );
 
-
 // Check if autocomplete should be enabled (default: true)
 const useFilter = computed(() => {
   // Check x-component-props
-  const xComponentProps = (props.schema as any)['x-component-props'];
+  const xComponentProps = (props.schema as any)["x-component-props"];
   if (xComponentProps?.autocomplete !== undefined) {
     return xComponentProps.autocomplete;
   }
 
   // Check quickformsDefaults for autocomplete
-  if ((formContext as any)?.quickformsDefaults?.select?.autocomplete !== undefined) {
+  if (formContext?.quickformsDefaults?.select?.autocomplete !== undefined) {
     return (formContext as any).quickformsDefaults.select.autocomplete;
   }
 
@@ -108,45 +108,47 @@ const useFilter = computed(() => {
 // Filter function for autocomplete
 const filterFn = (val: string, update: (fn: () => void) => void) => {
   update(() => {
-    if (val === '') {
+    if (val === "") {
       filteredOptions.value = allOptions.value;
     } else {
       const needle = val.toLowerCase();
-      filteredOptions.value = allOptions.value.filter(
-        (option) => option.label.toLowerCase().includes(needle)
+      filteredOptions.value = allOptions.value.filter((option) =>
+        option.label.toLowerCase().includes(needle)
       );
     }
   });
 };
 
-const fieldGap = computed(() => getFieldGapStyle(formContext?.componentDefaults));
+const fieldGap = computed(() =>
+  getFieldGapStyle(formContext?.componentDefaults)
+);
 </script>
 
 <template>
   <div :style="{ marginBottom: fieldGap }">
     <QSelect
       :id="fieldId"
-    v-model="value"
-    :label="label"
-    :hint="hint"
-    :options="filteredOptions"
-    :error="!!errorMessage"
-    :error-message="errorMessage || undefined"
-    :disable="disabled"
-    :readonly="readonly"
-    :required="schema.required"
-    :use-input="useFilter"
-    :input-debounce="0"
-    multiple
-    use-chips
-    clearable
-    emit-value
-    map-options
-    v-bind="quasarProps"
-    @filter="filterFn"
-  >
-    <template v-if="schema.required" #label>
-      {{ label }} <span style="color: red">*</span>
+      v-model="value"
+      :label="label"
+      :hint="hint"
+      :options="filteredOptions"
+      :error="!!errorMessage"
+      :error-message="errorMessage || undefined"
+      :disable="disabled"
+      :readonly="readonly"
+      :required="schema.required"
+      :use-input="useFilter"
+      :input-debounce="0"
+      multiple
+      use-chips
+      clearable
+      emit-value
+      map-options
+      v-bind="quasarProps"
+      @filter="filterFn"
+    >
+      <template v-if="schema.required" #label>
+        {{ label }} <span style="color: red">*</span>
       </template>
     </QSelect>
   </div>

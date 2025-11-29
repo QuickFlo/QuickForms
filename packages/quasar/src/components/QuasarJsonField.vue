@@ -5,16 +5,17 @@ import { Codemirror } from "vue-codemirror";
 import { json, jsonParseLinter } from "@codemirror/lang-json";
 import { oneDark } from "@codemirror/theme-one-dark";
 import { linter, lintGutter } from "@codemirror/lint";
-import { keymap, lineNumbers, EditorView as CMEditorView } from '@codemirror/view';
 import {
-  useFormField,
-  generateFieldId,
-  useFormContext,
-} from "@quickflo/quickforms-vue";
+  keymap,
+  lineNumbers,
+  EditorView as CMEditorView,
+} from "@codemirror/view";
+import { useFormField, generateFieldId } from "@quickflo/quickforms-vue";
 import { getFieldGapStyle } from "../utils";
 import type { FieldProps } from "@quickflo/quickforms-vue";
 import type { QuasarFormOptions } from "../types";
 import type { ViewUpdate, EditorView } from "@codemirror/view";
+import { useQuasarFormContext } from "../composables/useQuasarFormContext";
 
 const props = withDefaults(defineProps<FieldProps>(), {
   disabled: false,
@@ -27,7 +28,7 @@ const { value, setValue, label, hint, errorMessage, required } = useFormField(
   { label: props.label }
 );
 
-const formContext = useFormContext() as QuasarFormOptions | undefined;
+const formContext = useQuasarFormContext() as QuasarFormOptions | undefined;
 const $q = useQuasar();
 
 const fieldId = generateFieldId(props.path);
@@ -82,8 +83,8 @@ const useDarkTheme = computed(() => {
   }
 
   // 2. Check quickformsDefaults
-  const quickformsDarkTheme = (formContext as any)?.quickformsDefaults
-    ?.jsoneditor?.darkTheme;
+  const quickformsDarkTheme =
+    formContext?.quickformsDefaults?.jsoneditor?.darkTheme;
   if (quickformsDarkTheme !== undefined) {
     console.log(
       "[JSON Editor] Using darkTheme from quickformsDefaults:",
@@ -165,12 +166,12 @@ const formatKey = computed(() => {
 
 // CodeMirror extensions
 const extensions = computed(() => {
-  console.log('[JSON Editor] Building extensions:', {
+  console.log("[JSON Editor] Building extensions:", {
     showLineNumbers: showLineNumbers.value,
     showLintGutter: showLintGutter.value,
-    useDarkTheme: useDarkTheme.value
+    useDarkTheme: useDarkTheme.value,
   });
-  
+
   const exts = [
     json(),
     // Add keyboard shortcut for formatting
@@ -181,36 +182,38 @@ const extensions = computed(() => {
       },
     ]),
   ];
-  
+
   // Add line numbers if enabled, or explicitly hide gutters if disabled
   if (showLineNumbers.value) {
-    console.log('[JSON Editor] Adding lineNumbers extension');
+    console.log("[JSON Editor] Adding lineNumbers extension");
     exts.push(lineNumbers());
   } else {
-    console.log('[JSON Editor] Hiding gutters and line numbers');
+    console.log("[JSON Editor] Hiding gutters and line numbers");
     // Explicitly hide ALL gutters including basicSetup's default line numbers
-    exts.push(CMEditorView.theme({
-      ".cm-gutters": {
-        display: "none !important"
-      }
-    }));
+    exts.push(
+      CMEditorView.theme({
+        ".cm-gutters": {
+          display: "none !important",
+        },
+      })
+    );
   }
-  
+
   // Add linting if enabled
   if (showLintGutter.value) {
     exts.push(linter(jsonParseLinter()));
     exts.push(lintGutter());
   }
-  
+
   // Add dark theme if enabled
   if (useDarkTheme.value) {
-    console.log('[JSON Editor] Adding oneDark theme');
+    console.log("[JSON Editor] Adding oneDark theme");
     exts.push(oneDark);
   } else {
-    console.log('[JSON Editor] NOT adding oneDark theme');
+    console.log("[JSON Editor] NOT adding oneDark theme");
   }
-  
-  console.log('[JSON Editor] Final extensions count:', exts.length);
+
+  console.log("[JSON Editor] Final extensions count:", exts.length);
   return exts;
 });
 
@@ -222,16 +225,17 @@ const fieldGap = computed(() =>
 
 // Create a key that changes when extensions configuration changes
 // This forces CodeMirror to remount with new extensions
-const editorKey = computed(() => 
-  `${showLineNumbers.value}-${showLintGutter.value}-${useDarkTheme.value}-${formatKey.value}`
+const editorKey = computed(
+  () =>
+    `${showLineNumbers.value}-${showLintGutter.value}-${useDarkTheme.value}-${formatKey.value}`
 );
 
 // Watch for key changes and force re-initialization
 watch(editorKey, () => {
-  console.log('[JSON Editor] editorKey changed, forcing remount');
+  console.log("[JSON Editor] editorKey changed, forcing remount");
   // Trigger re-initialization by briefly clearing then restoring code
   const currentCode = code.value;
-  code.value = '';
+  code.value = "";
   nextTick(() => {
     code.value = currentCode;
   });
@@ -272,7 +276,7 @@ function handleChange(newCode: string, update: ViewUpdate) {
       Press <kbd>{{ formatKey }}</kbd> to format
     </div>
 
-    <div 
+    <div
       class="quickform-json-editor-container"
       :class="{ 'quickform-json-editor-dark': useDarkTheme }"
     >
@@ -360,16 +364,19 @@ function handleChange(newCode: string, update: ViewUpdate) {
 }
 
 /* Light theme styles - only apply when NOT in dark mode */
-.quickform-json-editor-container:not(.quickform-json-editor-dark) :deep(.cm-editor) {
+.quickform-json-editor-container:not(.quickform-json-editor-dark)
+  :deep(.cm-editor) {
   background-color: #ffffff;
 }
 
-.quickform-json-editor-container:not(.quickform-json-editor-dark) :deep(.cm-gutters) {
+.quickform-json-editor-container:not(.quickform-json-editor-dark)
+  :deep(.cm-gutters) {
   background-color: #f5f5f5;
   border-right: 1px solid rgba(0, 0, 0, 0.12);
 }
 
-.quickform-json-editor-container:not(.quickform-json-editor-dark) :deep(.cm-activeLineGutter) {
+.quickform-json-editor-container:not(.quickform-json-editor-dark)
+  :deep(.cm-activeLineGutter) {
   background-color: rgba(25, 118, 210, 0.08);
 }
 
