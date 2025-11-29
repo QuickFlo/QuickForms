@@ -226,6 +226,25 @@ export interface QuickFormsQuasarDefaults {
     /** Keyboard shortcut for formatting. Default: 'Ctrl-.' */
     formatKey?: string;
   };
+  /** JSONLogic builder-specific QuickForms features */
+  jsonlogicbuilder?: {
+    /** 
+     * Display mode for operators in dropdown
+     * - 'icon': Show only icons (most compact)
+     * - 'symbol': Show math symbols (e.g., "=", "≠")
+     * - 'short': Show short text (e.g., "eq", "neq")
+     * - 'verbose': Show full labels with symbols (e.g., "= equals")
+     * Default: 'symbol'
+     */
+    operatorDisplayMode?: 'icon' | 'symbol' | 'short' | 'verbose';
+    /**
+     * Limit which operators are available
+     * If provided, only these operators will be shown in the dropdown
+     * Useful to simplify the UI for specific use cases
+     * Example: ['==', '!=', '>', '<'] for basic comparisons
+     */
+    allowedOperators?: string[];
+  };
 }
 
 /**

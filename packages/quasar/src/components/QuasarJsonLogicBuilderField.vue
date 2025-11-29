@@ -13,6 +13,7 @@ import { computed, ref, watch } from "vue";
 import { QBtn, QSelect, QInput, QIcon, QToggle, QTooltip } from "quasar";
 import type { FieldProps } from "@quickflo/quickforms-vue";
 import { useQuasarFormField } from "../composables/useQuasarFormField";
+import { useQuasarFormContext } from "../composables/useQuasarFormContext";
 import {
   OPERATORS,
   type ComparisonOperator,
@@ -45,6 +46,9 @@ const {
 } = useQuasarFormField(props.path, props.schema, {
   label: props.label,
 });
+
+const formContext = useQuasarFormContext();
+const quickformsDefaults = computed(() => formContext?.quickformsDefaults);
 
 // ============================================================================
 // State
@@ -175,16 +179,135 @@ function handleJsonChange(newJson: string) {
 }
 
 // ============================================================================
-// Operator options for select
+// Operator options and display
 // ============================================================================
 
-const operatorOptions = computed(() =>
-  OPERATORS.map((op) => ({
-    value: op.value,
-    label: op.symbol ? `${op.symbol} ${op.label}` : op.label,
-  }))
-);
+// Get configuration from schema or defaults
+const operatorDisplayMode = computed(() => {
+  const schemaMode = (props.schema as any)["x-operator-display"];
+  const defaultMode =
+    quickformsDefaults.value?.jsonlogicbuilder?.operatorDisplayMode;
+  return schemaMode || defaultMode || "short";
+});
 
+const allowedOperators = computed(() => {
+  const schemaOperators = (props.schema as any)["x-allowed-operators"];
+  const defaultOperators =
+    quickformsDefaults.value?.jsonlogicbuilder?.allowedOperators;
+  return schemaOperators || defaultOperators || null;
+});
+
+// Filter and format operators based on settings
+const operatorOptions = computed(() => {
+  let operators = OPERATORS;
+
+  // Filter operators if allowedOperators is set
+  if (allowedOperators.value) {
+    operators = operators.filter((op) =>
+      allowedOperators.value.includes(op.value)
+    );
+  }
+
+  // Format labels based on display mode
+  return operators.map((op) => {
+    const mode = operatorDisplayMode.value;
+    let displayLabel = "";
+
+    switch (mode) {
+      case "icon":
+        // Icon mode - will render via slot, use short label as fallback
+        displayLabel = op.shortLabel || op.symbol || op.label;
+        break;
+      case "symbol":
+        // Symbol only (default)
+        displayLabel = op.symbol || op.label;
+        break;
+      case "short":
+        // Short text labels
+        displayLabel = op.shortLabel || op.label;
+        break;
+      case "verbose":
+        // Full label with symbol prefix
+        displayLabel = op.symbol ? `${op.symbol} ${op.label}` : op.label;
+        break;
+      default:
+        displayLabel = op.symbol || op.label;
+    }
+
+    return {
+      value: op.value,
+      label: displayLabel,
+      icon: op.icon,
+      description: op.description,
+      // Store searchTerms for custom filter function
+      searchTerms: op.searchTerms || [],
+    };
+  });
+});
+
+// Filtered operator options for autocomplete
+const filteredOperatorOptions = ref(operatorOptions.value);
+
+// Watch operatorOptions to update filtered list when config changes
+watch(operatorOptions, (newOptions) => {
+  filteredOperatorOptions.value = newOptions;
+});
+
+// Custom filter function for operator search that checks searchTerms
+function filterOperators(val: string, update: (fn: () => void) => void) {
+  if (val === "") {
+    update(() => {
+      filteredOperatorOptions.value = operatorOptions.value;
+    });
+    return;
+  }
+
+  update(() => {
+    const needle = val.toLowerCase();
+    filteredOperatorOptions.value = operatorOptions.value.filter((opt) => {
+      // Check label
+      if (opt.label.toLowerCase().includes(needle)) {
+        return true;
+      }
+
+      // Check searchTerms
+      if (opt.searchTerms && Array.isArray(opt.searchTerms)) {
+        return opt.searchTerms.some((term: string) =>
+          term.toLowerCase().includes(needle)
+        );
+      }
+
+      return false;
+    });
+  });
+}
+
+// Handle keyboard input for auto-selecting first option
+function handleOperatorInput(condition: SimpleCondition, val: string | null) {
+  // If user typed something and pressed Enter, select first filtered option
+  if (
+    val &&
+    typeof val === "string" &&
+    filteredOperatorOptions.value.length > 0
+  ) {
+    // Check if val is not already a valid operator value
+    const isValidOperator = operatorOptions.value.some(
+      (opt) => opt.value === val
+    );
+    if (!isValidOperator) {
+      // Auto-select first filtered option
+      updateConditionOperator(
+        condition,
+        filteredOperatorOptions.value[0].value
+      );
+      return;
+    }
+  }
+  // Otherwise treat as normal update
+  if (val) {
+    updateConditionOperator(condition, val as ComparisonOperator);
+  }
+}
 </script>
 
 <template>
@@ -280,16 +403,53 @@ const operatorOptions = computed(() =>
               <!-- Operator select -->
               <QSelect
                 :model-value="item.operator"
-                :options="operatorOptions"
+                :options="filteredOperatorOptions"
                 emit-value
                 map-options
                 dense
                 outlined
+                use-input
+                input-debounce="0"
+                fill-input
+                hide-selected
+                clearable
+                hide-dropdown-icon
+                new-value-mode="add-unique"
                 class="condition-operator"
                 :disable="disabled"
                 :readonly="readonly"
-                @update:model-value="(v) => updateConditionOperator(item, v)"
-              />
+                @filter="filterOperators"
+                @update:model-value="(v) => handleOperatorInput(item, v)"
+              >
+                <template v-if="operatorDisplayMode === 'icon'" #selected>
+                  <div class="row items-center no-wrap q-gutter-xs">
+                    <QIcon
+                      :name="
+                        operatorOptions.find((op) => op.value === item.operator)
+                          ?.icon || 'help'
+                      "
+                      size="xs"
+                    />
+                    <span class="text-caption">{{
+                      operatorOptions.find((op) => op.value === item.operator)
+                        ?.label
+                    }}</span>
+                  </div>
+                </template>
+                <template v-if="operatorDisplayMode === 'icon'" #option="scope">
+                  <q-item v-bind="scope.itemProps">
+                    <q-item-section avatar>
+                      <QIcon :name="scope.opt.icon || 'help'" />
+                    </q-item-section>
+                    <q-item-section>
+                      <q-item-label>{{ scope.opt.label }}</q-item-label>
+                      <q-item-label v-if="scope.opt.description" caption>{{
+                        scope.opt.description
+                      }}</q-item-label>
+                    </q-item-section>
+                  </q-item>
+                </template>
+              </QSelect>
 
               <!-- Right value (conditional based on operator) -->
               <template v-if="getOperatorInfo(item.operator)?.rightRequired">
@@ -404,18 +564,62 @@ const operatorOptions = computed(() =>
 
                     <QSelect
                       :model-value="subItem.operator"
-                      :options="operatorOptions"
+                      :options="filteredOperatorOptions"
                       emit-value
                       map-options
                       dense
                       outlined
+                      use-input
+                      input-debounce="0"
+                      fill-input
+                      hide-selected
+                      clearable
+                      hide-dropdown-icon
+                      new-value-mode="add-unique"
                       class="condition-operator"
                       :disable="disabled"
                       :readonly="readonly"
+                      @filter="filterOperators"
                       @update:model-value="
-                        (v) => updateConditionOperator(subItem, v)
+                        (v) => handleOperatorInput(subItem, v)
                       "
-                    />
+                    >
+                      <template v-if="operatorDisplayMode === 'icon'" #selected>
+                        <div class="row items-center no-wrap q-gutter-xs">
+                          <QIcon
+                            :name="
+                              operatorOptions.find(
+                                (op) => op.value === subItem.operator
+                              )?.icon || 'help'
+                            "
+                            size="xs"
+                          />
+                          <span class="text-caption">{{
+                            operatorOptions.find(
+                              (op) => op.value === subItem.operator
+                            )?.label
+                          }}</span>
+                        </div>
+                      </template>
+                      <template
+                        v-if="operatorDisplayMode === 'icon'"
+                        #option="scope"
+                      >
+                        <q-item v-bind="scope.itemProps">
+                          <q-item-section avatar>
+                            <QIcon :name="scope.opt.icon || 'help'" />
+                          </q-item-section>
+                          <q-item-section>
+                            <q-item-label>{{ scope.opt.label }}</q-item-label>
+                            <q-item-label
+                              v-if="scope.opt.description"
+                              caption
+                              >{{ scope.opt.description }}</q-item-label
+                            >
+                          </q-item-section>
+                        </q-item>
+                      </template>
+                    </QSelect>
 
                     <template
                       v-if="getOperatorInfo(subItem.operator)?.rightRequired"
@@ -615,6 +819,11 @@ const operatorOptions = computed(() =>
 .condition-operator {
   width: 160px;
   flex-shrink: 0;
+}
+
+/* Hide clear icon but keep clearable functionality */
+.condition-operator :deep(.q-field__append) {
+  display: none;
 }
 
 .condition-remove {

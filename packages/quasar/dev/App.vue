@@ -66,6 +66,9 @@ const formOptions: QuasarFormOptions = {
       addButton: {},
     },
     jsoneditor: {},
+    jsonlogicbuilder: {
+      operatorDisplayMode: "icon",
+    },
   },
 };
 
@@ -790,8 +793,8 @@ const handleSubmit = () => {
                     <strong>Icons:</strong> prepend/append |
                     <strong>Arrays:</strong> button positioning, custom labels |
                     <strong>JSONLogic:</strong> visual condition builder with
-                    AND/OR groups | <strong>And more:</strong> date/time pickers,
-                    password toggle, autocomplete, nested objects
+                    AND/OR groups | <strong>And more:</strong> date/time
+                    pickers, password toggle, autocomplete, nested objects
                   </div>
                 </q-banner>
               </q-card-section>

@@ -611,29 +611,67 @@ A visual condition builder for [JSONLogic](https://jsonlogic.com/) expressions. 
 - **AND/OR grouping**: Toggle between match ALL or match ANY
 - **Nested groups**: Create complex nested AND/OR logic
 - **14 operators**: equals, not equals, greater than, less than, contains, starts with, ends with, in list, matches regex, is true, is false, is empty, is not empty
+- **Customizable operator display**: Show operators as icons, symbols, short text, or verbose labels
+- **Operator filtering**: Limit which operators are available for specific use cases
 - **Advanced mode**: Toggle to raw JSON editor for complex expressions
 - **Bidirectional**: Converts between visual UI and JSONLogic format automatically
 - **Slot support**: Custom value inputs via `#left-input` and `#right-input` slots
 
+### Customizing Operator Display
+
+The operator dropdown is **autocomplete-enabled** with smart shortcuts:
+- Type `>=` to find "greater or equal"
+- Type `!=` to find "not equals"
+- Type `contains` or `has` to find "contains"
+- Type `empty` to find "is empty" and "is not empty"
+
+**Display Modes:**
+- `'short'` - Text labels (default, e.g., "equals", "contains", "is empty")
+- `'symbol'` - Math symbols for comparisons, text for others (e.g., `=`, `≠`, "contains")
+- `'icon'` - Icons with labels (most visual)
+- `'verbose'` - Full labels with symbols (e.g., `= equals`)
+
+**Via schema:**
+```typescript
+{
+  type: 'object',
+  'x-render': 'condition-builder',
+  'x-operator-display': 'symbol', // or 'icon', 'short', 'verbose'
+  'x-allowed-operators': ['==', '!=', '>', '<', '>=', '<='] // Limit to basic comparisons
+}
+```
+
+**Via componentDefaults:**
+```typescript
+const options = {
+  quickformsDefaults: {
+    jsonlogicbuilder: {
+      operatorDisplayMode: 'short',  // Default: clean text labels
+      allowedOperators: ['==', '!=', 'contains', 'isEmpty']  // Optional: limit operators
+    }
+  }
+}
+```
+
 ### Supported Operators
 
-| Operator | Symbol | Description | Right Value |
-|----------|--------|-------------|-------------|
-| `==` | = | Equals | Required |
-| `!=` | ≠ | Not equals | Required |
-| `>` | > | Greater than | Required |
-| `>=` | ≥ | Greater or equal | Required |
-| `<` | < | Less than | Required |
-| `<=` | ≤ | Less or equal | Required |
-| `contains` | - | String contains | Required |
-| `startsWith` | - | Starts with | Required |
-| `endsWith` | - | Ends with | Required |
-| `in` | - | Value in list | Required (comma-separated) |
-| `matches` | - | Regex match | Required (pattern) |
-| `isTrue` | - | Is true | Not needed |
-| `isFalse` | - | Is false | Not needed |
-| `isEmpty` | - | Is empty/null | Not needed |
-| `isNotEmpty` | - | Has value | Not needed |
+| Operator | Symbol | Text (default) | Description | Right Value |
+|----------|--------|----------------|-------------|-------------|
+| `==` | = | equals | Equals | Required |
+| `!=` | ≠ | not equals | Not equals | Required |
+| `>` | > | greater than | Greater than | Required |
+| `>=` | ≥ | greater or equal | Greater or equal | Required |
+| `<` | < | less than | Less than | Required |
+| `<=` | ≤ | less or equal | Less or equal | Required |
+| `contains` | - | contains | String contains substring | Required |
+| `startsWith` | - | starts with | Starts with | Required |
+| `endsWith` | - | ends with | Ends with | Required |
+| `in` | - | in list | Value in list | Required (comma-separated) |
+| `matches` | - | matches | Regex match | Required (pattern) |
+| `isTrue` | - | is true | Is true | Not needed |
+| `isFalse` | - | is false | Is false | Not needed |
+| `isEmpty` | - | is empty | Empty string, null, or undefined | Not needed |
+| `isNotEmpty` | - | is not empty | Has value | Not needed |
 
 ### UI Layout
 

@@ -39,6 +39,12 @@ export interface OperatorInfo {
   rightRequired: boolean
   rightType?: 'text' | 'number' | 'regex' | 'array'
   description?: string
+  /** Short text label (e.g., "eq", "gt") */
+  shortLabel?: string
+  /** Icon name for Quasar QIcon */
+  icon?: string
+  /** Search shortcuts for autocomplete (e.g., ">=", "!=") */
+  searchTerms?: string[]
 }
 
 /**
@@ -85,21 +91,21 @@ export type JsonLogic = Record<string, unknown> | boolean
 // ============================================================================
 
 export const OPERATORS: OperatorInfo[] = [
-  { value: '==', label: 'equals', symbol: '=', rightRequired: true, rightType: 'text' },
-  { value: '!=', label: 'not equals', symbol: '≠', rightRequired: true, rightType: 'text' },
-  { value: '>', label: 'greater than', symbol: '>', rightRequired: true, rightType: 'number' },
-  { value: '>=', label: 'greater or equal', symbol: '≥', rightRequired: true, rightType: 'number' },
-  { value: '<', label: 'less than', symbol: '<', rightRequired: true, rightType: 'number' },
-  { value: '<=', label: 'less or equal', symbol: '≤', rightRequired: true, rightType: 'number' },
-  { value: 'contains', label: 'contains', rightRequired: true, rightType: 'text', description: 'String contains substring' },
-  { value: 'startsWith', label: 'starts with', rightRequired: true, rightType: 'text' },
-  { value: 'endsWith', label: 'ends with', rightRequired: true, rightType: 'text' },
-  { value: 'in', label: 'in list', rightRequired: true, rightType: 'array', description: 'Value is in array' },
-  { value: 'matches', label: 'matches regex', rightRequired: true, rightType: 'regex' },
-  { value: 'isTrue', label: 'is true', rightRequired: false },
-  { value: 'isFalse', label: 'is false', rightRequired: false },
-  { value: 'isEmpty', label: 'is empty', rightRequired: false, description: 'Empty string, null, or undefined' },
-  { value: 'isNotEmpty', label: 'is not empty', rightRequired: false },
+  { value: '==', label: 'equals', symbol: '=', shortLabel: 'equals', icon: 'drag_handle', searchTerms: ['==', '=', 'eq', 'equal'], rightRequired: true, rightType: 'text' },
+  { value: '!=', label: 'not equals', symbol: '≠', shortLabel: 'not equals', icon: 'not_equal', searchTerms: ['!=', '!', 'neq', 'not'], rightRequired: true, rightType: 'text' },
+  { value: '>', label: 'greater than', symbol: '>', shortLabel: 'greater than', icon: 'chevron_right', searchTerms: ['>', 'gt', 'greater'], rightRequired: true, rightType: 'number' },
+  { value: '>=', label: 'greater or equal', symbol: '≥', shortLabel: 'greater or equal', icon: 'keyboard_tab', searchTerms: ['>=', 'gte'], rightRequired: true, rightType: 'number' },
+  { value: '<', label: 'less than', symbol: '<', shortLabel: 'less than', icon: 'chevron_left', searchTerms: ['<', 'lt', 'less'], rightRequired: true, rightType: 'number' },
+  { value: '<=', label: 'less or equal', symbol: '≤', shortLabel: 'less or equal', icon: 'keyboard_tab', searchTerms: ['<=', 'lte'], rightRequired: true, rightType: 'number' },
+  { value: 'contains', label: 'contains', shortLabel: 'contains', icon: 'menu_open', searchTerms: ['contains', 'has', 'includes'], rightRequired: true, rightType: 'text', description: 'String contains substring' },
+  { value: 'startsWith', label: 'starts with', shortLabel: 'starts with', icon: 'format_align_left', searchTerms: ['starts', 'begins'], rightRequired: true, rightType: 'text' },
+  { value: 'endsWith', label: 'ends with', shortLabel: 'ends with', icon: 'format_align_right', searchTerms: ['ends', 'finishes'], rightRequired: true, rightType: 'text' },
+  { value: 'in', label: 'in list', shortLabel: 'in list', icon: 'list', searchTerms: ['in', 'list'], rightRequired: true, rightType: 'array', description: 'Value is in array' },
+  { value: 'matches', label: 'matches regex', shortLabel: 'matches', icon: 'code', searchTerms: ['matches', 'regex', 'pattern'], rightRequired: true, rightType: 'regex', description: 'Matches regex pattern' },
+  { value: 'isTrue', label: 'is true', shortLabel: 'is true', icon: 'check', searchTerms: ['true', 'yes'], rightRequired: false },
+  { value: 'isFalse', label: 'is false', shortLabel: 'is false', icon: 'close', searchTerms: ['false', 'no'], rightRequired: false },
+  { value: 'isEmpty', label: 'is empty', shortLabel: 'is empty', icon: 'radio_button_unchecked', searchTerms: ['empty', 'blank', 'null'], rightRequired: false, description: 'Empty string, null, or undefined' },
+  { value: 'isNotEmpty', label: 'is not empty', shortLabel: 'is not empty', icon: 'radio_button_checked', searchTerms: ['not empty', 'filled', 'exists'], rightRequired: false },
 ]
 
 export function getOperatorInfo(op: ComparisonOperator): OperatorInfo | undefined {
