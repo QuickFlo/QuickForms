@@ -127,8 +127,11 @@ export interface ComponentDefaults {
 
 /**
  * Options for form configuration
+ * 
+ * @template TDefaults - Type for componentDefaults, defaults to ComponentDefaults.
+ *                       UI framework packages (like Quasar) can pass their own defaults type.
  */
-export interface FormOptions {
+export interface FormOptions<TDefaults = ComponentDefaults> {
   readonly?: boolean;
   disabled?: boolean;
   validateOnMount?: boolean;
@@ -150,9 +153,11 @@ export interface FormOptions {
   /** Customizable labels for i18n or branding */
   labels?: FormLabels;
   /** Component-specific default configurations */
-  componentDefaults?: ComponentDefaults;
+  componentDefaults?: TDefaults;
   /** Custom hint renderer function for dynamic hints */
   hintRenderer?: HintRendererFunction;
+  /** Additional properties for framework-specific options */
+  [key: string]: unknown;
 }
 
 /**
