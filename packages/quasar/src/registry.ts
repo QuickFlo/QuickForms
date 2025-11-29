@@ -16,6 +16,7 @@ import {
   hasAnyOf,
   hasAllOf,
   hasConst,
+  hasXRender,
   rankWith,
 } from '@quickflo/quickforms';
 import QuasarStringField from './components/QuasarStringField.vue';
@@ -66,6 +67,56 @@ export function createQuasarRegistry(): ComponentRegistry<Component> {
   registry.register('hidden', HiddenField, (schema) =>
     rankWith(100, hasConst(schema))
   );
+
+  // === EXPLICIT x-render OVERRIDES (priority: 50) ===
+  // These allow explicit control over which component renders a field
+  // Priority 50 is higher than normal type detection but lower than const fields
+  
+  registry.register('string-override', QuasarStringField, (schema) =>
+    rankWith(50, hasXRender('string')(schema))
+  );
+
+  registry.register('number-override', QuasarNumberField, (schema) =>
+    rankWith(50, hasXRender('number')(schema))
+  );
+
+  registry.register('boolean-override', QuasarBooleanField, (schema) =>
+    rankWith(50, hasXRender('boolean')(schema))
+  );
+
+  registry.register('enum-override', QuasarEnumField, (schema) =>
+    rankWith(50, hasXRender('enum')(schema))
+  );
+
+  registry.register('date-override', QuasarDateField, (schema) =>
+    rankWith(50, hasXRender('date')(schema))
+  );
+
+  registry.register('time-override', QuasarTimeField, (schema) =>
+    rankWith(50, hasXRender('time')(schema))
+  );
+
+  registry.register('datetime-override', QuasarDateTimeField, (schema) =>
+    rankWith(50, hasXRender('datetime')(schema))
+  );
+
+  registry.register('object-override', QuasarObjectField, (schema) =>
+    rankWith(50, hasXRender('object')(schema))
+  );
+
+  registry.register('array-override', QuasarArrayField, (schema) =>
+    rankWith(50, hasXRender('array')(schema))
+  );
+
+  registry.register('keyvalue-override', QuasarKeyValueField, (schema) =>
+    rankWith(50, hasXRender('keyvalue')(schema))
+  );
+
+  registry.register('json-override', QuasarJsonField, (schema) =>
+    rankWith(50, hasXRender('json')(schema) || hasXRender('jsoneditor')(schema))
+  );
+
+  // === NORMAL TYPE DETECTION (lower priorities) ===
 
   // Register string field (base priority: 1)
   registry.register('string', QuasarStringField, (schema) =>

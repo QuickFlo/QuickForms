@@ -519,6 +519,8 @@ All `x-*` attributes are optional. QuickForms works perfectly with standard JSON
 
 **Type:** `string`
 
+**Priority:** 50 (higher than automatic type detection)
+
 **Example:**
 ```typescript
 {
@@ -531,14 +533,57 @@ All `x-*` attributes are optional. QuickForms works perfectly with standard JSON
 ```
 
 **Available Renderers:**
-- `'jsoneditor'` - JSON code editor with syntax highlighting, linting, and formatting
+- `'string'` - String field (QInput in Quasar)
+- `'number'` - Number field
+- `'boolean'` - Boolean field (checkbox)
+- `'enum'` - Enum select field
+- `'date'` - Date picker field
+- `'time'` - Time picker field (Quasar only)
+- `'datetime'` - Date/time picker field (Quasar only)
+- `'object'` - Object field with nested properties
+- `'array'` - Array field with add/remove items
+- `'keyvalue'` - Key-value pair editor
+- `'json'` or `'jsoneditor'` - JSON code editor with syntax highlighting, linting, and formatting
 
 **Use Cases:**
-- Force JSON editor for object fields that would normally render as nested fields
-- Override automatic component selection
-- Enable freeform JSON input with validation
+- **Override default renderers**: Force a string field even when a custom renderer would normally match
+- **Simplify complex types**: Render a complex object as a simple string input
+- **Explicit control**: Guarantee which component renders regardless of schema properties
+- **Custom component scenarios**: Default all strings to a custom template editor, but selectively render some as plain strings
 
-**Customization:**
+**Example: Custom Template Editor with String Override**
+```typescript
+import { createQuasarRegistry, hasXRender, rankWith, isStringType } from '@quickflo/quickforms-quasar';
+import TemplateEditor from './TemplateEditor.vue';
+
+const registry = createQuasarRegistry();
+
+// Register custom template editor for ALL string fields (priority 60)
+registry.register('template', TemplateEditor, (schema) =>
+  rankWith(60, isStringType(schema))
+);
+
+// Use in schema:
+const schema = {
+  type: 'object',
+  properties: {
+    // This will use TemplateEditor (default for strings)
+    emailBody: {
+      type: 'string',
+      title: 'Email Body'
+    },
+    
+    // This will use regular StringField (override with x-render)
+    subject: {
+      type: 'string',
+      title: 'Subject',
+      'x-render': 'string'  // Force standard string input
+    }
+  }
+};
+```
+
+**JSON Editor Customization:**
 ```typescript
 {
   type: 'object',

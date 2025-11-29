@@ -161,6 +161,23 @@ export const hasExtension = (extensionKey: string) => (schema: JSONSchema): bool
 };
 
 /**
+ * Checks if schema has explicit x-render directive for a specific render type
+ * This allows explicit control over which component renders a field
+ * 
+ * @example
+ * ```typescript
+ * // Force string field rendering even if other renderers would normally match
+ * hasXRender('string')(schema)
+ * 
+ * // In schema:
+ * { type: 'string', format: 'email', 'x-render': 'string' }
+ * ```
+ */
+export const hasXRender = (renderType: string) => (schema: JSONSchema): boolean => {
+  return (schema as any)['x-render'] === renderType;
+};
+
+/**
  * Combines multiple testers with AND logic
  */
 export const and = (...testers: Array<(schema: JSONSchema) => boolean>) => {
