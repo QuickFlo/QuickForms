@@ -27,10 +27,8 @@ yarn add @quickflo/quickforms @quickflo/quickforms-vue @quickflo/quickforms-quas
 <script setup lang="ts">
 import { ref } from 'vue'
 import { DynamicForm } from '@quickflo/quickforms-vue'
-import { createQuasarRegistry } from '@quickflo/quickforms-quasar'
+import { createQuasarRegistry, type QuasarFormOptions } from '@quickflo/quickforms-quasar'
 import type { JSONSchema } from '@quickflo/quickforms'
-
-const registry = createQuasarRegistry()
 
 const schema: JSONSchema = {
   type: 'object',
@@ -43,16 +41,27 @@ const schema: JSONSchema = {
 }
 
 const formData = ref({})
+
+const options: QuasarFormOptions = {
+  registry: createQuasarRegistry(),
+  componentDefaults: {
+    global: { outlined: true, dense: true }
+  }
+}
 </script>
 
 <template>
   <DynamicForm 
     :schema="schema" 
     v-model="formData"
-    :options="{ registry }"
+    :options="options"
   />
 </template>
 ```
+
+::: tip Type Safety
+Always use `QuasarFormOptions` when configuring Quasar forms. This provides proper TypeScript support for Quasar-specific `componentDefaults` like `QInputProps`, `QSelectProps`, etc.
+:::
 
 ## Components
 
