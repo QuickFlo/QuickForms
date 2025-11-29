@@ -40,6 +40,7 @@ export {
   not,
   hasFormat,
   hasExtension,
+  hasXRender,
   // Type testers
   isStringType,
   isNumberType,

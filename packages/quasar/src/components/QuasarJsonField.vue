@@ -298,7 +298,7 @@ function handleChange(newCode: string, update: ViewUpdate) {
   </div>
 </template>
 
-<style scoped>
+<style>
 .quickform-json-field-wrapper {
   width: 100%;
 }

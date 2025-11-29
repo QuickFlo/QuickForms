@@ -39,6 +39,7 @@ export {
   isDiscriminatedUnion,
   hasConditional,
   hasExtension,
+  hasXRender,
   and,
   or,
   not

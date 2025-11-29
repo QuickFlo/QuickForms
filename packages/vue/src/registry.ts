@@ -1,5 +1,5 @@
 import type { Component } from 'vue';
-import { ComponentRegistry, isStringType, isNumberType, isBooleanType, isEnumType, isDateFormat, isObjectType, isArrayType, isRecordType, isJsonType, hasOneOf, hasAnyOf, hasAllOf, hasConst, rankWith } from '@quickflo/quickforms';
+import { ComponentRegistry, isStringType, isNumberType, isBooleanType, isEnumType, isDateFormat, isObjectType, isArrayType, isRecordType, isJsonType, hasOneOf, hasAnyOf, hasAllOf, hasConst, hasXRender, rankWith } from '@quickflo/quickforms';
 import StringField from './components/StringField.vue';
 import NumberField from './components/NumberField.vue';
 import BooleanField from './components/BooleanField.vue';
@@ -44,6 +44,48 @@ export function createDefaultRegistry(): ComponentRegistry<Component> {
   registry.register('hidden', HiddenField, (schema) =>
     rankWith(100, hasConst(schema))
   );
+
+  // === EXPLICIT x-render OVERRIDES (priority: 50) ===
+  // These allow explicit control over which component renders a field
+  // Priority 50 is higher than normal type detection but lower than const fields
+  
+  registry.register('string-override', StringField, (schema) =>
+    rankWith(50, hasXRender('string')(schema))
+  );
+
+  registry.register('number-override', NumberField, (schema) =>
+    rankWith(50, hasXRender('number')(schema))
+  );
+
+  registry.register('boolean-override', BooleanField, (schema) =>
+    rankWith(50, hasXRender('boolean')(schema))
+  );
+
+  registry.register('enum-override', EnumField, (schema) =>
+    rankWith(50, hasXRender('enum')(schema))
+  );
+
+  registry.register('date-override', DateField, (schema) =>
+    rankWith(50, hasXRender('date')(schema))
+  );
+
+  registry.register('object-override', ObjectField, (schema) =>
+    rankWith(50, hasXRender('object')(schema))
+  );
+
+  registry.register('array-override', ArrayField, (schema) =>
+    rankWith(50, hasXRender('array')(schema))
+  );
+
+  registry.register('keyvalue-override', KeyValueField, (schema) =>
+    rankWith(50, hasXRender('keyvalue')(schema))
+  );
+
+  registry.register('json-override', JsonField, (schema) =>
+    rankWith(50, hasXRender('json')(schema) || hasXRender('jsoneditor')(schema))
+  );
+
+  // === NORMAL TYPE DETECTION (lower priorities) ===
 
   // Register string field (base priority: 1)
   registry.register('string', StringField, (schema) =>

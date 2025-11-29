@@ -222,7 +222,7 @@ function handleChange(newCode: string, update: ViewUpdate) {
   </div>
 </template>
 
-<style scoped>
+<style>
 .quickform-field {
   margin-bottom: var(--quickform-spacing-md, 1rem);
 }
