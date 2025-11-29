@@ -19,7 +19,7 @@ import { schemaUtils } from "../schema-utils-singleton.js";
 
 interface Props {
   schema: JSONSchema;
-  options?: FormOptions;
+  options?: FormOptions<any>;
   showLoadingOverlay?: boolean;
 }
 

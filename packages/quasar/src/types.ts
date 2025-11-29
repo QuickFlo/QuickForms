@@ -233,7 +233,7 @@ export interface QuickFormsQuasarDefaults {
  * Extends Vue FormOptions with Quasar-specific componentDefaults
  */
 export interface QuasarFormOptions
-  extends Omit<VueFormOptions, "componentDefaults"> {
+  extends Omit<VueFormOptions<QuasarComponentDefaults>, "componentDefaults"> {
   /** Native Quasar component defaults (passed via v-bind) */
   componentDefaults?: QuasarComponentDefaults;
   /** QuickForms convenience features (interpreted by our components) */
