@@ -33,6 +33,7 @@ import QuasarJsonField from './components/QuasarJsonField.vue';
 import QuasarMultiEnumField from './components/QuasarMultiEnumField.vue';
 import QuasarOneOfField from './components/QuasarOneOfField.vue';
 import QuasarAllOfField from './components/QuasarAllOfField.vue';
+import QuasarJsonLogicBuilderField from './components/QuasarJsonLogicBuilderField.vue';
 import { HiddenField } from '@quickflo/quickforms-vue';
 
 /**
@@ -114,6 +115,10 @@ export function createQuasarRegistry(): ComponentRegistry<Component> {
 
   registry.register('json-override', QuasarJsonField, (schema) =>
     rankWith(50, hasXRender('json')(schema) || hasXRender('jsoneditor')(schema))
+  );
+
+  registry.register('jsonlogic-builder-override', QuasarJsonLogicBuilderField, (schema) =>
+    rankWith(50, hasXRender('jsonlogic-builder')(schema) || hasXRender('condition-builder')(schema))
   );
 
   // === NORMAL TYPE DETECTION (lower priorities) ===
