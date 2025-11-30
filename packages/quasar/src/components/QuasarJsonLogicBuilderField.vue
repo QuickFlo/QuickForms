@@ -50,6 +50,16 @@ const {
 const formContext = useQuasarFormContext();
 const quickformsDefaults = computed(() => formContext?.quickformsDefaults);
 
+// Template syntax mode - when enabled, {{ }} expressions are kept as strings
+// instead of being converted to { "var": ... }
+// NOTE: Must be defined before the immediate watch that references it
+const useTemplateSyntax = computed(() => {
+  const schemaValue = (props.schema as any)["x-use-template-syntax"];
+  const defaultValue =
+    quickformsDefaults.value?.jsonlogicbuilder?.useTemplateSyntax;
+  return schemaValue ?? defaultValue ?? false;
+});
+
 // ============================================================================
 // State
 // ============================================================================
@@ -205,15 +215,6 @@ const allowedOperators = computed(() => {
   const defaultOperators =
     quickformsDefaults.value?.jsonlogicbuilder?.allowedOperators;
   return schemaOperators || defaultOperators || null;
-});
-
-// Template syntax mode - when enabled, {{ }} expressions are kept as strings
-// instead of being converted to { "var": ... }
-const useTemplateSyntax = computed(() => {
-  const schemaValue = (props.schema as any)["x-use-template-syntax"];
-  const defaultValue =
-    quickformsDefaults.value?.jsonlogicbuilder?.useTemplateSyntax;
-  return schemaValue ?? defaultValue ?? false;
 });
 
 // Filter and format operators based on settings
