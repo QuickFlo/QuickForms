@@ -134,6 +134,18 @@ export interface QuickFormsQuasarKeyValueFeatures {
   keyLabel?: string;
   /** Custom label for the value column. Default: 'Value' */
   valueLabel?: string;
+  /**
+   * Automatically infer types from string values.
+   * When enabled:
+   * - "123" becomes 123 (number)
+   * - "true"/"false" become booleans
+   * - "null" becomes null
+   * - Template expressions ({{ }}) stay as strings
+   *
+   * Use via x-infer-types in schema or quickformsDefaults.keyvalue.inferTypes
+   * Default: false (values stay as strings for backwards compatibility)
+   */
+  inferTypes?: boolean;
 }
 
 /**

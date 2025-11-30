@@ -46,6 +46,13 @@ const quickformsFeatures = computed(() => {
   const valueLabel =
     schemaFeatures.valueLabel ?? globalDefaults.valueLabel ?? "Value";
 
+  // Type inference option (x-infer-types takes priority over defaults)
+  const inferTypes =
+    (props.schema as any)["x-infer-types"] ??
+    schemaFeatures.inferTypes ??
+    globalDefaults.inferTypes ??
+    false;
+
   // Merge QBtn props: defaults -> global -> schema (schema has highest priority)
   const addButtonDefaults = {
     outline: true,
@@ -83,6 +90,7 @@ const quickformsFeatures = computed(() => {
     showHeaders,
     keyLabel,
     valueLabel,
+    inferTypes,
   };
 });
 
@@ -142,8 +150,10 @@ watch(
     const obj: Record<string, unknown> = {};
     newPairs.forEach((pair) => {
       if (pair.key.trim()) {
-        // Infer type from string value (e.g., "1" -> 1, "true" -> true)
-        obj[pair.key] = inferType(pair.value);
+        // Optionally infer type from string value (e.g., "1" -> 1, "true" -> true)
+        obj[pair.key] = quickformsFeatures.value.inferTypes
+          ? inferType(pair.value)
+          : pair.value;
       }
     });
     isInternalUpdate.value = true;
