@@ -58,6 +58,8 @@ export type {
   ConditionItem,
   ConditionRoot,
   JsonLogic,
+  ToJsonLogicOptions,
+  FromJsonLogicOptions,
 } from './utils/jsonlogic.js';
 
 // Quasar-specific types

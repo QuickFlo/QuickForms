@@ -127,47 +127,58 @@ export function generateConditionId(): string {
 // ============================================================================
 
 /**
+ * Options for JSONLogic conversion
+ */
+export interface ToJsonLogicOptions {
+  /**
+   * When true, {{ }} template expressions are kept as strings.
+   * When false (default), variable references are converted to { "var": ... }.
+   */
+  useTemplateSyntax?: boolean
+}
+
+/**
  * Convert a condition root to JSONLogic
  */
-export function toJsonLogic(root: ConditionRoot): JsonLogic {
+export function toJsonLogic(root: ConditionRoot, options: ToJsonLogicOptions = {}): JsonLogic {
   if (root.conditions.length === 0) {
     return true // Empty condition = always true
   }
 
   if (root.conditions.length === 1) {
-    return conditionItemToJsonLogic(root.conditions[0]!)
+    return conditionItemToJsonLogic(root.conditions[0]!, options)
   }
 
   return {
-    [root.logic]: root.conditions.map(conditionItemToJsonLogic),
+    [root.logic]: root.conditions.map((c) => conditionItemToJsonLogic(c, options)),
   }
 }
 
 /**
  * Convert a condition item (simple or group) to JSONLogic
  */
-function conditionItemToJsonLogic(item: ConditionItem): JsonLogic {
+function conditionItemToJsonLogic(item: ConditionItem, options: ToJsonLogicOptions): JsonLogic {
   if (item.type === 'group') {
     if (item.conditions.length === 0) {
       return true
     }
     if (item.conditions.length === 1) {
-      return conditionItemToJsonLogic(item.conditions[0]!)
+      return conditionItemToJsonLogic(item.conditions[0]!, options)
     }
     return {
-      [item.logic]: item.conditions.map(conditionItemToJsonLogic),
+      [item.logic]: item.conditions.map((c) => conditionItemToJsonLogic(c, options)),
     }
   }
 
-  return simpleConditionToJsonLogic(item)
+  return simpleConditionToJsonLogic(item, options)
 }
 
 /**
  * Convert a simple condition to JSONLogic
  */
-function simpleConditionToJsonLogic(cond: SimpleCondition): JsonLogic {
-  const left = parseValue(cond.left)
-  const right = parseValue(cond.right)
+function simpleConditionToJsonLogic(cond: SimpleCondition, options: ToJsonLogicOptions): JsonLogic {
+  const left = parseValue(cond.left, options.useTemplateSyntax)
+  const right = parseValue(cond.right, options.useTemplateSyntax)
 
   switch (cond.operator) {
     case '==':
@@ -184,7 +195,7 @@ function simpleConditionToJsonLogic(cond: SimpleCondition): JsonLogic {
       return { '<=': [left, right] }
     case 'in':
       // Right should be an array
-      return { in: [left, parseArrayValue(cond.right)] }
+      return { in: [left, parseArrayValue(cond.right, options.useTemplateSyntax)] }
     case 'contains':
       // JSONLogic "in" with string checks if substring exists
       return { in: [right, left] }
@@ -212,19 +223,27 @@ function simpleConditionToJsonLogic(cond: SimpleCondition): JsonLogic {
 
 /**
  * Parse a value string into JSONLogic value
- * - Handles { "var": "path" } for variable references
+ * - When useTemplateSyntax is true, {{ ... }} expressions are kept as strings
+ * - When useTemplateSyntax is false, variable references become { "var": ... }
  * - Handles numbers
  * - Handles booleans
  * - Falls back to string
  */
-function parseValue(value: string): unknown {
+function parseValue(value: string, useTemplateSyntax = false): unknown {
   if (!value) {
     return ''
   }
 
+  // When template syntax is enabled, keep {{ }} expressions as strings
+  // The consuming application will resolve these before JSONLogic evaluation
+  if (useTemplateSyntax && value.includes('{{') && value.includes('}}')) {
+    return value
+  }
+
   // Check if it's a variable reference (starts with step ID or special prefix)
   // Variables typically look like: stepId.field or $env.VAR
-  if (isVariableReference(value)) {
+  // Only convert to { var: ... } when NOT using template syntax
+  if (!useTemplateSyntax && isVariableReference(value)) {
     return { var: value }
   }
 
@@ -262,7 +281,7 @@ function isVariableReference(value: string): boolean {
 /**
  * Parse a comma-separated string into an array
  */
-function parseArrayValue(value: string): unknown[] {
+function parseArrayValue(value: string, useTemplateSyntax = false): unknown[] {
   if (!value) {
     return []
   }
@@ -279,7 +298,7 @@ function parseArrayValue(value: string): unknown[] {
 
   return value.split(',').map((item) => {
     const trimmed = item.trim()
-    return parseValue(trimmed)
+    return parseValue(trimmed, useTemplateSyntax)
   })
 }
 
@@ -290,7 +309,7 @@ function parseArrayValue(value: string): unknown[] {
 /**
  * Convert JSONLogic to a condition root
  */
-export function fromJsonLogic(logic: JsonLogic): ConditionRoot {
+export function fromJsonLogic(logic: JsonLogic, options: FromJsonLogicOptions = {}): ConditionRoot {
   if (typeof logic === 'boolean' || logic === null || logic === undefined) {
     return { logic: 'and', conditions: [] }
   }
@@ -299,19 +318,19 @@ export function fromJsonLogic(logic: JsonLogic): ConditionRoot {
   if ('and' in logic && Array.isArray(logic.and)) {
     return {
       logic: 'and',
-      conditions: (logic.and as JsonLogic[]).map(jsonLogicToConditionItem),
+      conditions: (logic.and as JsonLogic[]).map((c) => jsonLogicToConditionItem(c, options)),
     }
   }
 
   if ('or' in logic && Array.isArray(logic.or)) {
     return {
       logic: 'or',
-      conditions: (logic.or as JsonLogic[]).map(jsonLogicToConditionItem),
+      conditions: (logic.or as JsonLogic[]).map((c) => jsonLogicToConditionItem(c, options)),
     }
   }
 
   // Single condition at root
-  const item = jsonLogicToConditionItem(logic)
+  const item = jsonLogicToConditionItem(logic, options)
   return {
     logic: 'and',
     conditions: item ? [item] : [],
@@ -319,9 +338,20 @@ export function fromJsonLogic(logic: JsonLogic): ConditionRoot {
 }
 
 /**
+ * Options for extracting values from JSONLogic
+ */
+export interface FromJsonLogicOptions {
+  /**
+   * When true, { "var": ... } is converted to {{ ... }} for UI display.
+   * When false (default), { "var": ... } is extracted as the raw path string.
+   */
+  useTemplateSyntax?: boolean
+}
+
+/**
  * Convert a JSONLogic expression to a condition item
  */
-function jsonLogicToConditionItem(logic: JsonLogic): ConditionItem {
+function jsonLogicToConditionItem(logic: JsonLogic, options: FromJsonLogicOptions): ConditionItem {
   if (typeof logic !== 'object' || logic === null) {
     // Can't parse, return empty condition
     return createEmptyCondition()
@@ -333,7 +363,7 @@ function jsonLogicToConditionItem(logic: JsonLogic): ConditionItem {
       id: generateConditionId(),
       type: 'group',
       logic: 'and',
-      conditions: (logic.and as JsonLogic[]).map(jsonLogicToConditionItem),
+      conditions: (logic.and as JsonLogic[]).map((c) => jsonLogicToConditionItem(c, options)),
     }
   }
 
@@ -342,18 +372,18 @@ function jsonLogicToConditionItem(logic: JsonLogic): ConditionItem {
       id: generateConditionId(),
       type: 'group',
       logic: 'or',
-      conditions: (logic.or as JsonLogic[]).map(jsonLogicToConditionItem),
+      conditions: (logic.or as JsonLogic[]).map((c) => jsonLogicToConditionItem(c, options)),
     }
   }
 
   // Try to parse as simple condition
-  return parseSimpleCondition(logic)
+  return parseSimpleCondition(logic, options)
 }
 
 /**
  * Parse a JSONLogic expression as a simple condition
  */
-function parseSimpleCondition(logic: JsonLogic): SimpleCondition {
+function parseSimpleCondition(logic: JsonLogic, options: FromJsonLogicOptions): SimpleCondition {
   if (typeof logic !== 'object' || logic === null) {
     return createEmptyCondition()
   }
@@ -389,9 +419,9 @@ function parseSimpleCondition(logic: JsonLogic): SimpleCondition {
     return {
       id: generateConditionId(),
       type: 'condition',
-      left: extractValue(args[0]),
+      left: extractValue(args[0], options.useTemplateSyntax),
       operator: mappedOp,
-      right: extractValue(args[1]),
+      right: extractValue(args[1], options.useTemplateSyntax),
     }
   }
 
@@ -401,14 +431,20 @@ function parseSimpleCondition(logic: JsonLogic): SimpleCondition {
 
 /**
  * Extract a string value from a JSONLogic value
+ * When useTemplateSyntax is true, converts { "var": "path" } to {{ path }}
+ * When useTemplateSyntax is false, extracts just the path string
  */
-function extractValue(val: unknown): string {
+function extractValue(val: unknown, useTemplateSyntax = false): string {
   if (val === null || val === undefined) {
     return ''
   }
 
+  // Handle var references based on template syntax mode
   if (typeof val === 'object' && val !== null && 'var' in val) {
-    return String((val as { var: unknown }).var)
+    const path = String((val as { var: unknown }).var)
+    // When template syntax is enabled, wrap in {{ }} for UI display
+    // This provides backwards compatibility with existing { "var": ... } definitions
+    return useTemplateSyntax ? `{{ ${path} }}` : path
   }
 
   if (Array.isArray(val)) {
