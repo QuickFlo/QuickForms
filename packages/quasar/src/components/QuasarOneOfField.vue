@@ -78,7 +78,8 @@ onMounted(() => {
       // Only update if we're adding new fields (don't overwrite existing)
       const hasNewFields = Object.keys(defaults).some(key => !(key in currentValue));
       if (hasNewFields && setValue) {
-        setValue(merged);
+        // Pass false to skip validation during initialization
+        setValue(merged, false);
       }
     }
   }
@@ -216,9 +217,9 @@ const handleOptionChange = (newIndex: number) => {
       // Merge defaults with current value, preferring current values for common fields
       const merged = { ...defaults, ...currentValue };
       
-      // Update form value
+      // Update form value - skip validation during option switch
       if (setValue) {
-        setValue(merged);
+        setValue(merged, false);
       }
     }
   }
