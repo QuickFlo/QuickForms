@@ -573,6 +573,39 @@ const formOptions = {
 
 Note: `componentDefaults.keyvalue` and `x-quasar-props` accept any native Quasar QInput props and apply them to both the key and value input fields.
 
+### Type Inference
+
+By default, all values are stored as strings. Enable `inferTypes` to automatically convert values to their appropriate types:
+
+- `"123"` → `123` (number)
+- `"12.5"` → `12.5` (number)
+- `"true"` / `"false"` → `true` / `false` (boolean)
+- `"null"` → `null`
+- Template expressions like <code v-pre>{{ path }}</code> stay as strings (resolved at runtime)
+
+**Via schema:**
+```typescript
+{
+  type: 'object',
+  title: 'Configuration',
+  additionalProperties: { type: 'string' },
+  'x-infer-types': true
+}
+```
+
+**Via componentDefaults:**
+```typescript
+const options = {
+  quickformsDefaults: {
+    keyvalue: {
+      inferTypes: true
+    }
+  }
+}
+```
+
+This is useful when your backend expects typed values (numbers, booleans) rather than strings.
+
 ---
 
 ## JsonLogicBuilderField
