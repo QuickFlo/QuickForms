@@ -51,6 +51,13 @@ interface VueComponentDefaults {
     defaultExpanded?: "required-only" | "all" | "none";
     /** Show "(optional)" indicator for optional object fields. Default: true */
     showOptionalIndicator?: boolean;
+    /**
+     * Visual style for object section borders.
+     * 'solid' = solid left border (default)
+     * 'dashed' = dashed left border
+     * 'none' = no border
+     */
+    sectionStyle?: "solid" | "dashed" | "none";
   };
   number?: {
     prefix?: string;

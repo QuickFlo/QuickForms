@@ -276,6 +276,12 @@ export function useFormField(
     }
   );
 
+  // Initialize string fields to empty string if undefined
+  // This ensures empty text fields are saved as "" not undefined/missing
+  if (schema.type === "string" && value.value === undefined) {
+    setValue("", false);  // Skip validation during initialization
+  }
+
   // Computed label from override or schema
   const label = computed(() => {
     if (options.label !== undefined) return options.label;
