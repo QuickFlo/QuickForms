@@ -52,6 +52,17 @@ const showOptionalIndicator = computed(() => {
   return objectDefaults?.showOptionalIndicator ?? true;
 });
 
+// Section border style
+const sectionStyle = computed(() => {
+  const objectDefaults = formContext?.componentDefaults?.object;
+  return objectDefaults?.sectionStyle ?? 'solid';
+});
+
+// Computed class for section style
+const sectionStyleClass = computed(() => {
+  return `quickform-section-${sectionStyle.value}`;
+});
+
 const quasarProps = computed(() => {
   const xQuasarProps = (props.schema as any)["x-quasar-props"] || {};
   const xComponentProps = (props.schema as any)["x-component-props"] || {};
@@ -72,29 +83,27 @@ const properties = computed(() => {
 </script>
 
 <template>
-  <div :style="{ marginBottom: fieldGap }">
+  <div :style="{ marginBottom: fieldGap }" class="quickform-object-field" :class="sectionStyleClass">
     <QExpansionItem
       :id="fieldId"
       :label="label"
       :caption="hint"
       :default-opened="defaultOpened"
+      header-class="quickform-object-header"
+      expand-icon-class="text-grey-7"
       v-bind="quasarProps"
     >
       <template #header>
-        <div class="text-subtitle1">
+        <div class="quickform-object-header-content">
           {{ label }}
-          <span v-if="required" style="color: red; margin-left: 0.25rem"
-            >*</span
-          >
-          <span
-            v-if="!required && showOptionalIndicator"
-            style="color: #888; font-size: 0.75rem; margin-left: 0.5rem"
-            >(optional)</span
-          >
+          <span v-if="required" class="quickform-required-indicator">*</span>
+          <span v-if="!required && showOptionalIndicator" class="quickform-optional-indicator">
+            (optional)
+          </span>
         </div>
       </template>
 
-      <div style="padding: 1rem">
+      <div class="quickform-object-content">
         <FieldRenderer
           v-for="prop in properties"
           :key="prop.key"
@@ -104,13 +113,70 @@ const properties = computed(() => {
           :readonly="readonly"
         />
 
-        <div
-          v-if="errorMessage"
-          style="color: red; font-size: 0.875rem; margin-top: 0.5rem"
-        >
+        <div v-if="errorMessage" class="quickform-error-message">
           {{ errorMessage }}
         </div>
       </div>
     </QExpansionItem>
   </div>
 </template>
+
+<style scoped>
+.quickform-object-field {
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.quickform-object-field :deep(.quickform-object-header) {
+  background-color: #f5f5f5;
+  border-bottom: 1px solid #e0e0e0;
+  font-weight: 500;
+}
+
+/* Section style: solid (default) */
+.quickform-object-field.quickform-section-solid :deep(.q-expansion-item__content) {
+  border-left: 3px solid #e0e0e0;
+  margin-left: 8px;
+}
+
+/* Section style: dashed */
+.quickform-object-field.quickform-section-dashed :deep(.q-expansion-item__content) {
+  border-left: 2px dashed #ccc;
+  margin-left: 8px;
+}
+
+/* Section style: none */
+.quickform-object-field.quickform-section-none :deep(.q-expansion-item__content) {
+  border-left: none;
+  margin-left: 0;
+}
+
+.quickform-object-header-content {
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: #333;
+}
+
+.quickform-required-indicator {
+  color: #c10015;
+  margin-left: 0.25rem;
+}
+
+.quickform-optional-indicator {
+  color: #888;
+  font-size: 0.75rem;
+  font-weight: 400;
+  margin-left: 0.5rem;
+}
+
+.quickform-object-content {
+  padding: 1rem;
+  padding-left: 1.25rem;
+}
+
+.quickform-error-message {
+  color: #c10015;
+  font-size: 0.875rem;
+  margin-top: 0.5rem;
+}
+</style>
