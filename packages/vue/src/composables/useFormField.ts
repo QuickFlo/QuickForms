@@ -224,6 +224,73 @@ export function useFormField(
       if (schema.uniqueItems && new Set(value).size !== value.length) {
         return getErrorMessage("uniqueItems", "All items must be unique");
       }
+
+      // Validate each item against the items schema
+      const itemsSchema = Array.isArray(schema.items)
+        ? schema.items[0]
+        : schema.items;
+      if (itemsSchema && typeof itemsSchema !== "boolean") {
+        for (let i = 0; i < value.length; i++) {
+          const item = value[i];
+
+          // String item validations
+          if (itemsSchema.type === "string" && typeof item === "string") {
+            if (itemsSchema.format === "email" && !isValidEmail(item)) {
+              return getErrorMessage(
+                "items.format",
+                `Item "${item}" is not a valid email address`
+              );
+            }
+            if (
+              (itemsSchema.format === "url" || itemsSchema.format === "uri") &&
+              !isValidUrl(item)
+            ) {
+              return getErrorMessage(
+                "items.format",
+                `Item "${item}" is not a valid URL`
+              );
+            }
+            if (
+              itemsSchema.minLength !== undefined &&
+              item.length < itemsSchema.minLength
+            ) {
+              return getErrorMessage(
+                "items.minLength",
+                `Item "${item}" must be at least ${itemsSchema.minLength} characters`
+              );
+            }
+            if (
+              itemsSchema.maxLength !== undefined &&
+              item.length > itemsSchema.maxLength
+            ) {
+              return getErrorMessage(
+                "items.maxLength",
+                `Item "${item}" must be at most ${itemsSchema.maxLength} characters`
+              );
+            }
+            if (itemsSchema.pattern) {
+              try {
+                if (!new RegExp(itemsSchema.pattern).test(item)) {
+                  return getErrorMessage(
+                    "items.pattern",
+                    `Item "${item}" has invalid format`
+                  );
+                }
+              } catch (e) {
+                console.warn("Invalid regex pattern:", itemsSchema.pattern);
+              }
+            }
+          }
+
+          // Enum item validation
+          if (itemsSchema.enum && !itemsSchema.enum.includes(item)) {
+            return getErrorMessage(
+              "items.enum",
+              `Item "${item}" is not a valid option`
+            );
+          }
+        }
+      }
     }
 
     // Enum validation

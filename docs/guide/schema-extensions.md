@@ -281,7 +281,11 @@ All `x-*` attributes are optional. QuickForms works perfectly with standard JSON
 - `addButton` - Native QBtn props
 - `removeButton` - Native QBtn props
 
-**Related:** [Quasar Package Docs](/guide/quasar#quickforms-convenience-features)
+**For Tags (arrays with `x-render: 'tags'`):**
+- `chip` - Native QChip props (color, textColor, icon, outline, dense, etc.)
+- `separator` - RegExp or string pattern for parsing pasted values (default: `/[,;\s]+/`)
+
+**Related:** [Quasar Package Docs](/guide/quasar#quickforms-convenience-features), [TagsField](/guide/components#tagsfield-quasar)
 
 ---
 
@@ -542,8 +546,10 @@ All `x-*` attributes are optional. QuickForms works perfectly with standard JSON
 - `'datetime'` - Date/time picker field (Quasar only)
 - `'object'` - Object field with nested properties
 - `'array'` - Array field with add/remove items
+- `'tags'` - Chip-based tags input for arrays (Quasar only) - ideal for emails, keywords
 - `'keyvalue'` - Key-value pair editor
 - `'json'` or `'jsoneditor'` - JSON code editor with syntax highlighting, linting, and formatting
+- `'condition-builder'` or `'jsonlogic-builder'` - Visual JSONLogic condition builder (Quasar only)
 
 **Use Cases:**
 - **Override default renderers**: Force a string field even when a custom renderer would normally match

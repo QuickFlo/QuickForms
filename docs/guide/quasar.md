@@ -76,6 +76,7 @@ The Quasar package provides pre-built Quasar-wrapped components:
 - **QuasarDateTimeField** - `QInput` with `QDate` and `QTime` popups
 - **QuasarObjectField** - `QExpansionItem` for nested objects
 - **QuasarArrayField** - `QCard` with add/remove buttons
+- **QuasarTagsField** - `QSelect` chips input for free-form arrays (emails, keywords)
 - **QuasarOneOfField** - `QSelect` for conditional schemas
 
 ## Configuration Options
@@ -193,6 +194,35 @@ Customize array field buttons with native QBtn props:
 - `addButton` - Native QBtn props (label, icon, color, size, push, fab, etc.)
 - `removeButton` - Native QBtn props
 
+#### Tags/Chips Input
+
+For free-form arrays like email addresses or keywords, use `x-render: 'tags'`:
+
+```typescript
+{
+  type: 'array',
+  title: 'Email Recipients',
+  'x-render': 'tags',
+  items: {
+    type: 'string',
+    format: 'email'
+  },
+  'x-quickforms-quasar': {
+    chip: {
+      color: 'primary',
+      icon: 'email'
+    },
+    separator: /[,;\n]+/  // Custom paste separator
+  }
+}
+```
+
+**Tags Properties:**
+- `chip` - Native QChip props (color, textColor, icon, outline, dense, etc.)
+- `separator` - RegExp or string pattern for parsing pasted values (default: `/[,;\s]+/`)
+
+See [TagsField documentation](/guide/components#tagsfield-quasar) for full details.
+
 ## Supported Formats
 
 QuickForms Quasar supports all standard JSON Schema formats:
@@ -302,6 +332,10 @@ interface QuasarFormOptions extends FormOptions {
       addButtonPosition?: string
       addButton?: Record<string, any>
       removeButton?: Record<string, any>
+    }
+    tags?: {
+      chip?: Record<string, any>        // QChip props for tag chips
+      separator?: RegExp | string       // Paste separator pattern
     }
     jsoneditor?: {
       height?: string             // Editor height (default: '300px')

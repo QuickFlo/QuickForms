@@ -34,6 +34,7 @@ import QuasarMultiEnumField from './components/QuasarMultiEnumField.vue';
 import QuasarOneOfField from './components/QuasarOneOfField.vue';
 import QuasarAllOfField from './components/QuasarAllOfField.vue';
 import QuasarJsonLogicBuilderField from './components/QuasarJsonLogicBuilderField.vue';
+import QuasarTagsField from './components/QuasarTagsField.vue';
 import { HiddenField } from '@quickflo/quickforms-vue';
 
 /**
@@ -119,6 +120,11 @@ export function createQuasarRegistry(): ComponentRegistry<Component> {
 
   registry.register('jsonlogic-builder-override', QuasarJsonLogicBuilderField, (schema) =>
     rankWith(50, hasXRender('jsonlogic-builder')(schema) || hasXRender('condition-builder')(schema))
+  );
+
+  // Tags/chips input for arrays of strings
+  registry.register('tags-override', QuasarTagsField, (schema) =>
+    rankWith(50, hasXRender('tags')(schema))
   );
 
   // === NORMAL TYPE DETECTION (lower priorities) ===

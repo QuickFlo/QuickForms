@@ -38,6 +38,7 @@ export { default as QuasarMultiEnumField } from './components/QuasarMultiEnumFie
 export { default as QuasarOneOfField } from './components/QuasarOneOfField.vue';
 export { default as QuasarAllOfField } from './components/QuasarAllOfField.vue';
 export { default as QuasarJsonLogicBuilderField } from './components/QuasarJsonLogicBuilderField.vue';
+export { default as QuasarTagsField } from './components/QuasarTagsField.vue';
 
 // JSONLogic utilities
 export {
@@ -73,6 +74,7 @@ export type {
   QuickFormsQuasarFeatures,
   QuickFormsQuasarArrayFeatures,
   QuickFormsQuasarKeyValueFeatures,
+  QuickFormsQuasarTagsFeatures,
   QuickFormsQuasarDefaults,
 } from './types.js';
 

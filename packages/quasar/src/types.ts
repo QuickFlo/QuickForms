@@ -11,6 +11,7 @@ import type {
   QCardProps,
   QExpansionItemProps,
   QBtnProps,
+  QChipProps,
 } from "quasar";
 
 /**
@@ -109,6 +110,25 @@ export interface QuickFormsQuasarArrayFeatures {
    * Defaults: { flat: true, round: true, dense: true, size: 'sm', icon: 'close', color: 'negative' }
    */
   removeButton?: Partial<QBtnProps> & VueComponentAttributes;
+}
+
+/**
+ * QuickForms features specific to tags/chips fields
+ * Customize chip appearance and input behavior
+ */
+export interface QuickFormsQuasarTagsFeatures {
+  /**
+   * Native Quasar QChip props for the tag chips
+   * Passed directly via v-bind - supports ALL QChip properties + class/style
+   * Defaults: { removable: true, dense: true, color: 'primary', textColor: 'white' }
+   */
+  chip?: Partial<QChipProps> & VueComponentAttributes;
+  /**
+   * Separator pattern for parsing pasted values
+   * Can be a string (converted to RegExp) or RegExp
+   * Default: /[,;\s]+/ (comma, semicolon, or whitespace)
+   */
+  separator?: string | RegExp;
 }
 
 /**
@@ -228,6 +248,8 @@ export interface QuickFormsQuasarDefaults {
   array?: QuickFormsQuasarArrayFeatures;
   /** Key-value specific QuickForms features */
   keyvalue?: QuickFormsQuasarKeyValueFeatures;
+  /** Tags/chips input specific QuickForms features */
+  tags?: QuickFormsQuasarTagsFeatures;
   /** JSON editor-specific QuickForms features */
   jsoneditor?: {
     /** Editor height. Default: '300px' */

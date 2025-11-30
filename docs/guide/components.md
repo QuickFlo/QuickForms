@@ -863,6 +863,183 @@ import type {
 
 ---
 
+## TagsField (Quasar)
+
+A chip-based tags input for arrays of free-form strings. Ideal for email addresses, keywords, labels, or any list where users type and add values.
+
+### Handles
+
+- `type: 'array'` with `'x-render': 'tags'`
+
+### Example Schema
+
+**Email recipients:**
+```typescript
+{
+  type: 'array',
+  title: 'Recipients',
+  description: 'Email addresses to send to',
+  'x-render': 'tags',
+  items: {
+    type: 'string',
+    format: 'email'
+  },
+  minItems: 1
+}
+```
+
+**Keywords:**
+```typescript
+{
+  type: 'array',
+  title: 'Keywords',
+  'x-render': 'tags',
+  'x-placeholder': 'Add keywords...',
+  items: {
+    type: 'string',
+    minLength: 2
+  }
+}
+```
+
+### Features
+
+- **Type and press Enter** to add a new tag
+- **Paste multiple values** - comma/semicolon/newline separated values are parsed automatically
+- **Click X to remove** tags
+- **Per-item validation** - invalid items show as red chips with error icon
+- **Duplicate prevention** - same value won't be added twice
+- **Smart placeholder** - auto-detects email format for contextual placeholder
+- **Full QChip customization** - color, icon, outline, size, etc.
+
+### Per-Item Validation
+
+The TagsField validates each item against the `items` schema:
+
+- `format: 'email'` - validates email format
+- `format: 'url'` - validates URL format
+- `minLength` / `maxLength` - validates string length
+- `pattern` - validates against regex pattern
+- `enum` - validates against allowed values
+
+Invalid items are displayed as **red chips with an error icon** and trigger validation errors that block form submission.
+
+### Schema Extensions
+
+| Extension | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `x-render` | `'tags'` | - | Required. Enables tags input mode |
+| `x-placeholder` | `string` | Auto-detected | Custom placeholder text |
+
+### QuickForms Features (`x-quickforms-quasar`)
+
+**Chip customization:**
+```typescript
+{
+  type: 'array',
+  title: 'Tags',
+  'x-render': 'tags',
+  items: { type: 'string' },
+  'x-quickforms-quasar': {
+    chip: {
+      color: 'secondary',      // Quasar color
+      textColor: 'white',      // Text color
+      icon: 'label',           // Icon inside chip
+      outline: true,           // Outline style
+      dense: true,             // Dense mode
+      square: true             // Square corners
+    }
+  }
+}
+```
+
+**Custom separator pattern:**
+```typescript
+{
+  type: 'array',
+  title: 'Emails',
+  'x-render': 'tags',
+  items: { type: 'string', format: 'email' },
+  'x-quickforms-quasar': {
+    separator: /[,;\n]+/  // Only split on comma, semicolon, newline (not spaces)
+  }
+}
+```
+
+**Default chip props:**
+```typescript
+// Default styling applied to all chips
+{
+  removable: true,
+  dense: true,
+  color: 'primary',
+  textColor: 'white'
+}
+```
+
+### Global Defaults
+
+```typescript
+const options: QuasarFormOptions = {
+  registry: createQuasarRegistry(),
+  quickformsDefaults: {
+    tags: {
+      chip: {
+        color: 'accent',
+        textColor: 'white',
+        dense: true
+      },
+      separator: /[,;\s]+/  // Default: comma, semicolon, or whitespace
+    }
+  }
+}
+```
+
+### Native Quasar Props
+
+The underlying QSelect accepts native props via `x-quasar-props`:
+
+```typescript
+{
+  type: 'array',
+  title: 'Tags',
+  'x-render': 'tags',
+  items: { type: 'string' },
+  'x-quasar-props': {
+    outlined: true,
+    filled: false,
+    color: 'secondary',
+    dense: true
+  }
+}
+```
+
+### Comparison: TagsField vs ArrayField vs MultiEnumField
+
+| Feature | TagsField | ArrayField | MultiEnumField |
+|---------|-----------|------------|----------------|
+| Use case | Free-form input | Structured items | Fixed options |
+| Input method | Type + Enter | Add button | Select from list |
+| Display | Chips inline | Expandable items | Chips |
+| Validation | Per-item | Per-item | Enum only |
+| Schema | `x-render: 'tags'` | `type: 'array'` | `items.enum` |
+
+**When to use TagsField:**
+- Email addresses (to, cc, bcc)
+- Keywords or labels
+- Any free-form list where users type values
+
+**When to use ArrayField:**
+- Complex item objects
+- Items with multiple fields
+- Items that need individual editing
+
+**When to use MultiEnumField:**
+- Fixed set of allowed values
+- Selecting from predefined options
+
+---
+
 ## ArrayField
 
 Renders dynamic array fields with add/remove buttons.
