@@ -194,8 +194,16 @@ function simpleConditionToJsonLogic(cond: SimpleCondition, options: ToJsonLogicO
     case '<=':
       return { '<=': [left, right] }
     case 'in':
-      // Right should be an array
-      return { in: [left, parseArrayValue(cond.right, options.useTemplateSyntax)] }
+      // In template mode, right side could be a template resolving to an array at runtime
+      // In non-template mode, parse as comma-separated literal values
+      return {
+        in: [
+          left,
+          options.useTemplateSyntax
+            ? parseValue(cond.right, true)
+            : parseArrayValue(cond.right, false),
+        ],
+      }
     case 'contains':
       // JSONLogic "in" with string checks if substring exists
       return { in: [right, left] }
@@ -448,6 +456,15 @@ function extractValue(val: unknown, useTemplateSyntax = false): string {
   }
 
   if (Array.isArray(val)) {
+    // Backwards compatibility: if template syntax is enabled and we have a single-element
+    // array containing a template expression, unwrap it for display
+    // (This handles data saved before the fix that stored templates as ["{{path}}"])
+    if (useTemplateSyntax && val.length === 1 && typeof val[0] === 'string') {
+      const item = val[0]
+      if (item.startsWith('{{') && item.endsWith('}}')) {
+        return item
+      }
+    }
     return JSON.stringify(val)
   }
 

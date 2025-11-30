@@ -658,9 +658,9 @@ const options = {
 By default, variable references like `user.status` are converted to JSONLogic's `{ "var": "user.status" }` format. If your application uses a template engine (like Handlebars), you can enable **template syntax mode** to preserve `{{ }}` expressions as strings.
 
 **When enabled:**
-- Values like `{{ user.status }}` are kept as strings in the JSONLogic output
+- Values like <code v-pre>{{ user.status }}</code> are kept as strings in the JSONLogic output
 - Your application is responsible for resolving templates before JSONLogic evaluation
-- Existing `{ "var": ... }` values are displayed as `{{ ... }}` in the UI for backwards compatibility
+- Existing `{ "var": ... }` values are displayed as <code v-pre>{{ ... }}</code> in the UI for backwards compatibility
 
 **Via schema:**
 ```typescript
@@ -687,11 +687,11 @@ const options = {
 | Mode | User types | JSONLogic output |
 |------|------------|------------------|
 | Default (`false`) | `user.status` | `{ "var": "user.status" }` |
-| Template (`true`) | `{{ user.status }}` | `"{{ user.status }}"` |
+| Template (`true`) | <code v-pre>{{ user.status }}</code> | <code v-pre>"{{ user.status }}"</code> |
 
 **Loading existing data:**
 
-When `useTemplateSyntax: true`, the builder automatically converts existing `{ "var": ... }` definitions to `{{ ... }}` format for display, ensuring backwards compatibility.
+When `useTemplateSyntax: true`, the builder automatically converts existing `{ "var": ... }` definitions to <code v-pre>{{ ... }}</code> format for display, ensuring backwards compatibility.
 
 ### Supported Operators
 

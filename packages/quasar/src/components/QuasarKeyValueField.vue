@@ -3,6 +3,7 @@ import { ref, watch, computed } from "vue";
 import { QInput, QBtn, QIcon } from "quasar";
 import type { FieldProps } from "@quickflo/quickforms-vue";
 import { useQuasarFormField } from "../composables/useQuasarFormField";
+import { inferType } from "../utils/type-inference";
 
 const props = withDefaults(defineProps<FieldProps>(), {
   disabled: false,
@@ -45,6 +46,13 @@ const quickformsFeatures = computed(() => {
   const valueLabel =
     schemaFeatures.valueLabel ?? globalDefaults.valueLabel ?? "Value";
 
+  // Type inference option (x-infer-types takes priority over defaults)
+  const inferTypes =
+    (props.schema as any)["x-infer-types"] ??
+    schemaFeatures.inferTypes ??
+    globalDefaults.inferTypes ??
+    false;
+
   // Merge QBtn props: defaults -> global -> schema (schema has highest priority)
   const addButtonDefaults = {
     outline: true,
@@ -82,6 +90,7 @@ const quickformsFeatures = computed(() => {
     showHeaders,
     keyLabel,
     valueLabel,
+    inferTypes,
   };
 });
 
@@ -138,10 +147,13 @@ watch(
 watch(
   pairs,
   (newPairs) => {
-    const obj: Record<string, string> = {};
+    const obj: Record<string, unknown> = {};
     newPairs.forEach((pair) => {
       if (pair.key.trim()) {
-        obj[pair.key] = pair.value;
+        // Optionally infer type from string value (e.g., "1" -> 1, "true" -> true)
+        obj[pair.key] = quickformsFeatures.value.inferTypes
+          ? inferType(pair.value)
+          : pair.value;
       }
     });
     isInternalUpdate.value = true;
