@@ -50,6 +50,9 @@ export {
   getOperatorInfo,
   generateConditionId,
 } from './utils/jsonlogic.js';
+
+// Type inference utilities
+export { inferType, toDisplayString } from './utils/type-inference.js';
 export type {
   ComparisonOperator,
   OperatorInfo,

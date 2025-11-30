@@ -3,6 +3,7 @@ import { ref, watch, computed } from "vue";
 import { QInput, QBtn, QIcon } from "quasar";
 import type { FieldProps } from "@quickflo/quickforms-vue";
 import { useQuasarFormField } from "../composables/useQuasarFormField";
+import { inferType } from "../utils/type-inference";
 
 const props = withDefaults(defineProps<FieldProps>(), {
   disabled: false,
@@ -138,10 +139,11 @@ watch(
 watch(
   pairs,
   (newPairs) => {
-    const obj: Record<string, string> = {};
+    const obj: Record<string, unknown> = {};
     newPairs.forEach((pair) => {
       if (pair.key.trim()) {
-        obj[pair.key] = pair.value;
+        // Infer type from string value (e.g., "1" -> 1, "true" -> true)
+        obj[pair.key] = inferType(pair.value);
       }
     });
     isInternalUpdate.value = true;
