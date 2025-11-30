@@ -456,6 +456,15 @@ function extractValue(val: unknown, useTemplateSyntax = false): string {
   }
 
   if (Array.isArray(val)) {
+    // Backwards compatibility: if template syntax is enabled and we have a single-element
+    // array containing a template expression, unwrap it for display
+    // (This handles data saved before the fix that stored templates as ["{{path}}"])
+    if (useTemplateSyntax && val.length === 1 && typeof val[0] === 'string') {
+      const item = val[0]
+      if (item.startsWith('{{') && item.endsWith('}}')) {
+        return item
+      }
+    }
     return JSON.stringify(val)
   }
 
