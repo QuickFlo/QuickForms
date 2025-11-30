@@ -194,8 +194,16 @@ function simpleConditionToJsonLogic(cond: SimpleCondition, options: ToJsonLogicO
     case '<=':
       return { '<=': [left, right] }
     case 'in':
-      // Right should be an array
-      return { in: [left, parseArrayValue(cond.right, options.useTemplateSyntax)] }
+      // In template mode, right side could be a template resolving to an array at runtime
+      // In non-template mode, parse as comma-separated literal values
+      return {
+        in: [
+          left,
+          options.useTemplateSyntax
+            ? parseValue(cond.right, true)
+            : parseArrayValue(cond.right, false),
+        ],
+      }
     case 'contains':
       // JSONLogic "in" with string checks if substring exists
       return { in: [right, left] }
