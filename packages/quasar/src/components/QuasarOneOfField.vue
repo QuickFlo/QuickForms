@@ -21,6 +21,7 @@ const props = withDefaults(defineProps<FieldProps>(), {
 
 const {
   value,
+  setValue,
   label,
   hint,
   errorMessage,
@@ -44,16 +45,41 @@ const options = computed(() => props.schema.oneOf || props.schema.anyOf || []);
 // Selected option index
 const selectedIndex = ref(0);
 
-// Try to determine initial selection based on data
+// Try to determine initial selection based on data and initialize defaults
 onMounted(() => {
-  if (value.value) {
+  let initialIndex = 0;
+  
+  if (value.value && typeof value.value === 'object' && Object.keys(value.value).length > 0) {
+    // Find matching schema based on existing data
     const index = options.value.findIndex((optionSchema) => {
       const result = schemaUtils.validate(optionSchema, value.value);
       return result.valid;
     });
 
     if (index !== -1) {
-      selectedIndex.value = index;
+      initialIndex = index;
+    }
+  }
+  
+  selectedIndex.value = initialIndex;
+  
+  // Initialize default values for the selected schema
+  // This ensures fields exist even if the form starts empty
+  const initialSchema = options.value[initialIndex];
+  if (initialSchema && initialSchema.properties) {
+    const currentValue = (value.value && typeof value.value === 'object') ? value.value : {};
+    const defaults = schemaUtils.getDefaultValue(initialSchema);
+    
+    // Only proceed if defaults is a valid object
+    if (defaults && typeof defaults === 'object') {
+      // Merge defaults with current value
+      const merged = { ...defaults, ...currentValue };
+      
+      // Only update if we're adding new fields (don't overwrite existing)
+      const hasNewFields = Object.keys(defaults).some(key => !(key in currentValue));
+      if (hasNewFields && setValue) {
+        setValue(merged);
+      }
     }
   }
 });
@@ -177,7 +203,25 @@ const filterFn = (val: string, update: (fn: () => void) => void) => {
 // Handle manual switch
 const handleOptionChange = (newIndex: number) => {
   selectedIndex.value = newIndex;
-  // Keep existing value to allow common fields to persist
+  
+  // Initialize default values for the new schema's fields
+  // This ensures fields exist even if user never touches them (e.g., empty string for 'value')
+  const newSchema = options.value[newIndex];
+  if (newSchema && newSchema.properties) {
+    const currentValue = (value.value && typeof value.value === 'object') ? value.value : {};
+    const defaults = schemaUtils.getDefaultValue(newSchema);
+    
+    // Only proceed if defaults is a valid object
+    if (defaults && typeof defaults === 'object') {
+      // Merge defaults with current value, preferring current values for common fields
+      const merged = { ...defaults, ...currentValue };
+      
+      // Update form value
+      if (setValue) {
+        setValue(merged);
+      }
+    }
+  }
 };
 
 </script>
