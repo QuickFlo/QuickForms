@@ -1,6 +1,6 @@
 {
   "name": "@quickflo/quickforms",
-  "version": "1.14.2",
+  "version": "1.14.3",
   "description": "Framework-agnostic core for QuickForms - JSON Schema form generator",
   "type": "module",
   "main": "./dist/index.js",
