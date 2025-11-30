@@ -77,7 +77,9 @@ watch(
     }
 
     if (newValue && typeof newValue === "object") {
-      conditionRoot.value = fromJsonLogic(newValue as Record<string, unknown>);
+      conditionRoot.value = fromJsonLogic(newValue as Record<string, unknown>, {
+        useTemplateSyntax: useTemplateSyntax.value,
+      });
       jsonText.value = JSON.stringify(newValue, null, 2);
     } else {
       conditionRoot.value = createEmptyRoot();
@@ -90,7 +92,9 @@ watch(
 // Sync changes back to form
 function syncToValue() {
   isInternalUpdate.value = true;
-  const logic = toJsonLogic(conditionRoot.value);
+  const logic = toJsonLogic(conditionRoot.value, {
+    useTemplateSyntax: useTemplateSyntax.value,
+  });
   setValue(logic);
   jsonText.value = JSON.stringify(logic, null, 2);
 }
@@ -152,7 +156,9 @@ function toggleAdvancedMode() {
     // Switching from advanced to visual
     try {
       const parsed = JSON.parse(jsonText.value);
-      conditionRoot.value = fromJsonLogic(parsed);
+      conditionRoot.value = fromJsonLogic(parsed, {
+        useTemplateSyntax: useTemplateSyntax.value,
+      });
       jsonParseError.value = null;
       isAdvancedMode.value = false;
     } catch (err: any) {
@@ -161,7 +167,11 @@ function toggleAdvancedMode() {
     }
   } else {
     // Switching from visual to advanced
-    jsonText.value = JSON.stringify(toJsonLogic(conditionRoot.value), null, 2);
+    jsonText.value = JSON.stringify(
+      toJsonLogic(conditionRoot.value, { useTemplateSyntax: useTemplateSyntax.value }),
+      null,
+      2
+    );
     isAdvancedMode.value = true;
   }
 }
@@ -195,6 +205,15 @@ const allowedOperators = computed(() => {
   const defaultOperators =
     quickformsDefaults.value?.jsonlogicbuilder?.allowedOperators;
   return schemaOperators || defaultOperators || null;
+});
+
+// Template syntax mode - when enabled, {{ }} expressions are kept as strings
+// instead of being converted to { "var": ... }
+const useTemplateSyntax = computed(() => {
+  const schemaValue = (props.schema as any)["x-use-template-syntax"];
+  const defaultValue =
+    quickformsDefaults.value?.jsonlogicbuilder?.useTemplateSyntax;
+  return schemaValue ?? defaultValue ?? false;
 });
 
 // Filter and format operators based on settings

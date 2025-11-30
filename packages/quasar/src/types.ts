@@ -244,6 +244,21 @@ export interface QuickFormsQuasarDefaults {
      * Example: ['==', '!=', '>', '<'] for basic comparisons
      */
     allowedOperators?: string[];
+    /**
+     * Enable template syntax ({{ }}) for values instead of JSONLogic's { "var": ... }
+     * 
+     * When enabled:
+     * - Values like "{{ initial.status }}" are kept as strings in the JSONLogic output
+     * - The consuming application is responsible for resolving templates before JSONLogic evaluation
+     * - Existing { "var": ... } values are displayed as {{ ... }} in the UI for backwards compatibility
+     * 
+     * When disabled (default):
+     * - Variable references like "initial.status" are converted to { "var": "initial.status" }
+     * - Standard JSONLogic behavior
+     * 
+     * Default: false
+     */
+    useTemplateSyntax?: boolean;
   };
 }
 

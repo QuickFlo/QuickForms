@@ -653,6 +653,46 @@ const options = {
 }
 ```
 
+### Template Syntax Mode
+
+By default, variable references like `user.status` are converted to JSONLogic's `{ "var": "user.status" }` format. If your application uses a template engine (like Handlebars), you can enable **template syntax mode** to preserve `{{ }}` expressions as strings.
+
+**When enabled:**
+- Values like `{{ user.status }}` are kept as strings in the JSONLogic output
+- Your application is responsible for resolving templates before JSONLogic evaluation
+- Existing `{ "var": ... }` values are displayed as `{{ ... }}` in the UI for backwards compatibility
+
+**Via schema:**
+```typescript
+{
+  type: 'object',
+  'x-render': 'condition-builder',
+  'x-use-template-syntax': true
+}
+```
+
+**Via componentDefaults:**
+```typescript
+const options = {
+  quickformsDefaults: {
+    jsonlogicbuilder: {
+      useTemplateSyntax: true
+    }
+  }
+}
+```
+
+**Output comparison:**
+
+| Mode | User types | JSONLogic output |
+|------|------------|------------------|
+| Default (`false`) | `user.status` | `{ "var": "user.status" }` |
+| Template (`true`) | `{{ user.status }}` | `"{{ user.status }}"` |
+
+**Loading existing data:**
+
+When `useTemplateSyntax: true`, the builder automatically converts existing `{ "var": ... }` definitions to `{{ ... }}` format for display, ensuring backwards compatibility.
+
 ### Supported Operators
 
 | Operator | Symbol | Text (default) | Description | Right Value |
@@ -783,6 +823,8 @@ import type {
   ConditionItem,
   ConditionRoot,
   JsonLogic,
+  ToJsonLogicOptions,
+  FromJsonLogicOptions,
 } from '@quickflo/quickforms-quasar'
 ```
 
