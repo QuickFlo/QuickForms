@@ -196,6 +196,47 @@ const schema: JSONSchema = {
       },
     },
 
+    // === TAGS INPUT (CHIPS) ===
+    emailRecipients: {
+      type: "array",
+      title: "Email Recipients",
+      description:
+        "Chip-based tags input for emails. Type and press Enter, or paste multiple comma-separated values.",
+      "x-render": "tags",
+      items: {
+        type: "string",
+        format: "email",
+      },
+      minItems: 1,
+      "x-quickforms-quasar": {
+        chip: {
+          color: "primary",
+          textColor: "white",
+          icon: "email",
+        },
+      },
+    },
+
+    // === TAGS INPUT (CUSTOM STYLING) ===
+    keywords: {
+      type: "array",
+      title: "Keywords",
+      description: "Tags with custom chip styling - try pasting: vue, react, angular",
+      "x-render": "tags",
+      items: {
+        type: "string",
+      },
+      "x-placeholder": "Add keywords...",
+      "x-quickforms-quasar": {
+        chip: {
+          color: "secondary",
+          outline: true,
+          dense: true,
+        },
+        separator: /[,;\n]+/, // Only split on comma, semicolon, newline (not spaces)
+      },
+    },
+
     // === ARRAY OF OBJECTS ===
     teamMembers: {
       type: "array",
