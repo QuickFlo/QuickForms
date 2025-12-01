@@ -35,7 +35,7 @@ const sectionStyle = computed(() => {
   // Then check quickformsDefaults.array, then fall back to object defaults for consistency
   const arrayDefaults = formContext?.quickformsDefaults?.array;
   const objectDefaults = formContext?.quickformsDefaults?.object;
-  return arrayDefaults?.sectionStyle ?? objectDefaults?.sectionStyle ?? 'solid';
+  return arrayDefaults?.sectionStyle ?? objectDefaults?.sectionStyle ?? 'card';
 });
 
 const sectionStyleClass = computed(() => {

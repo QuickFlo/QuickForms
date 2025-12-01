@@ -1116,9 +1116,9 @@ Renders dynamic array fields with add/remove buttons.
 Array fields can display visual boundaries to group their items and "Add" button, creating a clear separation from subsequent fields.
 
 **Border styles:**
-- `'solid'` (default) - 3px solid left border
+- `'card'` (default) - Full border around entire array with subtle background
+- `'solid'` - 3px solid left border
 - `'dashed'` - 2px dashed left border
-- `'card'` - Full border around entire array with subtle background
 - `'none'` - No visual boundary
 
 **Per-field (schema):**
@@ -1136,7 +1136,7 @@ Array fields can display visual boundaries to group their items and "Add" button
 const formOptions = {
   quickformsDefaults: {
     array: {
-      sectionStyle: 'solid'  // 'solid' | 'dashed' | 'card' | 'none'
+      sectionStyle: 'card'  // 'card' | 'solid' | 'dashed' | 'none'
     },
     // Or set once for both objects and arrays:
     object: {

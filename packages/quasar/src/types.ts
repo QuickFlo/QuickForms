@@ -273,9 +273,9 @@ export interface QuickFormsQuasarDefaults {
   array?: QuickFormsQuasarArrayFeatures & {
     /**
      * Visual style for array content boundary
-     * - 'solid': 3px solid left border (default)
+     * - 'card': Full border around entire array with subtle background (default)
+     * - 'solid': 3px solid left border
      * - 'dashed': 2px dashed left border
-     * - 'card': Full border around entire array with subtle background
      * - 'none': No visual boundary
      * Falls back to object.sectionStyle if not set
      */
