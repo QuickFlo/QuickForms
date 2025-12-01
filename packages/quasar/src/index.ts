@@ -73,9 +73,11 @@ export type {
   QuasarFormContext,
   QuickFormsQuasarFeatures,
   QuickFormsQuasarArrayFeatures,
+  QuickFormsQuasarObjectFeatures,
   QuickFormsQuasarKeyValueFeatures,
   QuickFormsQuasarTagsFeatures,
   QuickFormsQuasarDefaults,
+  SectionStyle,
 } from './types.js';
 
 // Re-export types from Vue package

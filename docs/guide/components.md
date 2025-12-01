@@ -303,6 +303,38 @@ Renders nested object fields.
 - Plain Vue: Simple wrapper with nested fields
 - Quasar: Expandable card with `QExpansionItem`
 
+### Section Styling (Quasar)
+
+Object fields can display a left border to visually group their nested content. This helps users understand the field hierarchy.
+
+**Border styles:**
+- `'solid'` (default) - 3px solid gray border
+- `'dashed'` - 2px dashed gray border
+- `'none'` - No border
+
+**Per-field (schema):**
+```typescript
+{
+  type: 'object',
+  title: 'Shipping Address',
+  'x-section-style': 'dashed',  // or 'solid', 'none'
+  properties: { /* ... */ }
+}
+```
+
+**Global defaults:**
+```typescript
+const formOptions = {
+  quickformsDefaults: {
+    object: {
+      sectionStyle: 'solid',        // 'solid' | 'dashed' | 'none'
+      defaultExpanded: 'required-only',  // 'all' | 'none' | 'required-only'
+      showOptionalIndicator: true   // Show "(optional)" label
+    }
+  }
+}
+```
+
 ---
 
 ## JsonField
@@ -1078,6 +1110,65 @@ Renders dynamic array fields with add/remove buttons.
 - Add/remove buttons
 - Respects `minItems` and `maxItems`
 - Drag-to-reorder (if enabled)
+
+### Section Styling (Quasar)
+
+Array fields can display visual boundaries to group their items and "Add" button, creating a clear separation from subsequent fields.
+
+**Border styles:**
+- `'solid'` (default) - 3px solid left border
+- `'dashed'` - 2px dashed left border
+- `'card'` - Full border around entire array with subtle background
+- `'none'` - No visual boundary
+
+**Per-field (schema):**
+```typescript
+{
+  type: 'array',
+  title: 'Field Mappings',
+  'x-section-style': 'card',  // or 'solid', 'dashed', 'none'
+  items: { /* ... */ }
+}
+```
+
+**Global defaults:**
+```typescript
+const formOptions = {
+  quickformsDefaults: {
+    array: {
+      sectionStyle: 'solid'  // 'solid' | 'dashed' | 'card' | 'none'
+    },
+    // Or set once for both objects and arrays:
+    object: {
+      sectionStyle: 'solid'  // Arrays inherit from object defaults if not set
+    }
+  }
+}
+```
+
+### Button Customization (Quasar)
+
+Customize add/remove buttons via `x-quickforms-quasar`:
+
+```typescript
+{
+  type: 'array',
+  title: 'Items',
+  items: { type: 'string' },
+  'x-quickforms-quasar': {
+    addButtonPosition: 'bottom-right',  // 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right'
+    addButton: {
+      label: 'Add Item',
+      icon: 'add_circle',
+      color: 'secondary'
+    },
+    removeButton: {
+      icon: 'delete',
+      color: 'negative'
+    }
+  }
+}
+```
 
 ---
 

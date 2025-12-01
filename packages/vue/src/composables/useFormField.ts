@@ -233,6 +233,11 @@ export function useFormField(
         for (let i = 0; i < value.length; i++) {
           const item = value[i];
 
+          // Skip validation for template expressions ({{ }}) - they're resolved at runtime
+          if (typeof item === "string" && /\{\{.*?\}\}/.test(item)) {
+            continue;
+          }
+
           // String item validations
           if (itemsSchema.type === "string" && typeof item === "string") {
             if (itemsSchema.format === "email" && !isValidEmail(item)) {

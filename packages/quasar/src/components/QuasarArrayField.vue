@@ -25,6 +25,23 @@ const {
   componentType: 'card',
 });
 
+// Section border style - matches QuasarObjectField pattern
+const sectionStyle = computed(() => {
+  // Schema-level override first
+  const xSectionStyle = (props.schema as any)["x-section-style"];
+  if (xSectionStyle) {
+    return xSectionStyle;
+  }
+  // Then check quickformsDefaults.array, then fall back to object defaults for consistency
+  const arrayDefaults = formContext?.quickformsDefaults?.array;
+  const objectDefaults = formContext?.quickformsDefaults?.object;
+  return arrayDefaults?.sectionStyle ?? objectDefaults?.sectionStyle ?? 'solid';
+});
+
+const sectionStyleClass = computed(() => {
+  return `quickform-section-${sectionStyle.value}`;
+});
+
 // Merge QuickForms convenience features for button customization
 // Respects quickformsDefaults.array from form options
 const quickformsFeatures = computed(() => {
@@ -173,132 +190,219 @@ const getItemLabel = (index: number) => {
 </script>
 
 <template>
-  <div :id="fieldId" :style="{ marginBottom: fieldGap }">
-    <!-- Label (always shows if present) -->
-    <div
-      v-if="label"
-      :style="{
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent:
-          isTopPosition && isRightPosition ? 'space-between' : 'flex-start',
-        marginBottom: '0.5rem',
-      }"
-    >
-      <div style="font-weight: 500">
-        {{ label }}
-        <span v-if="schema.required" style="color: red; margin-left: 0.125rem"
-          >*</span
+  <div :id="fieldId" :style="{ marginBottom: fieldGap }" class="quickform-array-field" :class="sectionStyleClass">
+    <!-- Array header -->
+    <div class="quickform-array-header">
+      <div
+        v-if="label"
+        class="quickform-array-label-row"
+        :style="{
+          justifyContent:
+            isTopPosition && isRightPosition ? 'space-between' : 'flex-start',
+        }"
+      >
+        <div class="quickform-array-label">
+          {{ label }}
+          <span v-if="schema.required" class="quickform-required-indicator">*</span>
+        </div>
+        <!-- Add button on same line only for top-right -->
+        <div v-if="isTopPosition && isRightPosition">
+          <QBtn
+            v-bind="quickformsFeatures.addButton"
+            :disable="!canAdd"
+            @click="addItem"
+          />
+        </div>
+      </div>
+
+      <!-- Add button below label for top-left -->
+      <div
+        v-if="isTopPosition && !isRightPosition"
+        style="text-align: left; margin-top: 0.5rem"
+      >
+        <QBtn
+          v-bind="quickformsFeatures.addButton"
+          :disable="!canAdd"
+          @click="addItem"
+        />
+      </div>
+
+      <div v-if="hint" class="quickform-array-hint">
+        {{ hint }}
+      </div>
+    </div>
+
+    <!-- Array content area -->
+    <div class="quickform-array-content">
+      <div class="quickform-array-items">
+        <QCard
+          v-for="(item, index) in arrayValue"
+          :key="index"
+          flat
+          bordered
+          v-bind="quasarProps"
         >
-      </div>
-      <!-- Add button on same line only for top-right -->
-      <div v-if="isTopPosition && isRightPosition">
-        <QBtn
-          v-bind="quickformsFeatures.addButton"
-          :disable="!canAdd"
-          @click="addItem"
-        />
-      </div>
-    </div>
+          <QCardSection class="row items-start">
+            <div class="col">
+              <FieldRenderer
+                :schema="itemsSchema!"
+                :path="`${path}[${index}]`"
+                :label="getItemLabel(index)"
+                :disabled="disabled"
+                :readonly="readonly"
+              />
+            </div>
+            <div class="col-auto q-ml-sm row q-gutter-xs items-center">
+              <QBtn
+                flat
+                round
+                dense
+                size="sm"
+                icon="arrow_upward"
+                :disable="index === 0 || disabled || readonly"
+                @click="moveItem(index, 'up')"
+                title="Move Up"
+              >
+                <q-tooltip>Move Up</q-tooltip>
+              </QBtn>
+              <QBtn
+                flat
+                round
+                dense
+                size="sm"
+                icon="arrow_downward"
+                :disable="index === arrayValue.length - 1 || disabled || readonly"
+                @click="moveItem(index, 'down')"
+                title="Move Down"
+              >
+                <q-tooltip>Move Down</q-tooltip>
+              </QBtn>
+              <QBtn
+                v-bind="quickformsFeatures.removeButton"
+                :disable="!canRemove"
+                @click="removeItem(index)"
+                :title="formContext?.labels?.removeItem || 'Remove'"
+              >
+                <q-tooltip>{{
+                  formContext?.labels?.removeItem || "Remove"
+                }}</q-tooltip>
+              </QBtn>
+            </div>
+          </QCardSection>
+        </QCard>
 
-    <!-- Add button below label for top-left -->
-    <div
-      v-if="isTopPosition && !isRightPosition"
-      style="text-align: left; margin-bottom: 0.5rem"
-    >
-      <QBtn
-        v-bind="quickformsFeatures.addButton"
-        :disable="!canAdd"
-        @click="addItem"
-      />
-    </div>
+        <div
+          v-if="arrayValue.length === 0"
+          class="quickform-array-empty"
+        >
+          No items
+        </div>
 
-    <div
-      v-if="hint"
-      style="font-size: 0.875rem; color: #666; margin-bottom: 0.5rem"
-    >
-      {{ hint }}
-    </div>
+        <!-- Add button (bottom position) -->
+        <div
+          v-if="!isTopPosition"
+          :style="{ textAlign: isRightPosition ? 'right' : 'left' }"
+        >
+          <QBtn
+            v-bind="quickformsFeatures.addButton"
+            :disable="!canAdd"
+            @click="addItem"
+          />
+        </div>
 
-    <div style="display: flex; flex-direction: column; gap: 0.75rem">
-      <QCard
-        v-for="(item, index) in arrayValue"
-        :key="index"
-        flat
-        bordered
-        v-bind="quasarProps"
-      >
-        <QCardSection class="row items-start">
-          <div class="col">
-            <FieldRenderer
-              :schema="itemsSchema!"
-              :path="`${path}[${index}]`"
-              :label="getItemLabel(index)"
-              :disabled="disabled"
-              :readonly="readonly"
-            />
-          </div>
-          <div class="col-auto q-ml-sm row q-gutter-xs items-center">
-            <QBtn
-              flat
-              round
-              dense
-              size="sm"
-              icon="arrow_upward"
-              :disable="index === 0 || disabled || readonly"
-              @click="moveItem(index, 'up')"
-              title="Move Up"
-            >
-              <q-tooltip>Move Up</q-tooltip>
-            </QBtn>
-            <QBtn
-              flat
-              round
-              dense
-              size="sm"
-              icon="arrow_downward"
-              :disable="index === arrayValue.length - 1 || disabled || readonly"
-              @click="moveItem(index, 'down')"
-              title="Move Down"
-            >
-              <q-tooltip>Move Down</q-tooltip>
-            </QBtn>
-            <QBtn
-              v-bind="quickformsFeatures.removeButton"
-              :disable="!canRemove"
-              @click="removeItem(index)"
-              :title="formContext?.labels?.removeItem || 'Remove'"
-            >
-              <q-tooltip>{{
-                formContext?.labels?.removeItem || "Remove"
-              }}</q-tooltip>
-            </QBtn>
-          </div>
-        </QCardSection>
-      </QCard>
-
-      <div
-        v-if="arrayValue.length === 0"
-        style="color: #999; font-style: italic"
-      >
-        No items
-      </div>
-
-      <!-- Add button (bottom position) -->
-      <div
-        v-if="!isTopPosition"
-        :style="{ textAlign: isRightPosition ? 'right' : 'left' }"
-      >
-        <QBtn
-          v-bind="quickformsFeatures.addButton"
-          :disable="!canAdd"
-          @click="addItem"
-        />
-      </div>
-
-      <div v-if="errorMessage" style="color: red; font-size: 0.875rem">
-        {{ errorMessage }}
+        <div v-if="errorMessage" class="quickform-array-error">
+          {{ errorMessage }}
+        </div>
       </div>
     </div>
   </div>
 </template>
+
+<style scoped>
+.quickform-array-field {
+  border-radius: 4px;
+}
+
+.quickform-array-header {
+  margin-bottom: 0.5rem;
+}
+
+.quickform-array-label-row {
+  display: flex;
+  align-items: center;
+}
+
+.quickform-array-label {
+  font-weight: 500;
+}
+
+.quickform-required-indicator {
+  color: #c10015;
+  margin-left: 0.125rem;
+}
+
+.quickform-array-hint {
+  font-size: 0.875rem;
+  color: #666;
+  margin-top: 0.25rem;
+}
+
+.quickform-array-content {
+  /* Content area that gets the border styling */
+}
+
+.quickform-array-items {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.quickform-array-empty {
+  color: #999;
+  font-style: italic;
+}
+
+.quickform-array-error {
+  color: #c10015;
+  font-size: 0.875rem;
+}
+
+/* Section style: solid (default) */
+.quickform-array-field.quickform-section-solid .quickform-array-content {
+  border-left: 3px solid #e0e0e0;
+  padding-left: 1rem;
+  margin-left: 0.25rem;
+}
+
+/* Section style: dashed */
+.quickform-array-field.quickform-section-dashed .quickform-array-content {
+  border-left: 2px dashed #ccc;
+  padding-left: 1rem;
+  margin-left: 0.25rem;
+}
+
+/* Section style: none */
+.quickform-array-field.quickform-section-none .quickform-array-content {
+  border-left: none;
+  padding-left: 0;
+  margin-left: 0;
+}
+
+/* Section style: card - full border around entire array */
+.quickform-array-field.quickform-section-card {
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 1rem;
+  background-color: #fafafa;
+}
+
+.quickform-array-field.quickform-section-card .quickform-array-header {
+  margin-bottom: 0.75rem;
+}
+
+.quickform-array-field.quickform-section-card .quickform-array-content {
+  border-left: none;
+  padding-left: 0;
+  margin-left: 0;
+}
+</style>

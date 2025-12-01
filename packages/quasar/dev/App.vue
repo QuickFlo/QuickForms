@@ -61,6 +61,7 @@ const formOptions: QuasarFormOptions = {
       removeButton: {
         color: "negative",
       },
+      sectionStyle: "card",
     },
     keyvalue: {
       addButton: {},
@@ -221,7 +222,8 @@ const schema: JSONSchema = {
     keywords: {
       type: "array",
       title: "Keywords",
-      description: "Tags with custom chip styling - try pasting: vue, react, angular",
+      description:
+        "Tags with custom chip styling - try pasting: vue, react, angular",
       "x-render": "tags",
       items: {
         type: "string",

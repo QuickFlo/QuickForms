@@ -180,6 +180,9 @@ export interface QuickFormsQuasarKeyValueFeatures {
  * Uses native Quasar component prop types - these get passed through via v-bind
  * All properties here are NATIVE Quasar props from the official Quasar type definitions
  */
+/** Section style options for visual grouping of nested content */
+export type SectionStyle = 'solid' | 'dashed' | 'card' | 'none';
+
 export interface QuasarComponentDefaults
   extends Omit<VueComponentDefaults, "select"> {
   /**
@@ -227,6 +230,26 @@ export interface QuasarComponentDefaults
  * These are convenience features we provide on top of native Quasar
  * Use via x-quickforms-quasar in schema
  */
+/** QuickForms features for object fields */
+export interface QuickFormsQuasarObjectFeatures {
+  /**
+   * Visual style for nested content boundary
+   * - 'solid': 3px solid left border (default)
+   * - 'dashed': 2px dashed left border
+   * - 'none': No visual boundary
+   */
+  sectionStyle?: SectionStyle;
+  /**
+   * Default expanded state for object fields
+   * - 'all': All objects start expanded
+   * - 'none': All objects start collapsed
+   * - 'required-only': Required objects expanded, optional collapsed (default)
+   */
+  defaultExpanded?: 'all' | 'none' | 'required-only';
+  /** Show "(optional)" indicator on optional objects. Default: true */
+  showOptionalIndicator?: boolean;
+}
+
 export interface QuickFormsQuasarDefaults {
   /** Global QuickForms features for all components */
   global?: QuickFormsQuasarFeatures;
@@ -244,8 +267,20 @@ export interface QuickFormsQuasarDefaults {
     /** Time mask format. Default: 'hh:mm A' (12-hour with AM/PM) */
     timeMask?: string;
   };
-  /** Array-specific QuickForms features */
-  array?: QuickFormsQuasarArrayFeatures;
+  /** Object-specific QuickForms features */
+  object?: QuickFormsQuasarObjectFeatures;
+  /** Array-specific QuickForms features (includes sectionStyle + button customization) */
+  array?: QuickFormsQuasarArrayFeatures & {
+    /**
+     * Visual style for array content boundary
+     * - 'solid': 3px solid left border (default)
+     * - 'dashed': 2px dashed left border
+     * - 'card': Full border around entire array with subtle background
+     * - 'none': No visual boundary
+     * Falls back to object.sectionStyle if not set
+     */
+    sectionStyle?: SectionStyle;
+  };
   /** Key-value specific QuickForms features */
   keyvalue?: QuickFormsQuasarKeyValueFeatures;
   /** Tags/chips input specific QuickForms features */
