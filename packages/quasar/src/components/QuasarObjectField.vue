@@ -31,8 +31,8 @@ const defaultOpened = computed(() => {
     return xDefaultExpanded;
   }
 
-  // 2. Check componentDefaults.object.defaultExpanded
-  const objectDefaults = formContext?.componentDefaults?.object;
+  // 2. Check quickformsDefaults.object.defaultExpanded
+  const objectDefaults = formContext?.quickformsDefaults?.object;
   const defaultExpandedMode =
     objectDefaults?.defaultExpanded ?? "required-only";
 
@@ -48,13 +48,18 @@ const defaultOpened = computed(() => {
 
 // Show "(optional)" indicator
 const showOptionalIndicator = computed(() => {
-  const objectDefaults = formContext?.componentDefaults?.object;
+  const objectDefaults = formContext?.quickformsDefaults?.object;
   return objectDefaults?.showOptionalIndicator ?? true;
 });
 
 // Section border style
 const sectionStyle = computed(() => {
-  const objectDefaults = formContext?.componentDefaults?.object;
+  // Schema-level override first
+  const xSectionStyle = (props.schema as any)["x-section-style"];
+  if (xSectionStyle) {
+    return xSectionStyle;
+  }
+  const objectDefaults = formContext?.quickformsDefaults?.object;
   return objectDefaults?.sectionStyle ?? 'solid';
 });
 
