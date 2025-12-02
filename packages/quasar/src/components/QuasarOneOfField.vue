@@ -172,6 +172,30 @@ const getOptionLabel = (option: any, index: number): string => {
   return option.title || `Option ${index + 1}`;
 };
 
+// Get description for the currently selected option
+const activeOptionDescription = computed((): string | null => {
+  const xOneofDescriptions = (props.schema as any)["x-oneof-descriptions"];
+  if (!xOneofDescriptions) return null;
+
+  const option = activeSchema.value;
+  if (!option) return null;
+
+  // Array format
+  if (Array.isArray(xOneofDescriptions) && xOneofDescriptions[selectedIndex.value]) {
+    return xOneofDescriptions[selectedIndex.value];
+  }
+
+  // Object format keyed by discriminator value
+  if (typeof xOneofDescriptions === 'object') {
+    const discValue = getDiscriminatorValue(option);
+    if (discValue && xOneofDescriptions[discValue]) {
+      return xOneofDescriptions[discValue];
+    }
+  }
+
+  return null;
+});
+
 // Compute display labels for the dropdown/tabs
 const allSelectOptions = computed(() => {
   return options.value.map((option, index) => ({
@@ -298,6 +322,14 @@ const handleOptionChange = (newIndex: number) => {
             />
           </QTabs>
 
+          <!-- Option description hint -->
+          <div
+            v-if="activeOptionDescription"
+            style="font-size: 0.875rem; color: #666; margin-top: 0.5rem"
+          >
+            {{ activeOptionDescription }}
+          </div>
+
           <div
             style="
               margin-top: 1rem;
@@ -346,6 +378,14 @@ const handleOptionChange = (newIndex: number) => {
             @filter="filterFn"
             v-bind="quasarProps"
           />
+
+          <!-- Option description hint -->
+          <div
+            v-if="activeOptionDescription"
+            style="font-size: 0.875rem; color: #666; margin-top: 0.75rem"
+          >
+            {{ activeOptionDescription }}
+          </div>
 
           <div
             style="

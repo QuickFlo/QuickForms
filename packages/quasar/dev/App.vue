@@ -722,6 +722,53 @@ const schema: JSONSchema = {
       "x-render": "jsonlogic-builder",
     },
 
+    // === ONEOF WITH DESCRIPTIONS (Discriminated Union style) ===
+    dateOperation: {
+      title: "",
+      description: "",
+      "x-oneof-style": "dropdown",
+      "x-oneof-select-label": "Operation",
+      "x-oneof-labels": {
+        now: "Get Current Time",
+        format: "Format Date",
+        add: "Add Time",
+      },
+      "x-oneof-descriptions": {
+        now: "Returns the current date and time in the specified timezone",
+        format: "Convert a date/time value to a formatted string (e.g., 'Jan 1, 2025')",
+        add: "Add a duration to a date (e.g., +5 days, +2 hours)",
+      },
+      anyOf: [
+        {
+          type: "object",
+          properties: {
+            operation: { type: "string", const: "now" },
+            timezone: { type: "string", title: "Timezone", default: "UTC" },
+          },
+          required: ["operation"],
+        },
+        {
+          type: "object",
+          properties: {
+            operation: { type: "string", const: "format" },
+            dateTime: { type: "string", title: "Date/Time Input" },
+            outputFormat: { type: "string", title: "Output Format", default: "yyyy-MM-dd" },
+          },
+          required: ["operation"],
+        },
+        {
+          type: "object",
+          properties: {
+            operation: { type: "string", const: "add" },
+            dateTime: { type: "string", title: "Date/Time Input" },
+            amount: { type: "number", title: "Amount" },
+            unit: { type: "string", title: "Unit", enum: ["days", "hours", "minutes"] },
+          },
+          required: ["operation"],
+        },
+      ],
+    },
+
     // === ONEOF WITH DROPDOWN (Many options) ===
     shippingMethod: {
       type: "object",
