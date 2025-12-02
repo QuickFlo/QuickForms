@@ -45,7 +45,16 @@ const registry = props.options.registry || createDefaultRegistry();
 const SINGLE_FIELD_PATH = "__root__";
 
 // Determine if this schema represents a single logical field
+// This is true when:
+// 1. Schema is an object type without properties (freeform JSON)
+// 2. Schema has x-render defined (custom component should handle the entire object)
 const isSingleField = computed(() => {
+  const schema = props.schema as any;
+  // If x-render is specified on the root, treat entire object as single field
+  // so the custom component can handle all properties itself
+  if (schema['x-render']) {
+    return true;
+  }
   return props.schema.type === "object" && !props.schema.properties;
 });
 

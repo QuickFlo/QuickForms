@@ -87,9 +87,18 @@ const quasarProps = computed(() => {
     multiple,
     hideDropdownIcon,
     newValueMode,
+    autocomplete,
     ...quasarOnly
   } = merged;
-  return quasarOnly;
+
+  // QSelect expects autocomplete as string ("off", "on"), not boolean
+  // Convert boolean to appropriate string value
+  const result: Record<string, any> = { ...quasarOnly };
+  if (autocomplete !== undefined) {
+    result.autocomplete = autocomplete === true ? "on" : autocomplete === false ? "off" : autocomplete;
+  }
+
+  return result;
 });
 
 // Merge QuickForms features (chip customization, separator, etc.)
