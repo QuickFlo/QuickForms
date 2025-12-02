@@ -128,14 +128,47 @@ const displayStyle = computed(() => {
   return options.value.length <= 4 ? "tabs" : "dropdown";
 });
 
-// Get custom labels from x-oneof-labels or fall back to option titles
-const getOptionLabel = (option: any, index: number): string => {
-  const xOneofLabels = (props.schema as any)["x-oneof-labels"] as
-    | string[]
-    | undefined;
-  if (xOneofLabels && xOneofLabels[index]) {
-    return xOneofLabels[index];
+// Detect discriminator field from the first option's const properties
+const discriminatorField = computed(() => {
+  const firstOption = options.value[0];
+  if (!firstOption?.properties) return null;
+
+  // Find property with a const value (discriminator)
+  for (const [key, propSchema] of Object.entries(firstOption.properties)) {
+    if ((propSchema as any).const !== undefined) {
+      return key;
+    }
   }
+  return null;
+});
+
+// Get discriminator value for a given option schema
+const getDiscriminatorValue = (option: any): string | null => {
+  const field = discriminatorField.value;
+  if (!field || !option?.properties?.[field]) return null;
+  return (option.properties[field] as any).const ?? null;
+};
+
+// Get custom labels from x-oneof-labels or fall back to option titles
+// Supports both array format and object format keyed by discriminator value
+const getOptionLabel = (option: any, index: number): string => {
+  const xOneofLabels = (props.schema as any)["x-oneof-labels"];
+
+  if (xOneofLabels) {
+    // Array format: ["Label 1", "Label 2", ...]
+    if (Array.isArray(xOneofLabels) && xOneofLabels[index]) {
+      return xOneofLabels[index];
+    }
+
+    // Object format keyed by discriminator value: { "value1": "Label 1", "value2": "Label 2" }
+    if (typeof xOneofLabels === 'object') {
+      const discValue = getDiscriminatorValue(option);
+      if (discValue && xOneofLabels[discValue]) {
+        return xOneofLabels[discValue];
+      }
+    }
+  }
+
   return option.title || `Option ${index + 1}`;
 };
 
