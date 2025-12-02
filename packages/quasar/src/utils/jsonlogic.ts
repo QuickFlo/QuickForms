@@ -177,7 +177,8 @@ function conditionItemToJsonLogic(item: ConditionItem, options: ToJsonLogicOptio
  * Convert a simple condition to JSONLogic
  */
 function simpleConditionToJsonLogic(cond: SimpleCondition, options: ToJsonLogicOptions): JsonLogic {
-  const left = parseValue(cond.left, options.useTemplateSyntax)
+  // Left side is typically a field reference - treat it as a var unless it's a template or literal
+  const left = parseValue(cond.left, options.useTemplateSyntax, { treatAsVar: true })
   const right = parseValue(cond.right, options.useTemplateSyntax)
 
   switch (cond.operator) {
@@ -230,14 +231,27 @@ function simpleConditionToJsonLogic(cond: SimpleCondition, options: ToJsonLogicO
 }
 
 /**
+ * Options for parseValue
+ */
+interface ParseValueOptions {
+  /**
+   * When true, treat non-literal values as variable references.
+   * This is used for the left side of conditions where you're
+   * typically referencing a field path.
+   */
+  treatAsVar?: boolean
+}
+
+/**
  * Parse a value string into JSONLogic value
  * - When useTemplateSyntax is true, {{ ... }} expressions are kept as strings
  * - When useTemplateSyntax is false, variable references become { "var": ... }
+ * - When treatAsVar is true, non-literal values become { "var": ... }
  * - Handles numbers
  * - Handles booleans
  * - Falls back to string
  */
-function parseValue(value: string, useTemplateSyntax = false): unknown {
+function parseValue(value: string, useTemplateSyntax = false, options: ParseValueOptions = {}): unknown {
   if (!value) {
     return ''
   }
@@ -248,20 +262,13 @@ function parseValue(value: string, useTemplateSyntax = false): unknown {
     return value
   }
 
-  // Check if it's a variable reference (starts with step ID or special prefix)
-  // Variables typically look like: stepId.field or $env.VAR
-  // Only convert to { var: ... } when NOT using template syntax
-  if (!useTemplateSyntax && isVariableReference(value)) {
-    return { var: value }
-  }
-
-  // Try to parse as number
+  // Try to parse as number first (numbers are literals, not var references)
   const num = Number(value)
   if (!isNaN(num) && value.trim() !== '') {
     return num
   }
 
-  // Check for booleans
+  // Check for booleans (literals)
   if (value.toLowerCase() === 'true') {
     return true
   }
@@ -269,9 +276,22 @@ function parseValue(value: string, useTemplateSyntax = false): unknown {
     return false
   }
 
-  // Check for null
+  // Check for null (literal)
   if (value.toLowerCase() === 'null') {
     return null
+  }
+
+  // When treatAsVar is true (used for left side of conditions),
+  // convert remaining values to var references
+  if (options.treatAsVar) {
+    return { var: value }
+  }
+
+  // Check if it's a variable reference (starts with step ID or special prefix)
+  // Variables typically look like: stepId.field or $env.VAR
+  // Only convert to { var: ... } when NOT using template syntax
+  if (!useTemplateSyntax && isVariableReference(value)) {
+    return { var: value }
   }
 
   // String value
