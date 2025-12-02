@@ -45,6 +45,19 @@ const options = computed(() => props.schema.oneOf || props.schema.anyOf || []);
 // Selected option index
 const selectedIndex = ref(0);
 
+// Extract const values from a schema's properties
+const extractConstValues = (schema: any): Record<string, any> => {
+  const constValues: Record<string, any> = {};
+  if (!schema?.properties) return constValues;
+
+  for (const [key, propSchema] of Object.entries(schema.properties)) {
+    if ((propSchema as any).const !== undefined) {
+      constValues[key] = (propSchema as any).const;
+    }
+  }
+  return constValues;
+};
+
 // Try to determine initial selection based on data and initialize defaults
 onMounted(() => {
   let initialIndex = 0;
@@ -68,19 +81,19 @@ onMounted(() => {
   const initialSchema = options.value[initialIndex];
   if (initialSchema && initialSchema.properties) {
     const currentValue = (value.value && typeof value.value === 'object') ? value.value : {};
-    const defaults = schemaUtils.getDefaultValue(initialSchema);
+    const defaults = schemaUtils.getDefaultValue(initialSchema) || {};
     
-    // Only proceed if defaults is a valid object
-    if (defaults && typeof defaults === 'object') {
-      // Merge defaults with current value
-      const merged = { ...defaults, ...currentValue };
-      
-      // Only update if we're adding new fields (don't overwrite existing)
-      const hasNewFields = Object.keys(defaults).some(key => !(key in currentValue));
-      if (hasNewFields && setValue) {
-        // Pass false to skip validation during initialization
-        setValue(merged, false);
-      }
+    // Extract const values (discriminator fields) - these MUST be set
+    const constValues = extractConstValues(initialSchema);
+    
+    // Merge: const values take priority, then current values, then defaults
+    const merged = { ...defaults, ...currentValue, ...constValues };
+    
+    // Check if we need to update (new fields or missing const values)
+    const hasNewFields = Object.keys(merged).some(key => !(key in currentValue));
+    if (hasNewFields && setValue) {
+      // Pass false to skip validation during initialization
+      setValue(merged, false);
     }
   }
 });
@@ -172,6 +185,30 @@ const getOptionLabel = (option: any, index: number): string => {
   return option.title || `Option ${index + 1}`;
 };
 
+// Get description for the currently selected option
+const activeOptionDescription = computed((): string | null => {
+  const xOneofDescriptions = (props.schema as any)["x-oneof-descriptions"];
+  if (!xOneofDescriptions) return null;
+
+  const option = activeSchema.value;
+  if (!option) return null;
+
+  // Array format
+  if (Array.isArray(xOneofDescriptions) && xOneofDescriptions[selectedIndex.value]) {
+    return xOneofDescriptions[selectedIndex.value];
+  }
+
+  // Object format keyed by discriminator value
+  if (typeof xOneofDescriptions === 'object') {
+    const discValue = getDiscriminatorValue(option);
+    if (discValue && xOneofDescriptions[discValue]) {
+      return xOneofDescriptions[discValue];
+    }
+  }
+
+  return null;
+});
+
 // Compute display labels for the dropdown/tabs
 const allSelectOptions = computed(() => {
   return options.value.map((option, index) => ({
@@ -243,17 +280,17 @@ const handleOptionChange = (newIndex: number) => {
   const newSchema = options.value[newIndex];
   if (newSchema && newSchema.properties) {
     const currentValue = (value.value && typeof value.value === 'object') ? value.value : {};
-    const defaults = schemaUtils.getDefaultValue(newSchema);
+    const defaults = schemaUtils.getDefaultValue(newSchema) || {};
     
-    // Only proceed if defaults is a valid object
-    if (defaults && typeof defaults === 'object') {
-      // Merge defaults with current value, preferring current values for common fields
-      const merged = { ...defaults, ...currentValue };
-      
-      // Update form value - skip validation during option switch
-      if (setValue) {
-        setValue(merged, false);
-      }
+    // Extract const values (discriminator fields) - these MUST be set
+    const constValues = extractConstValues(newSchema);
+    
+    // Merge: const values take priority, then current values, then defaults
+    const merged = { ...defaults, ...currentValue, ...constValues };
+    
+    // Update form value - skip validation during option switch
+    if (setValue) {
+      setValue(merged, false);
     }
   }
 };
@@ -297,6 +334,14 @@ const handleOptionChange = (newIndex: number) => {
               :disable="disabled || readonly"
             />
           </QTabs>
+
+          <!-- Option description hint -->
+          <div
+            v-if="activeOptionDescription"
+            style="font-size: 0.875rem; color: #666; margin-top: 0.5rem"
+          >
+            {{ activeOptionDescription }}
+          </div>
 
           <div
             style="
@@ -346,6 +391,14 @@ const handleOptionChange = (newIndex: number) => {
             @filter="filterFn"
             v-bind="quasarProps"
           />
+
+          <!-- Option description hint -->
+          <div
+            v-if="activeOptionDescription"
+            style="font-size: 0.875rem; color: #666; margin-top: 0.75rem"
+          >
+            {{ activeOptionDescription }}
+          </div>
 
           <div
             style="
