@@ -48,11 +48,17 @@ const SINGLE_FIELD_PATH = "__root__";
 // This is true when:
 // 1. Schema is an object type without properties (freeform JSON)
 // 2. Schema has x-render defined (custom component should handle the entire object)
+// 3. Schema has oneOf/anyOf at root level (discriminated union)
 const isSingleField = computed(() => {
   const schema = props.schema as any;
   // If x-render is specified on the root, treat entire object as single field
   // so the custom component can handle all properties itself
   if (schema['x-render']) {
+    return true;
+  }
+  // Root-level oneOf/anyOf (e.g., from Zod discriminatedUnion) should be treated as single field
+  // so the OneOfField component can handle the entire schema
+  if (schema.oneOf || schema.anyOf) {
     return true;
   }
   return props.schema.type === "object" && !props.schema.properties;
