@@ -89,9 +89,15 @@ onMounted(() => {
     // Merge: const values take priority, then current values, then defaults
     const merged = { ...defaults, ...currentValue, ...constValues };
     
-    // Check if we need to update (new fields or missing const values)
+    // Check if we need to update:
+    // - Any new fields that don't exist in current value
+    // - Any const values that are missing or different
     const hasNewFields = Object.keys(merged).some(key => !(key in currentValue));
-    if (hasNewFields && setValue) {
+    const hasMissingConst = Object.entries(constValues).some(
+      ([key, val]) => currentValue[key] !== val
+    );
+    
+    if ((hasNewFields || hasMissingConst) && setValue) {
       // Pass false to skip validation during initialization
       setValue(merged, false);
     }
