@@ -31,7 +31,7 @@ const {
   formContext,
 } = useQuasarFormField(props.path, props.schema, {
   label: props.label,
-  componentType: 'jsoneditor',
+  componentType: "jsoneditor",
 });
 
 const $q = useQuasar();
