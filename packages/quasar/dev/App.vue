@@ -69,6 +69,8 @@ const formOptions: QuasarFormOptions = {
     jsoneditor: {},
     jsonlogicbuilder: {
       operatorDisplayMode: "icon",
+      leftPlaceholder: "{{ field }}",
+      rightPlaceholder: "value or {{ expression }}",
     },
   },
 };
@@ -735,7 +737,8 @@ const schema: JSONSchema = {
       },
       "x-oneof-descriptions": {
         now: "Returns the current date and time in the specified timezone",
-        format: "Convert a date/time value to a formatted string (e.g., 'Jan 1, 2025')",
+        format:
+          "Convert a date/time value to a formatted string (e.g., 'Jan 1, 2025')",
         add: "Add a duration to a date (e.g., +5 days, +2 hours)",
       },
       anyOf: [
@@ -752,7 +755,11 @@ const schema: JSONSchema = {
           properties: {
             operation: { type: "string", const: "format" },
             dateTime: { type: "string", title: "Date/Time Input" },
-            outputFormat: { type: "string", title: "Output Format", default: "yyyy-MM-dd" },
+            outputFormat: {
+              type: "string",
+              title: "Output Format",
+              default: "yyyy-MM-dd",
+            },
           },
           required: ["operation"],
         },
@@ -762,7 +769,11 @@ const schema: JSONSchema = {
             operation: { type: "string", const: "add" },
             dateTime: { type: "string", title: "Date/Time Input" },
             amount: { type: "number", title: "Amount" },
-            unit: { type: "string", title: "Unit", enum: ["days", "hours", "minutes"] },
+            unit: {
+              type: "string",
+              title: "Unit",
+              enum: ["days", "hours", "minutes"],
+            },
           },
           required: ["operation"],
         },
