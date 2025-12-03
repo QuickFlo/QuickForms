@@ -335,6 +335,18 @@ export interface QuickFormsQuasarDefaults {
      * Default: false
      */
     useTemplateSyntax?: boolean;
+    /**
+     * Placeholder text for the left input (typically the field/property being compared)
+     * Default: 'Value or path'
+     * Example: '{{ field }}' for template syntax
+     */
+    leftPlaceholder?: string;
+    /**
+     * Placeholder text for the right input (the value to compare against)
+     * Default: 'Value'
+     * Example: 'value or {{ field }}' for template syntax
+     */
+    rightPlaceholder?: string;
   };
 }
 

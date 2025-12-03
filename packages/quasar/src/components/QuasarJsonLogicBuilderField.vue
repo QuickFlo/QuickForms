@@ -210,6 +210,21 @@ const operatorDisplayMode = computed(() => {
   return schemaMode || defaultMode || "short";
 });
 
+// Placeholder text for inputs - configurable via schema or defaults
+const leftPlaceholder = computed(() => {
+  const schemaValue = (props.schema as any)["x-left-placeholder"];
+  const defaultValue =
+    quickformsDefaults.value?.jsonlogicbuilder?.leftPlaceholder;
+  return schemaValue ?? defaultValue ?? "Value or path";
+});
+
+const rightPlaceholder = computed(() => {
+  const schemaValue = (props.schema as any)["x-right-placeholder"];
+  const defaultValue =
+    quickformsDefaults.value?.jsonlogicbuilder?.rightPlaceholder;
+  return schemaValue ?? defaultValue ?? "Value";
+});
+
 const allowedOperators = computed(() => {
   const schemaOperators = (props.schema as any)["x-allowed-operators"];
   const defaultOperators =
@@ -397,18 +412,18 @@ function handleOperatorInput(condition: SimpleCondition, val: string | null) {
           <!-- Simple condition row -->
           <div v-if="item.type === 'condition'" class="condition-row">
             <div class="condition-inputs">
-              <!-- Left value (slot or default input) -->
+            <!-- Left value (slot or default input) -->
               <slot
                 name="left-input"
                 :value="item.left"
                 :on-change="(v: string) => updateConditionLeft(item, v)"
                 :disabled="disabled"
                 :readonly="readonly"
-                :placeholder="'Value or path'"
+                :placeholder="leftPlaceholder"
               >
                 <QInput
                   :model-value="item.left"
-                  placeholder="Value or path"
+                  :placeholder="leftPlaceholder"
                   dense
                   outlined
                   class="condition-input"
@@ -479,12 +494,12 @@ function handleOperatorInput(condition: SimpleCondition, val: string | null) {
                   :on-change="(v: string) => updateConditionRight(item, v)"
                   :disabled="disabled"
                   :readonly="readonly"
-                  :placeholder="'Value'"
+                  :placeholder="rightPlaceholder"
                   :operator="item.operator"
                 >
                   <QInput
                     :model-value="item.right"
-                    placeholder="Value"
+                    :placeholder="rightPlaceholder"
                     dense
                     outlined
                     class="condition-input"
@@ -566,11 +581,11 @@ function handleOperatorInput(condition: SimpleCondition, val: string | null) {
                       :on-change="(v: string) => updateConditionLeft(subItem, v)"
                       :disabled="disabled"
                       :readonly="readonly"
-                      :placeholder="'Value or path'"
+                      :placeholder="leftPlaceholder"
                     >
                       <QInput
                         :model-value="subItem.left"
-                        placeholder="Value or path"
+                        :placeholder="leftPlaceholder"
                         dense
                         outlined
                         class="condition-input"
@@ -650,12 +665,12 @@ function handleOperatorInput(condition: SimpleCondition, val: string | null) {
                         :on-change="(v: string) => updateConditionRight(subItem, v)"
                         :disabled="disabled"
                         :readonly="readonly"
-                        :placeholder="'Value'"
+                        :placeholder="rightPlaceholder"
                         :operator="subItem.operator"
                       >
                         <QInput
                           :model-value="subItem.right"
-                          placeholder="Value"
+                          :placeholder="rightPlaceholder"
                           dense
                           outlined
                           class="condition-input"
