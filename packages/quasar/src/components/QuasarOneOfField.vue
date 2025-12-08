@@ -61,21 +61,40 @@ const extractConstValues = (schema: any): Record<string, any> => {
   return constValues;
 };
 
-// Try to determine initial selection based on data and initialize defaults
-onMounted(() => {
-  let initialIndex = 0;
+// Find option index by matching discriminator const value against data
+const findMatchingOptionIndex = (data: any): number => {
+  if (!data || typeof data !== 'object') {
+    return 0;
+  }
   
-  if (value.value && typeof value.value === 'object' && Object.keys(value.value).length > 0) {
-    // Find matching schema based on existing data
-    const index = options.value.findIndex((optionSchema) => {
-      const result = schemaUtils.validate(optionSchema, value.value);
-      return result.valid;
-    });
-
-    if (index !== -1) {
-      initialIndex = index;
+  // Check each option for a const property that matches the data
+  for (let i = 0; i < options.value.length; i++) {
+    const optionSchema = options.value[i];
+    if (!optionSchema?.properties) {
+      continue;
+    }
+    
+    // Look for const fields and check if data matches
+    for (const [key, propSchema] of Object.entries(optionSchema.properties)) {
+      const constValue = (propSchema as any).const;
+      if (constValue !== undefined && data[key] === constValue) {
+        return i;
+      }
     }
   }
+  
+  // Fallback to schema validation if no const match found
+  const index = options.value.findIndex((optionSchema) => {
+    const result = schemaUtils.validate(optionSchema, data);
+    return result.valid;
+  });
+  
+  return index !== -1 ? index : 0;
+};
+
+// Try to determine initial selection based on data and initialize defaults
+onMounted(() => {
+  const initialIndex = findMatchingOptionIndex(value.value);
   
   selectedIndex.value = initialIndex;
   
