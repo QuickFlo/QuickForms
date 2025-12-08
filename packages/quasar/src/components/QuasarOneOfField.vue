@@ -277,13 +277,9 @@ const filterFn = (val: string, update: (fn: () => void) => void) => {
   });
 };
 
-// Handle manual switch
-const handleOptionChange = (newIndex: number) => {
-  selectedIndex.value = newIndex;
-  
-  // Initialize default values for the new schema's fields
-  // This ensures fields exist even if user never touches them (e.g., empty string for 'value')
-  const newSchema = options.value[newIndex];
+// Apply schema defaults and const values for a given option index
+const applySchemaDefaults = (index: number) => {
+  const newSchema = options.value[index];
   if (newSchema && newSchema.properties) {
     const currentValue = (value.value && typeof value.value === 'object') ? value.value : {};
     const defaults = schemaUtils.getDefaultValue(newSchema) || {};
@@ -299,6 +295,19 @@ const handleOptionChange = (newIndex: number) => {
       setValue(merged, false);
     }
   }
+};
+
+// Watch for tab changes (tabs mode uses v-model directly)
+watch(selectedIndex, (newIndex, oldIndex) => {
+  if (newIndex !== oldIndex) {
+    applySchemaDefaults(newIndex);
+  }
+});
+
+// Handle manual switch (for dropdown mode)
+const handleOptionChange = (newIndex: number) => {
+  selectedIndex.value = newIndex;
+  // Note: the watcher will handle applying defaults
 };
 
 </script>
@@ -360,7 +369,7 @@ const handleOptionChange = (newIndex: number) => {
             <template v-if="shouldRenderPropertiesInline">
               <FieldRenderer
                 v-for="prop in activeProperties"
-                :key="prop.key"
+                :key="`${selectedIndex}-${prop.key}`"
                 :schema="prop.schema"
                 :path="prop.path"
                 :disabled="disabled"
@@ -370,6 +379,7 @@ const handleOptionChange = (newIndex: number) => {
             <!-- Fallback for non-object schemas -->
             <FieldRenderer
               v-else-if="activeSchema"
+              :key="`${selectedIndex}-fallback`"
               :schema="activeSchema"
               :path="path"
               :disabled="disabled"
@@ -417,7 +427,7 @@ const handleOptionChange = (newIndex: number) => {
             <template v-if="shouldRenderPropertiesInline">
               <FieldRenderer
                 v-for="prop in activeProperties"
-                :key="prop.key"
+                :key="`${selectedIndex}-${prop.key}`"
                 :schema="prop.schema"
                 :path="prop.path"
                 :disabled="disabled"
@@ -427,6 +437,7 @@ const handleOptionChange = (newIndex: number) => {
             <!-- Fallback for non-object schemas -->
             <FieldRenderer
               v-else-if="activeSchema"
+              :key="`${selectedIndex}-fallback`"
               :schema="activeSchema"
               :path="path"
               :disabled="disabled"

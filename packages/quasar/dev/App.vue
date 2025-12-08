@@ -650,6 +650,70 @@ const schema: JSONSchema = {
       },
     },
 
+    // === ONEOF WITH SHARED FIELD NAMES (Discriminated Union) ===
+    // This tests that switching tabs properly re-renders fields with the same key
+    // but different labels. Without proper key handling, Vue reuses components
+    // and shows stale labels from the previous tab.
+    connectionConfig: {
+      type: "object",
+      title: "Connection Configuration",
+      description:
+        "Switch between tabs - each has a 'connection' field with different labels",
+      "x-oneof-style": "tabs",
+      oneOf: [
+        {
+          title: "GCP",
+          properties: {
+            provider: { const: "gcp" },
+            connection: {
+              type: "string",
+              title: "GCP Connection",
+              description: "Reference to a GCP service account",
+            },
+            projectId: {
+              type: "string",
+              title: "GCP Project ID",
+            },
+          },
+          required: ["connection"],
+        },
+        {
+          title: "AWS",
+          properties: {
+            provider: { const: "aws" },
+            connection: {
+              type: "string",
+              title: "AWS Connection",
+              description: "Reference to AWS credentials",
+            },
+            region: {
+              type: "string",
+              title: "AWS Region",
+              enum: ["us-east-1", "us-west-2", "eu-west-1"],
+            },
+          },
+          required: ["connection"],
+        },
+        {
+          title: "SFTP",
+          properties: {
+            provider: { const: "sftp" },
+            connection: {
+              type: "string",
+              title: "SFTP Connection",
+              description: "Reference to SFTP server credentials",
+            },
+            remotePath: {
+              type: "string",
+              title: "Remote Path",
+              default: "/",
+            },
+          },
+          required: ["connection"],
+        },
+      ],
+    },
+
     // === ONEOF (CONDITIONAL) WITH TABS AND CUSTOM LABELS ===
     paymentMethod: {
       type: "object",
