@@ -45,6 +45,9 @@ const options = computed(() => props.schema.oneOf || props.schema.anyOf || []);
 // Selected option index
 const selectedIndex = ref(0);
 
+// Track if initial mount has completed (to avoid watcher overwriting existing data)
+const isInitialized = ref(false);
+
 // Extract const values from a schema's properties
 const extractConstValues = (schema: any): Record<string, any> => {
   const constValues: Record<string, any> = {};
@@ -102,6 +105,9 @@ onMounted(() => {
       setValue(merged, false);
     }
   }
+  
+  // Mark initialization complete after mount logic runs
+  isInitialized.value = true;
 });
 
 const activeSchema = computed(() => options.value[selectedIndex.value]);
@@ -298,8 +304,9 @@ const applySchemaDefaults = (index: number) => {
 };
 
 // Watch for tab changes (tabs mode uses v-model directly)
+// Skip during initialization to avoid overwriting existing data
 watch(selectedIndex, (newIndex, oldIndex) => {
-  if (newIndex !== oldIndex) {
+  if (isInitialized.value && newIndex !== oldIndex) {
     applySchemaDefaults(newIndex);
   }
 });
