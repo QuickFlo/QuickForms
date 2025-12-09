@@ -75,7 +75,7 @@ const formOptions: QuasarFormOptions = {
   },
 };
 
-const formData = ref({});
+const formData = ref({connectionConfig: {provider: 'aws', connection: '', region: ''}});
 
 const schema: JSONSchema = {
   type: "object",

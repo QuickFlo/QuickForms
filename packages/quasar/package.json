@@ -1,6 +1,6 @@
 {
   "name": "@quickflo/quickforms-quasar",
-  "version": "1.16.11",
+  "version": "1.16.12",
   "description": "Quasar UI components for QuickForms - JSON Schema form generator",
   "type": "module",
   "main": "./dist/index.js",

@@ -20,6 +20,7 @@ export type ComparisonOperator =
   | '<'
   | '<='
   | 'in'
+  | '!in'
   | 'contains'
   | 'startsWith'
   | 'endsWith'
@@ -92,7 +93,7 @@ export type JsonLogic = Record<string, unknown> | boolean
 
 export const OPERATORS: OperatorInfo[] = [
   { value: '==', label: 'equals', symbol: '=', shortLabel: 'equals', icon: 'drag_handle', searchTerms: ['==', '=', 'eq', 'equal'], rightRequired: true, rightType: 'text' },
-  { value: '!=', label: 'not equals', symbol: '≠', shortLabel: 'not equals', icon: 'not_equal', searchTerms: ['!=', '!', 'neq', 'not'], rightRequired: true, rightType: 'text' },
+  { value: '!=', label: 'not equals', symbol: '≠', shortLabel: 'not equals', icon: 'close', searchTerms: ['!=', '!', 'neq', 'not'], rightRequired: true, rightType: 'text' },
   { value: '>', label: 'greater than', symbol: '>', shortLabel: 'greater than', icon: 'chevron_right', searchTerms: ['>', 'gt', 'greater'], rightRequired: true, rightType: 'number' },
   { value: '>=', label: 'greater or equal', symbol: '≥', shortLabel: 'greater or equal', icon: 'keyboard_tab', searchTerms: ['>=', 'gte'], rightRequired: true, rightType: 'number' },
   { value: '<', label: 'less than', symbol: '<', shortLabel: 'less than', icon: 'chevron_left', searchTerms: ['<', 'lt', 'less'], rightRequired: true, rightType: 'number' },
@@ -101,6 +102,7 @@ export const OPERATORS: OperatorInfo[] = [
   { value: 'startsWith', label: 'starts with', shortLabel: 'starts with', icon: 'format_align_left', searchTerms: ['starts', 'begins'], rightRequired: true, rightType: 'text' },
   { value: 'endsWith', label: 'ends with', shortLabel: 'ends with', icon: 'format_align_right', searchTerms: ['ends', 'finishes'], rightRequired: true, rightType: 'text' },
   { value: 'in', label: 'in list', shortLabel: 'in list', icon: 'list', searchTerms: ['in', 'list'], rightRequired: true, rightType: 'array', description: 'Value is in array' },
+  { value: '!in', label: 'not in list', shortLabel: 'not in list', icon: 'format_list_bulleted', searchTerms: ['!in', 'not in', 'notin', 'exclude'], rightRequired: true, rightType: 'array', description: 'Value is not in array' },
   { value: 'matches', label: 'matches regex', shortLabel: 'matches', icon: 'code', searchTerms: ['matches', 'regex', 'pattern'], rightRequired: true, rightType: 'regex', description: 'Matches regex pattern' },
   { value: 'isTrue', label: 'is true', shortLabel: 'is true', icon: 'check', searchTerms: ['true', 'yes'], rightRequired: false },
   { value: 'isFalse', label: 'is false', shortLabel: 'is false', icon: 'close', searchTerms: ['false', 'no'], rightRequired: false },
@@ -204,6 +206,18 @@ function simpleConditionToJsonLogic(cond: SimpleCondition, options: ToJsonLogicO
             ? parseValue(cond.right, true)
             : parseArrayValue(cond.right, false),
         ],
+      }
+    case '!in':
+      // Not in list - negation of 'in' operator
+      return {
+        '!': {
+          in: [
+            left,
+            options.useTemplateSyntax
+              ? parseValue(cond.right, true)
+              : parseArrayValue(cond.right, false),
+          ],
+        },
       }
     case 'contains':
       // JSONLogic "in" with string checks if substring exists
@@ -440,6 +454,20 @@ function parseSimpleCondition(logic: JsonLogic, options: FromJsonLogicOptions): 
     '<=': '<=',
     in: 'in',
     matches: 'matches',
+  }
+
+  // Check for negated 'in' operator: { "!": { "in": [...] } }
+  if (operator === '!' && typeof args[0] === 'object' && args[0] !== null && 'in' in args[0]) {
+    const inArgs = (args[0] as Record<string, unknown>).in as unknown[]
+    if (Array.isArray(inArgs) && inArgs.length >= 2) {
+      return {
+        id: generateConditionId(),
+        type: 'condition',
+        left: extractValue(inArgs[0], options.useTemplateSyntax),
+        operator: '!in',
+        right: extractValue(inArgs[1], options.useTemplateSyntax),
+      }
+    }
   }
 
   const mappedOp = opMap[operator]
