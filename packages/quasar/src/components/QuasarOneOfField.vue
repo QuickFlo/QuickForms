@@ -45,6 +45,9 @@ const options = computed(() => props.schema.oneOf || props.schema.anyOf || []);
 // Selected option index
 const selectedIndex = ref(0);
 
+// Track if initial mount has completed (to avoid watcher overwriting existing data)
+const isInitialized = ref(false);
+
 // Extract const values from a schema's properties
 const extractConstValues = (schema: any): Record<string, any> => {
   const constValues: Record<string, any> = {};
@@ -58,21 +61,40 @@ const extractConstValues = (schema: any): Record<string, any> => {
   return constValues;
 };
 
-// Try to determine initial selection based on data and initialize defaults
-onMounted(() => {
-  let initialIndex = 0;
+// Find option index by matching discriminator const value against data
+const findMatchingOptionIndex = (data: any): number => {
+  if (!data || typeof data !== 'object') {
+    return 0;
+  }
   
-  if (value.value && typeof value.value === 'object' && Object.keys(value.value).length > 0) {
-    // Find matching schema based on existing data
-    const index = options.value.findIndex((optionSchema) => {
-      const result = schemaUtils.validate(optionSchema, value.value);
-      return result.valid;
-    });
-
-    if (index !== -1) {
-      initialIndex = index;
+  // Check each option for a const property that matches the data
+  for (let i = 0; i < options.value.length; i++) {
+    const optionSchema = options.value[i];
+    if (!optionSchema?.properties) {
+      continue;
+    }
+    
+    // Look for const fields and check if data matches
+    for (const [key, propSchema] of Object.entries(optionSchema.properties)) {
+      const constValue = (propSchema as any).const;
+      if (constValue !== undefined && data[key] === constValue) {
+        return i;
+      }
     }
   }
+  
+  // Fallback to schema validation if no const match found
+  const index = options.value.findIndex((optionSchema) => {
+    const result = schemaUtils.validate(optionSchema, data);
+    return result.valid;
+  });
+  
+  return index !== -1 ? index : 0;
+};
+
+// Try to determine initial selection based on data and initialize defaults
+onMounted(() => {
+  const initialIndex = findMatchingOptionIndex(value.value);
   
   selectedIndex.value = initialIndex;
   
@@ -102,6 +124,9 @@ onMounted(() => {
       setValue(merged, false);
     }
   }
+  
+  // Mark initialization complete after mount logic runs
+  isInitialized.value = true;
 });
 
 const activeSchema = computed(() => options.value[selectedIndex.value]);
@@ -277,13 +302,9 @@ const filterFn = (val: string, update: (fn: () => void) => void) => {
   });
 };
 
-// Handle manual switch
-const handleOptionChange = (newIndex: number) => {
-  selectedIndex.value = newIndex;
-  
-  // Initialize default values for the new schema's fields
-  // This ensures fields exist even if user never touches them (e.g., empty string for 'value')
-  const newSchema = options.value[newIndex];
+// Apply schema defaults and const values for a given option index
+const applySchemaDefaults = (index: number) => {
+  const newSchema = options.value[index];
   if (newSchema && newSchema.properties) {
     const currentValue = (value.value && typeof value.value === 'object') ? value.value : {};
     const defaults = schemaUtils.getDefaultValue(newSchema) || {};
@@ -299,6 +320,20 @@ const handleOptionChange = (newIndex: number) => {
       setValue(merged, false);
     }
   }
+};
+
+// Watch for tab changes (tabs mode uses v-model directly)
+// Skip during initialization to avoid overwriting existing data
+watch(selectedIndex, (newIndex, oldIndex) => {
+  if (isInitialized.value && newIndex !== oldIndex) {
+    applySchemaDefaults(newIndex);
+  }
+});
+
+// Handle manual switch (for dropdown mode)
+const handleOptionChange = (newIndex: number) => {
+  selectedIndex.value = newIndex;
+  // Note: the watcher will handle applying defaults
 };
 
 </script>
@@ -360,7 +395,7 @@ const handleOptionChange = (newIndex: number) => {
             <template v-if="shouldRenderPropertiesInline">
               <FieldRenderer
                 v-for="prop in activeProperties"
-                :key="prop.key"
+                :key="`${selectedIndex}-${prop.key}`"
                 :schema="prop.schema"
                 :path="prop.path"
                 :disabled="disabled"
@@ -370,6 +405,7 @@ const handleOptionChange = (newIndex: number) => {
             <!-- Fallback for non-object schemas -->
             <FieldRenderer
               v-else-if="activeSchema"
+              :key="`${selectedIndex}-fallback`"
               :schema="activeSchema"
               :path="path"
               :disabled="disabled"
@@ -417,7 +453,7 @@ const handleOptionChange = (newIndex: number) => {
             <template v-if="shouldRenderPropertiesInline">
               <FieldRenderer
                 v-for="prop in activeProperties"
-                :key="prop.key"
+                :key="`${selectedIndex}-${prop.key}`"
                 :schema="prop.schema"
                 :path="prop.path"
                 :disabled="disabled"
@@ -427,6 +463,7 @@ const handleOptionChange = (newIndex: number) => {
             <!-- Fallback for non-object schemas -->
             <FieldRenderer
               v-else-if="activeSchema"
+              :key="`${selectedIndex}-fallback`"
               :schema="activeSchema"
               :path="path"
               :disabled="disabled"
