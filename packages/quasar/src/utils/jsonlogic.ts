@@ -164,9 +164,8 @@ function conditionItemToJsonLogic(item: ConditionItem, options: ToJsonLogicOptio
     if (item.conditions.length === 0) {
       return true
     }
-    if (item.conditions.length === 1) {
-      return conditionItemToJsonLogic(item.conditions[0]!, options)
-    }
+    // Always preserve group structure, even with single condition
+    // This ensures groups persist through save/load cycles
     return {
       [item.logic]: item.conditions.map((c) => conditionItemToJsonLogic(c, options)),
     }
@@ -445,7 +444,6 @@ function parseSimpleCondition(logic: JsonLogic, options: FromJsonLogicOptions): 
     if (Array.isArray(inArgs) && inArgs.length >= 2) {
       const left = extractValue(inArgs[0], options.useTemplateSyntax)
       const right = extractValue(inArgs[1], options.useTemplateSyntax)
-      console.log('[JSONLogic] Parsing negated in:', { inArgs, left, right, useTemplateSyntax: options.useTemplateSyntax })
       return {
         id: generateConditionId(),
         type: 'condition',
