@@ -438,6 +438,24 @@ function parseSimpleCondition(logic: JsonLogic, options: FromJsonLogicOptions): 
   const operator = keys[0]!
   const args = (logic as Record<string, unknown>)[operator]
 
+  // Check for negated 'in' operator BEFORE array validation: { "!": { "in": [...] } }
+  // The "!" operator has an object value, not an array
+  if (operator === '!' && typeof args === 'object' && args !== null && 'in' in args) {
+    const inArgs = (args as Record<string, unknown>).in as unknown[]
+    if (Array.isArray(inArgs) && inArgs.length >= 2) {
+      const left = extractValue(inArgs[0], options.useTemplateSyntax)
+      const right = extractValue(inArgs[1], options.useTemplateSyntax)
+      console.log('[JSONLogic] Parsing negated in:', { inArgs, left, right, useTemplateSyntax: options.useTemplateSyntax })
+      return {
+        id: generateConditionId(),
+        type: 'condition',
+        left,
+        operator: '!in',
+        right,
+      }
+    }
+  }
+
   if (!Array.isArray(args)) {
     return createEmptyCondition()
   }
@@ -454,23 +472,6 @@ function parseSimpleCondition(logic: JsonLogic, options: FromJsonLogicOptions): 
     '<=': '<=',
     in: 'in',
     matches: 'matches',
-  }
-
-  // Check for negated 'in' operator: { "!": { "in": [...] } }
-  if (operator === '!' && typeof args[0] === 'object' && args[0] !== null && 'in' in args[0]) {
-    const inArgs = (args[0] as Record<string, unknown>).in as unknown[]
-    if (Array.isArray(inArgs) && inArgs.length >= 2) {
-      const left = extractValue(inArgs[0], options.useTemplateSyntax)
-      const right = extractValue(inArgs[1], options.useTemplateSyntax)
-      console.log('[JSONLogic] Parsing negated in:', { inArgs, left, right, useTemplateSyntax: options.useTemplateSyntax })
-      return {
-        id: generateConditionId(),
-        type: 'condition',
-        left,
-        operator: '!in',
-        right,
-      }
-    }
   }
 
   const mappedOp = opMap[operator]
