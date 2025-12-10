@@ -87,9 +87,15 @@ watch(
     }
 
     if (newValue && typeof newValue === "object") {
-      conditionRoot.value = fromJsonLogic(newValue as Record<string, unknown>, {
+      const parsed = fromJsonLogic(newValue as Record<string, unknown>, {
         useTemplateSyntax: useTemplateSyntax.value,
       });
+      console.log('[QuasarJsonLogicBuilder] Loaded condition:', { 
+        input: newValue, 
+        parsed, 
+        useTemplateSyntax: useTemplateSyntax.value 
+      });
+      conditionRoot.value = parsed;
       jsonText.value = JSON.stringify(newValue, null, 2);
     } else {
       conditionRoot.value = createEmptyRoot();

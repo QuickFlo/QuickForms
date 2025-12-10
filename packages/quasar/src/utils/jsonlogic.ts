@@ -460,12 +460,15 @@ function parseSimpleCondition(logic: JsonLogic, options: FromJsonLogicOptions): 
   if (operator === '!' && typeof args[0] === 'object' && args[0] !== null && 'in' in args[0]) {
     const inArgs = (args[0] as Record<string, unknown>).in as unknown[]
     if (Array.isArray(inArgs) && inArgs.length >= 2) {
+      const left = extractValue(inArgs[0], options.useTemplateSyntax)
+      const right = extractValue(inArgs[1], options.useTemplateSyntax)
+      console.log('[JSONLogic] Parsing negated in:', { inArgs, left, right, useTemplateSyntax: options.useTemplateSyntax })
       return {
         id: generateConditionId(),
         type: 'condition',
-        left: extractValue(inArgs[0], options.useTemplateSyntax),
+        left,
         operator: '!in',
-        right: extractValue(inArgs[1], options.useTemplateSyntax),
+        right,
       }
     }
   }
