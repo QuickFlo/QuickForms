@@ -893,7 +893,9 @@ function handleOperatorInput(condition: SimpleCondition, val: string | null) {
 }
 
 .group-actions {
-  margin-top: 4px;
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px dashed rgba(0, 0, 0, 0.08);
 }
 
 .logic-connector {

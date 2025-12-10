@@ -1,6 +1,6 @@
 {
   "name": "@quickflo/quickforms-vue",
-  "version": "1.16.13",
+  "version": "1.16.15",
   "description": "Vue 3 bindings for QuickForms - JSON Schema form generator",
   "type": "module",
   "main": "./dist/index.js",
