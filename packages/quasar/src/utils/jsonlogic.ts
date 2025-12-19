@@ -422,11 +422,86 @@ function jsonLogicToConditionItem(logic: JsonLogic, options: FromJsonLogicOption
 }
 
 /**
+ * Detect special patterns that collapse to single operators
+ */
+function detectSpecialPattern(logic: JsonLogic, options: FromJsonLogicOptions): SimpleCondition | null {
+  if (typeof logic !== 'object' || logic === null) {
+    return null
+  }
+
+  // Pattern: { "and": [{ "!=": [left, ""] }, { "!=": [left, null] }, { "!!": [left] }] }
+  // Collapses to: isNotEmpty
+  if ('and' in logic && Array.isArray(logic.and) && logic.and.length === 3) {
+    const [first, second, third] = logic.and as JsonLogic[]
+    if (
+      first && typeof first === 'object' && '!=' in first &&
+      second && typeof second === 'object' && '!=' in second &&
+      third && typeof third === 'object' && '!!' in third
+    ) {
+      const firstArgs = (first as any)['!=']  
+      const secondArgs = (second as any)['!=']
+      const thirdArgs = (third as any)['!!']
+      
+      if (
+        Array.isArray(firstArgs) && firstArgs[1] === '' &&
+        Array.isArray(secondArgs) && secondArgs[1] === null &&
+        Array.isArray(thirdArgs) && thirdArgs.length === 1
+      ) {
+        return {
+          id: generateConditionId(),
+          type: 'condition',
+          left: extractValue(firstArgs[0], options.useTemplateSyntax),
+          operator: 'isNotEmpty',
+          right: '',
+        }
+      }
+    }
+  }
+
+  // Pattern: { "or": [{ "==": [left, ""] }, { "==": [left, null] }, { "!": [left] }] }
+  // Collapses to: isEmpty
+  if ('or' in logic && Array.isArray(logic.or) && logic.or.length === 3) {
+    const [first, second, third] = logic.or as JsonLogic[]
+    if (
+      first && typeof first === 'object' && '==' in first &&
+      second && typeof second === 'object' && '==' in second &&
+      third && typeof third === 'object' && '!' in third
+    ) {
+      const firstArgs = (first as any)['==']
+      const secondArgs = (second as any)['==']
+      const thirdArgs = (third as any)['!']
+      
+      if (
+        Array.isArray(firstArgs) && firstArgs[1] === '' &&
+        Array.isArray(secondArgs) && secondArgs[1] === null &&
+        Array.isArray(thirdArgs) && thirdArgs.length === 1
+      ) {
+        return {
+          id: generateConditionId(),
+          type: 'condition',
+          left: extractValue(firstArgs[0], options.useTemplateSyntax),
+          operator: 'isEmpty',
+          right: '',
+        }
+      }
+    }
+  }
+
+  return null
+}
+
+/**
  * Parse a JSONLogic expression as a simple condition
  */
 function parseSimpleCondition(logic: JsonLogic, options: FromJsonLogicOptions): SimpleCondition {
   if (typeof logic !== 'object' || logic === null) {
     return createEmptyCondition()
+  }
+
+  // Check for special patterns first (isEmpty, isNotEmpty)
+  const specialPattern = detectSpecialPattern(logic, options)
+  if (specialPattern) {
+    return specialPattern
   }
 
   const keys = Object.keys(logic)
