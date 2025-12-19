@@ -315,20 +315,8 @@ const applySchemaDefaults = (index: number) => {
     // Merge: const values take priority, then current values, then defaults
     const merged = { ...defaults, ...currentValue, ...constValues };
 
-    // IMPORTANT: Ensure discriminator const values are always present
-    // This prevents empty objects when all visible fields are optional
-    // The merged object must at minimum contain the discriminator field
-    const hasDiscriminator = Object.keys(constValues).length > 0;
-    const mergedHasValues = Object.keys(merged).some(key => {
-      const val = merged[key];
-      // Check if value is meaningful (not undefined, null, or empty string)
-      return val !== undefined && val !== null && val !== '';
-    });
-
     // Update form value - skip validation during option switch
     if (setValue) {
-      // Always set the value if we have discriminator const values,
-      // even if merged appears "empty" (discriminator is the value)
       setValue(merged, false);
     }
   }
