@@ -270,17 +270,25 @@ const onSubmit = handleSubmit((submittedValues) => {
   }
 });
 
-// Get all top-level properties from schema
+// Get all top-level properties from schema, respecting x-field-order if present
 const properties = computed(() => {
   if (props.schema.type !== "object" || !props.schema.properties) {
     return [];
   }
 
-  return Object.entries(props.schema.properties).map(([key, fieldSchema]) => ({
-    key,
-    schema: fieldSchema,
-    path: key,
-  }));
+  // Get field order from x-field-order or fall back to Object.keys order
+  const fieldOrder = (props.schema as any)['x-field-order'] as string[] | undefined;
+  const keys = fieldOrder && Array.isArray(fieldOrder) && fieldOrder.length > 0
+    ? fieldOrder
+    : Object.keys(props.schema.properties);
+
+  return keys
+    .filter(key => key in props.schema.properties!)
+    .map((key) => ({
+      key,
+      schema: props.schema.properties![key],
+      path: key,
+    }));
 });
 
 // Compute field gap - convert Quasar sizes to CSS values

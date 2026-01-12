@@ -13,15 +13,23 @@ const props = withDefaults(defineProps<FieldProps>(), {
 const { label, hint, errorMessage } = useFormField(props.path, props.schema, { label: props.label });
 const fieldId = generateFieldId(props.path);
 
-// Get properties to render
+// Get properties to render, respecting x-field-order if present
 const properties = computed(() => {
   if (!props.schema.properties) return [];
-  
-  return Object.entries(props.schema.properties).map(([key, schema]) => ({
-    key,
-    schema,
-    path: props.path ? `${props.path}.${key}` : key
-  }));
+
+  // Get field order from x-field-order or fall back to Object.keys order
+  const fieldOrder = (props.schema as any)['x-field-order'] as string[] | undefined;
+  const keys = fieldOrder && Array.isArray(fieldOrder) && fieldOrder.length > 0
+    ? fieldOrder
+    : Object.keys(props.schema.properties);
+
+  return keys
+    .filter(key => key in props.schema.properties!)
+    .map((key) => ({
+      key,
+      schema: props.schema.properties![key],
+      path: props.path ? `${props.path}.${key}` : key
+    }));
 });
 </script>
 
