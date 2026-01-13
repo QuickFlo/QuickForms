@@ -5,9 +5,15 @@ import { FieldRenderer } from "@quickflo/quickforms-vue";
 import type { FieldProps } from "@quickflo/quickforms-vue";
 import { useQuasarFormField } from "../composables/useQuasarFormField";
 
-const props = withDefaults(defineProps<FieldProps>(), {
+interface Props extends FieldProps {
+  /** Hide the label (used when parent component already shows it) */
+  hideLabel?: boolean;
+}
+
+const props = withDefaults(defineProps<Props>(), {
   disabled: false,
   readonly: false,
+  hideLabel: false,
 });
 
 const {
@@ -108,11 +114,13 @@ const properties = computed(() => {
     >
       <template #header>
         <div class="quickform-object-header-content">
-          {{ label }}
-          <span v-if="required" class="quickform-required-indicator">*</span>
-          <span v-if="!required && showOptionalIndicator" class="quickform-optional-indicator">
-            (optional)
-          </span>
+          <template v-if="!hideLabel">
+            {{ label }}
+            <span v-if="required" class="quickform-required-indicator">*</span>
+            <span v-if="!required && showOptionalIndicator" class="quickform-optional-indicator">
+              (optional)
+            </span>
+          </template>
         </div>
       </template>
 
