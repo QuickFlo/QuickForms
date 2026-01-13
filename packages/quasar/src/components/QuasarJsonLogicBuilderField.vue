@@ -442,6 +442,7 @@ function handleOperatorInput(condition: SimpleCondition, val: string | null) {
                 emit-value
                 map-options
                 dense
+                options-dense
                 outlined
                 use-input
                 input-debounce="0"
@@ -603,6 +604,7 @@ function handleOperatorInput(condition: SimpleCondition, val: string | null) {
                       emit-value
                       map-options
                       dense
+                      options-dense
                       outlined
                       use-input
                       input-debounce="0"
@@ -822,12 +824,13 @@ function handleOperatorInput(condition: SimpleCondition, val: string | null) {
 
 .condition-row {
   display: flex;
-  align-items: center;
+  align-items: flex-start; /* Align to top when wrapped */
   gap: 8px;
   padding: 8px;
   background: white;
   border: 1px solid rgba(0, 0, 0, 0.08);
   border-radius: 6px;
+  min-width: 0; /* Prevent flex item from overflowing */
 }
 
 .condition-row--nested {
@@ -839,21 +842,37 @@ function handleOperatorInput(condition: SimpleCondition, val: string | null) {
   align-items: center;
   gap: 8px;
   flex: 1;
+  min-width: 0; /* Allow flex children to shrink below content size */
+  flex-wrap: wrap; /* Wrap to next row when tight */
 }
 
 .condition-input {
-  flex: 1;
-  min-width: 120px;
+  flex: 1 1 120px; /* Grow, shrink, base width 120px - will wrap when can't fit */
+  min-width: 100px;
 }
 
 .condition-input-placeholder {
-  flex: 1;
-  min-width: 120px;
+  flex: 1 1 120px;
+  min-width: 100px;
 }
 
 .condition-operator {
-  width: 160px;
-  flex-shrink: 0;
+  flex: 1 0 90px; /* Compact default, can grow when wrapped */
+  max-width: 110px; /* Stay compact when inline with inputs */
+}
+
+/* When wrapped to own line, allow operator to grow fully */
+@container (max-width: 400px) {
+  .condition-operator {
+    max-width: none;
+  }
+}
+
+/* Fallback for browsers without container queries - use parent width */
+@media (max-width: 500px) {
+  .condition-operator {
+    max-width: none;
+  }
 }
 
 /* Hide clear icon but keep clearable functionality */
