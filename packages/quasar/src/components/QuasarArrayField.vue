@@ -210,6 +210,8 @@ const getItemLabel = (index: number) => {
         <div class="quickform-array-label">
           {{ label }}
           <span v-if="schema.required" class="quickform-required-indicator">*</span>
+          <!-- Slot for additional header actions (e.g., template toggle buttons) -->
+          <slot name="header-actions"></slot>
         </div>
         <!-- Add button on same line only for top-right -->
         <div v-if="isTopPosition && isRightPosition">
@@ -340,6 +342,9 @@ const getItemLabel = (index: number) => {
 
 .quickform-array-label {
   font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 
 .quickform-required-indicator {

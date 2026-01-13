@@ -121,6 +121,8 @@ const properties = computed(() => {
               (optional)
             </span>
           </template>
+          <!-- Slot for additional header actions (e.g., template toggle buttons) -->
+          <slot name="header-actions"></slot>
         </div>
       </template>
 
@@ -176,6 +178,10 @@ const properties = computed(() => {
   font-size: 0.95rem;
   font-weight: 500;
   color: #333;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex: 1;
 }
 
 .quickform-required-indicator {

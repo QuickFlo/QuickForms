@@ -108,8 +108,21 @@ interface FieldProps {
   path: string          // Field path in form data
   disabled?: boolean    // Disable field input
   readonly?: boolean    // Make field read-only
+  label?: string        // Override label (defaults to schema.title or last path segment)
 }
 ```
+
+### Container Component Props (ObjectField, ArrayField)
+
+Container components that render nested fields accept an additional prop:
+
+```typescript
+interface ContainerFieldProps extends FieldProps {
+  hideLabel?: boolean   // Hide the label (useful when a wrapper component already displays it)
+}
+```
+
+The `hideLabel` prop is used by wrapper components (like custom template fields) that display their own label with additional UI controls, preventing duplicate labels.
 
 ---
 

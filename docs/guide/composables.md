@@ -99,7 +99,7 @@ const { value, errorMessage, label, hint, required } = useFormField(
 **Label Resolution:**
 - Uses override from `options.label` if provided
 - Falls back to `schema.title`
-- Falls back to `path`
+- Falls back to last segment of `path` (e.g., `maxAllowed` instead of `userInfo.generalInfo.mediaTypeConfig.maxAllowed`)
 
 ### Advanced: Custom Validators
 
