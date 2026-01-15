@@ -422,11 +422,86 @@ function jsonLogicToConditionItem(logic: JsonLogic, options: FromJsonLogicOption
 }
 
 /**
+ * Detect special patterns that collapse to single operators
+ */
+function detectSpecialPattern(logic: JsonLogic, options: FromJsonLogicOptions): SimpleCondition | null {
+  if (typeof logic !== 'object' || logic === null) {
+    return null
+  }
+
+  // Pattern: { "and": [{ "!=": [left, ""] }, { "!=": [left, null] }, { "!!": [left] }] }
+  // Collapses to: isNotEmpty
+  if ('and' in logic && Array.isArray(logic.and) && logic.and.length === 3) {
+    const [first, second, third] = logic.and as JsonLogic[]
+    if (
+      first && typeof first === 'object' && '!=' in first &&
+      second && typeof second === 'object' && '!=' in second &&
+      third && typeof third === 'object' && '!!' in third
+    ) {
+      const firstArgs = (first as any)['!=']  
+      const secondArgs = (second as any)['!=']
+      const thirdArgs = (third as any)['!!']
+      
+      if (
+        Array.isArray(firstArgs) && firstArgs[1] === '' &&
+        Array.isArray(secondArgs) && secondArgs[1] === null &&
+        Array.isArray(thirdArgs) && thirdArgs.length === 1
+      ) {
+        return {
+          id: generateConditionId(),
+          type: 'condition',
+          left: extractValue(firstArgs[0], options.useTemplateSyntax),
+          operator: 'isNotEmpty',
+          right: '',
+        }
+      }
+    }
+  }
+
+  // Pattern: { "or": [{ "==": [left, ""] }, { "==": [left, null] }, { "!": [left] }] }
+  // Collapses to: isEmpty
+  if ('or' in logic && Array.isArray(logic.or) && logic.or.length === 3) {
+    const [first, second, third] = logic.or as JsonLogic[]
+    if (
+      first && typeof first === 'object' && '==' in first &&
+      second && typeof second === 'object' && '==' in second &&
+      third && typeof third === 'object' && '!' in third
+    ) {
+      const firstArgs = (first as any)['==']
+      const secondArgs = (second as any)['==']
+      const thirdArgs = (third as any)['!']
+      
+      if (
+        Array.isArray(firstArgs) && firstArgs[1] === '' &&
+        Array.isArray(secondArgs) && secondArgs[1] === null &&
+        Array.isArray(thirdArgs) && thirdArgs.length === 1
+      ) {
+        return {
+          id: generateConditionId(),
+          type: 'condition',
+          left: extractValue(firstArgs[0], options.useTemplateSyntax),
+          operator: 'isEmpty',
+          right: '',
+        }
+      }
+    }
+  }
+
+  return null
+}
+
+/**
  * Parse a JSONLogic expression as a simple condition
  */
 function parseSimpleCondition(logic: JsonLogic, options: FromJsonLogicOptions): SimpleCondition {
   if (typeof logic !== 'object' || logic === null) {
     return createEmptyCondition()
+  }
+
+  // Check for special patterns first (isEmpty, isNotEmpty)
+  const specialPattern = detectSpecialPattern(logic, options)
+  if (specialPattern) {
+    return specialPattern
   }
 
   const keys = Object.keys(logic)
@@ -458,6 +533,84 @@ function parseSimpleCondition(logic: JsonLogic, options: FromJsonLogicOptions): 
     return createEmptyCondition()
   }
 
+  // Handle 'in' operator - distinguish between "contains" (string contains) and "in" (in list)
+  // "contains" outputs: { in: [substring, string] } - substring is in string
+  // "in" (in list) outputs: { in: [value, array] } - value is in array
+  if (operator === 'in' && args.length >= 2) {
+    const first = args[0]
+    const second = args[1]
+
+    // Detect "contains" pattern: { in: [substring, {var: path}] } or { in: [substring, string] }
+    // where the second argument is a var reference (the string to search in)
+    // and first is the substring to look for
+    //
+    // For "in list", the pattern is: { in: [{var: path}, array] }
+    // where first is the value to find and second is an array
+    const secondIsArray = Array.isArray(second)
+    const secondIsVarRef = typeof second === 'object' && second !== null && 'var' in second
+    const firstIsVarRef = typeof first === 'object' && first !== null && 'var' in first
+
+    // If second is an array literal, this is "in list"
+    if (secondIsArray) {
+      return {
+        id: generateConditionId(),
+        type: 'condition',
+        left: extractValue(first, options.useTemplateSyntax),
+        operator: 'in',
+        right: extractValue(second, options.useTemplateSyntax),
+      }
+    }
+
+    // If second is a var reference and first is NOT a var reference (or is a simple string/value),
+    // this is likely "contains" (string contains substring)
+    // Pattern: { in: ["substring", { var: "path.to.string" }] }
+    if (secondIsVarRef && !firstIsVarRef) {
+      return {
+        id: generateConditionId(),
+        type: 'condition',
+        // For "contains", left is the string (second in JSONLogic), right is the substring (first in JSONLogic)
+        left: extractValue(second, options.useTemplateSyntax),
+        operator: 'contains',
+        right: extractValue(first, options.useTemplateSyntax),
+      }
+    }
+
+    // If both are var refs, we need to use context to decide
+    // Default to "contains" if second is a var ref (more common use case for string operations)
+    if (secondIsVarRef && firstIsVarRef) {
+      // Both are var refs - this could be either "contains" or "in list"
+      // Default to "contains" since { in: [needle, haystack] } is the JSONLogic pattern for string contains
+      return {
+        id: generateConditionId(),
+        type: 'condition',
+        left: extractValue(second, options.useTemplateSyntax),
+        operator: 'contains',
+        right: extractValue(first, options.useTemplateSyntax),
+      }
+    }
+
+    // If second is a string and first is a var ref, this is "in list" with a template
+    // Pattern: { in: [{ var: "path" }, "{{array}}" ] } (template mode)
+    if (firstIsVarRef && typeof second === 'string') {
+      return {
+        id: generateConditionId(),
+        type: 'condition',
+        left: extractValue(first, options.useTemplateSyntax),
+        operator: 'in',
+        right: extractValue(second, options.useTemplateSyntax),
+      }
+    }
+
+    // Default fallback for 'in' - treat as "in list"
+    return {
+      id: generateConditionId(),
+      type: 'condition',
+      left: extractValue(first, options.useTemplateSyntax),
+      operator: 'in',
+      right: extractValue(second, options.useTemplateSyntax),
+    }
+  }
+
   // Map JSONLogic operators to our operators
   const opMap: Record<string, ComparisonOperator> = {
     '==': '==',
@@ -468,7 +621,6 @@ function parseSimpleCondition(logic: JsonLogic, options: FromJsonLogicOptions): 
     '>=': '>=',
     '<': '<',
     '<=': '<=',
-    in: 'in',
     matches: 'matches',
   }
 

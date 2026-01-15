@@ -517,6 +517,119 @@ All `x-*` attributes are optional. QuickForms works perfectly with standard JSON
 
 ---
 
+## `x-field-order`
+
+**Purpose:** Control the display order of fields within an object
+
+**Type:** `number` (on individual fields) or `string[]` (on parent object)
+
+**Default:** `999` (fields without `x-field-order` appear last, sorted alphabetically)
+
+QuickForms supports two approaches to field ordering:
+
+### Approach 1: Numeric Order on Individual Fields
+
+Assign a numeric `x-field-order` value to each field. Lower numbers appear first, and fields with the same order are sorted alphabetically by key.
+
+**Example:**
+```typescript
+{
+  type: 'object',
+  properties: {
+    // These fields will render in order: isActive, firstName, age, status
+    // regardless of their order in the schema
+    status: {
+      type: 'string',
+      enum: ['active', 'inactive'],
+      'x-field-order': 400  // Enums: 400
+    },
+    firstName: {
+      type: 'string',
+      'x-field-order': 200  // Strings: 200
+    },
+    age: {
+      type: 'number',
+      'x-field-order': 300  // Numbers: 300
+    },
+    isActive: {
+      type: 'boolean',
+      'x-field-order': 100  // Booleans: 100 (appears first)
+    }
+  }
+}
+```
+
+**Recommended Order Values for Type Grouping:**
+| Field Type | Order Value |
+|-----------|-------------|
+| Boolean | 100 |
+| String | 200 |
+| Number | 300 |
+| Enum | 400 |
+| String Array | 500 |
+| Object Array | 600 |
+| Object | 700 |
+
+### Approach 2: Array Order on Parent Object
+
+Alternatively, specify an explicit field order array on the parent object's schema:
+
+**Example:**
+```typescript
+{
+  type: 'object',
+  'x-field-order': ['firstName', 'lastName', 'email', 'age'],
+  properties: {
+    age: { type: 'number' },
+    email: { type: 'string', format: 'email' },
+    firstName: { type: 'string' },
+    lastName: { type: 'string' }
+  }
+}
+```
+
+**Priority:** If both approaches are used, the array-based approach takes precedence.
+
+### Nested Object Ordering
+
+Field ordering works recursively. Nested objects respect their own `x-field-order` values:
+
+```typescript
+{
+  type: 'object',
+  properties: {
+    settings: {
+      type: 'object',
+      'x-field-order': 700,  // Parent field order
+      properties: {
+        // Nested fields have their own ordering
+        notifications: {
+          type: 'boolean',
+          'x-field-order': 100  // Boolean first in nested object
+        },
+        theme: {
+          type: 'string',
+          enum: ['light', 'dark'],
+          'x-field-order': 400  // Enum after strings/numbers
+        },
+        displayName: {
+          type: 'string',
+          'x-field-order': 200  // String second
+        }
+      }
+    }
+  }
+}
+```
+
+**Use Cases:**
+- Group similar field types together (all booleans, then strings, etc.)
+- Ensure important fields appear first regardless of schema definition order
+- Create consistent field ordering across forms generated from different schemas
+- Automatic type-based ordering in schema enhancement pipelines
+
+---
+
 ## `x-render`
 
 **Purpose:** Force a specific renderer for a field

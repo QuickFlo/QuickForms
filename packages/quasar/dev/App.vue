@@ -82,6 +82,176 @@ const schema: JSONSchema = {
   title: "Comprehensive Form Demo",
   description: "Demonstrating all QuickForms Quasar features",
   properties: {
+    // === FIELD ORDERING DEMO ===
+    // This object demonstrates numeric x-field-order on individual fields.
+    // Fields are sorted by their x-field-order value (lower = first).
+    // Fields without x-field-order default to 999 and sort alphabetically.
+    fieldOrderingDemo: {
+      type: "object",
+      title: "Field Ordering Demo (x-field-order)",
+      description: "Fields sorted by numeric x-field-order: booleans (100), strings (200), numbers (300), enums (400), string arrays (500), object arrays (600), objects (700)",
+      properties: {
+        // These fields are intentionally out of order in the schema,
+        // but will render sorted by x-field-order
+
+        // Object (order: 700) - should appear last among typed fields
+        contactInfo: {
+          type: "object",
+          title: "Contact Info (order: 700)",
+          "x-field-order": 700,
+          properties: {
+            phone: { type: "string", title: "Phone" },
+            email: { type: "string", title: "Email", format: "email" },
+          },
+        },
+
+        // String (order: 200)
+        lastName: {
+          type: "string",
+          title: "Last Name (order: 200)",
+          "x-field-order": 200,
+        },
+
+        // Object Array (order: 600) - should appear after string arrays
+        teamMembers: {
+          type: "array",
+          title: "Team Members (order: 600)",
+          "x-field-order": 600,
+          items: {
+            type: "object",
+            properties: {
+              name: { type: "string", title: "Name" },
+              role: { type: "string", title: "Role", enum: ["Dev", "QA", "PM"] },
+            },
+          },
+          "x-item-label": "{{name}} - {{role}}",
+        },
+
+        // Boolean (order: 100) - should appear first
+        isActive: {
+          type: "boolean",
+          title: "Is Active (order: 100)",
+          "x-field-order": 100,
+        },
+
+        // Enum (order: 400)
+        priority: {
+          type: "string",
+          title: "Priority (order: 400)",
+          enum: ["low", "medium", "high"],
+          "x-field-order": 400,
+        },
+
+        // String Array (order: 500) - should appear after enums
+        tags: {
+          type: "array",
+          title: "Tags (order: 500)",
+          "x-field-order": 500,
+          "x-render": "tags",
+          items: { type: "string" },
+        },
+
+        // Number (order: 300)
+        age: {
+          type: "number",
+          title: "Age (order: 300)",
+          "x-field-order": 300,
+        },
+
+        // String (order: 200)
+        firstName: {
+          type: "string",
+          title: "First Name (order: 200)",
+          "x-field-order": 200,
+        },
+
+        // Boolean (order: 100)
+        isVerified: {
+          type: "boolean",
+          title: "Is Verified (order: 100)",
+          "x-field-order": 100,
+        },
+
+        // Another nested object (order: 700)
+        settings: {
+          type: "object",
+          title: "Settings (order: 700)",
+          "x-field-order": 700,
+          properties: {
+            // Nested fields also respect x-field-order!
+            notifications: {
+              type: "boolean",
+              title: "Enable Notifications (nested order: 100)",
+              "x-field-order": 100,
+            },
+            theme: {
+              type: "string",
+              title: "Theme (nested order: 400)",
+              enum: ["light", "dark", "auto"],
+              "x-field-order": 400,
+            },
+            displayName: {
+              type: "string",
+              title: "Display Name (nested order: 200)",
+              "x-field-order": 200,
+            },
+            maxItems: {
+              type: "number",
+              title: "Max Items (nested order: 300)",
+              "x-field-order": 300,
+            },
+          },
+        },
+
+        // Number (order: 300)
+        score: {
+          type: "number",
+          title: "Score (order: 300)",
+          "x-field-order": 300,
+        },
+
+        // Another string array (order: 500)
+        keywords: {
+          type: "array",
+          title: "Keywords (order: 500)",
+          "x-field-order": 500,
+          "x-render": "tags",
+          items: { type: "string" },
+        },
+
+        // Enum (order: 400)
+        status: {
+          type: "string",
+          title: "Status (order: 400)",
+          enum: ["active", "inactive", "pending"],
+          "x-field-order": 400,
+        },
+
+        // Another object array (order: 600)
+        addresses: {
+          type: "array",
+          title: "Addresses (order: 600)",
+          "x-field-order": 600,
+          items: {
+            type: "object",
+            properties: {
+              street: { type: "string", title: "Street" },
+              city: { type: "string", title: "City" },
+              zip: { type: "string", title: "ZIP" },
+            },
+          },
+          "x-item-label": "{{city}}, {{zip}}",
+        },
+
+        // No order - defaults to 999, appears last
+        noOrder: {
+          type: "string",
+          title: "No Order (defaults to 999)",
+          description: "This field has no x-field-order, so it appears last",
+        },
+      },
+    },
+
     name: {
       type: "string",
       title: "Full Name",

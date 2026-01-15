@@ -10,10 +10,15 @@ const props = withDefaults(defineProps<FieldProps>(), {
 
 const { value } = useFormField(props.path, props.schema, { label: props.label });
 
-// Automatically set the const value on mount if not already set
+// Automatically set the const or default value on mount if not already set
+// This ensures discriminator fields get their values in oneOf/anyOf schemas
 onMounted(() => {
-  if (props.schema.const !== undefined && value.value === undefined) {
-    value.value = props.schema.const;
+  if (value.value === undefined) {
+    if (props.schema.const !== undefined) {
+      value.value = props.schema.const;
+    } else if (props.schema.default !== undefined) {
+      value.value = props.schema.default;
+    }
   }
 });
 </script>

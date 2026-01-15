@@ -106,9 +106,10 @@ export function useFormField(
       const isRequired = schemaUtils.isRequired(rootSchema, path);
       if (isRequired) {
         if (value === undefined || value === null || value === "") {
+          const fieldLabel = schema.title || path.split('.').pop()?.replace(/\[\d+\]$/, '') || path;
           return getErrorMessage(
             "required",
-            `${schema.title || path} is required`
+            `${fieldLabel} is required`
           );
         }
       }
@@ -359,7 +360,9 @@ export function useFormField(
     if (options.label !== undefined) return options.label;
     // Hide label for synthetic root path
     if (path === "__root__") return schema.title || "";
-    return schema.title || path;
+    // Use schema title if available, otherwise use just the last path segment
+    // (not the full path like "userInfo.generalInfo.mediaTypeConfig.mediaTypes[0].maxAllowed")
+    return schema.title || path.split('.').pop()?.replace(/\[\d+\]$/, '') || path;
   });
 
   // Computed hint from schema with optional custom renderer

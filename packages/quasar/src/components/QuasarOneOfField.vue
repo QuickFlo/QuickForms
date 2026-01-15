@@ -13,6 +13,7 @@ import { FieldRenderer } from "@quickflo/quickforms-vue";
 import type { FieldProps } from "@quickflo/quickforms-vue";
 import { useQuasarFormField } from "../composables/useQuasarFormField";
 import { schemaUtils } from "../schema-utils-singleton";
+import { mergeQuasarProps } from "../utils";
 
 const props = withDefaults(defineProps<FieldProps>(), {
   disabled: false,
@@ -33,10 +34,22 @@ const {
   componentType: 'card',
 });
 
+// Use mergeQuasarProps to get defaults from componentDefaults (including dense)
 const quasarProps = computed(() => {
-  const xQuasarProps = (props.schema as any)["x-quasar-props"] || {};
-  const xComponentProps = (props.schema as any)["x-component-props"] || {};
-  return { ...xComponentProps, ...xQuasarProps };
+  const merged = mergeQuasarProps(
+    props.schema,
+    formContext?.componentDefaults,
+    "select"
+  );
+  // Remove props we control internally
+  const {
+    autocomplete,
+    useInput,
+    fillInput,
+    hideSelected,
+    ...quasarOnly
+  } = merged;
+  return quasarOnly;
 });
 
 // Get the sub-schemas
@@ -308,13 +321,13 @@ const applySchemaDefaults = (index: number) => {
   if (newSchema && newSchema.properties) {
     const currentValue = (value.value && typeof value.value === 'object') ? value.value : {};
     const defaults = schemaUtils.getDefaultValue(newSchema) || {};
-    
+
     // Extract const values (discriminator fields) - these MUST be set
     const constValues = extractConstValues(newSchema);
-    
+
     // Merge: const values take priority, then current values, then defaults
     const merged = { ...defaults, ...currentValue, ...constValues };
-    
+
     // Update form value - skip validation during option switch
     if (setValue) {
       setValue(merged, false);
@@ -425,7 +438,6 @@ const handleOptionChange = (newIndex: number) => {
             :input-debounce="0"
             :fill-input="useFilter"
             :hide-selected="useFilter"
-            outlined
             clearable
             emit-value
             map-options

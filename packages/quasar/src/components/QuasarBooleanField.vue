@@ -20,9 +20,9 @@ const {
   componentType: 'checkbox',
 });
 
-// Default to false if undefined (prevents indeterminate state)
+// Default to schema default if defined, otherwise false (prevents indeterminate state)
 if (value.value === undefined || value.value === null) {
-  value.value = false;
+  value.value = props.schema.default ?? false;
 }
 </script>
 <template>

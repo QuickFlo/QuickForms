@@ -5,9 +5,15 @@ import { FieldRenderer } from "@quickflo/quickforms-vue";
 import type { FieldProps } from "@quickflo/quickforms-vue";
 import { useQuasarFormField } from "../composables/useQuasarFormField";
 
-const props = withDefaults(defineProps<FieldProps>(), {
+interface Props extends FieldProps {
+  /** Hide the label (used when parent component already shows it) */
+  hideLabel?: boolean;
+}
+
+const props = withDefaults(defineProps<Props>(), {
   disabled: false,
   readonly: false,
+  hideLabel: false,
 });
 
 const {
@@ -74,11 +80,42 @@ const quasarProps = computed(() => {
   return { ...xComponentProps, ...xQuasarProps };
 });
 
-// Get properties to render
+/**
+ * Sort properties by x-field-order:
+ * - If x-field-order is an array at schema root level, use that explicit order
+ * - If x-field-order is a number on individual field schemas, sort numerically
+ * - Fall back to alphabetical order by key
+ */
 const properties = computed(() => {
   if (!props.schema.properties) return [];
 
-  return Object.entries(props.schema.properties).map(([key, schema]) => ({
+  // Check for explicit field order array at schema root level
+  const fieldOrderArray = (props.schema as any)['x-field-order'] as string[] | undefined;
+  if (fieldOrderArray && Array.isArray(fieldOrderArray) && fieldOrderArray.length > 0) {
+    // Use explicit ordering from root-level x-field-order array
+    return fieldOrderArray
+      .filter(key => key in props.schema.properties!)
+      .map((key) => ({
+        key,
+        schema: props.schema.properties![key],
+        path: props.path ? `${props.path}.${key}` : key,
+      }));
+  }
+
+  // Otherwise, sort by numeric x-field-order on individual field schemas
+  const entries = Object.entries(props.schema.properties);
+  entries.sort(([keyA, schemaA], [keyB, schemaB]) => {
+    const orderA = (schemaA as any)?.['x-field-order'] ?? 999;
+    const orderB = (schemaB as any)?.['x-field-order'] ?? 999;
+
+    if (orderA !== orderB) {
+      return orderA - orderB;
+    }
+    // Fall back to alphabetical by key
+    return keyA.localeCompare(keyB);
+  });
+
+  return entries.map(([key, schema]) => ({
     key,
     schema,
     path: props.path ? `${props.path}.${key}` : key,
@@ -100,11 +137,17 @@ const properties = computed(() => {
     >
       <template #header>
         <div class="quickform-object-header-content">
-          {{ label }}
-          <span v-if="required" class="quickform-required-indicator">*</span>
-          <span v-if="!required && showOptionalIndicator" class="quickform-optional-indicator">
-            (optional)
-          </span>
+          <div class="quickform-object-header-label">
+            <template v-if="!hideLabel">
+              {{ label }}
+              <span v-if="required" class="quickform-required-indicator">*</span>
+              <span v-if="!required && showOptionalIndicator" class="quickform-optional-indicator">
+                (optional)
+              </span>
+            </template>
+          </div>
+          <!-- Slot for additional header actions (e.g., template toggle buttons) -->
+          <slot name="header-actions"></slot>
         </div>
       </template>
 
@@ -160,6 +203,16 @@ const properties = computed(() => {
   font-size: 0.95rem;
   font-weight: 500;
   color: #333;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex: 1;
+}
+
+.quickform-object-header-label {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
 }
 
 .quickform-required-indicator {

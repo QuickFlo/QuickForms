@@ -6,9 +6,15 @@ import type { FieldProps } from "@quickflo/quickforms-vue";
 import { useQuasarFormField } from "../composables/useQuasarFormField";
 import { schemaUtils } from "../schema-utils-singleton.js";
 
-const props = withDefaults(defineProps<FieldProps>(), {
+interface Props extends FieldProps {
+  /** Hide the label (used when parent component already shows it) */
+  hideLabel?: boolean;
+}
+
+const props = withDefaults(defineProps<Props>(), {
   disabled: false,
   readonly: false,
+  hideLabel: false,
 });
 
 const {
@@ -194,20 +200,19 @@ const getItemLabel = (index: number) => {
     <!-- Array header -->
     <div class="quickform-array-header">
       <div
-        v-if="label"
+        v-if="label && !hideLabel"
         class="quickform-array-label-row"
-        :style="{
-          justifyContent:
-            isTopPosition && isRightPosition ? 'space-between' : 'flex-start',
-        }"
       >
         <div class="quickform-array-label">
           {{ label }}
           <span v-if="schema.required" class="quickform-required-indicator">*</span>
         </div>
-        <!-- Add button on same line only for top-right -->
-        <div v-if="isTopPosition && isRightPosition">
+        <div class="quickform-array-header-actions">
+          <!-- Slot for additional header actions (e.g., template toggle buttons) -->
+          <slot name="header-actions"></slot>
+          <!-- Add button on same line only for top-right -->
           <QBtn
+            v-if="isTopPosition && isRightPosition"
             v-bind="quickformsFeatures.addButton"
             :disable="!canAdd"
             @click="addItem"
@@ -330,10 +335,20 @@ const getItemLabel = (index: number) => {
 .quickform-array-label-row {
   display: flex;
   align-items: center;
+  justify-content: space-between;
 }
 
 .quickform-array-label {
   font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.quickform-array-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 
 .quickform-required-indicator {
