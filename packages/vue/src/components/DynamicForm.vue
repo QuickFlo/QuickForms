@@ -212,6 +212,7 @@ watch(model, (newValue) => {
 });
 
 // Sync form value changes back to model
+// Using immediate: true ensures default values from schema are synced to model on init
 if (isSingleField.value) {
   watch(
     () => values[SINGLE_FIELD_PATH],
@@ -224,7 +225,7 @@ if (isSingleField.value) {
         isUpdatingModel = false;
       });
     },
-    { deep: true }
+    { deep: true, immediate: true }
   );
 } else {
   watch(
@@ -238,7 +239,7 @@ if (isSingleField.value) {
         isUpdatingModel = false;
       });
     },
-    { deep: true }
+    { deep: true, immediate: true }
   );
 }
 
@@ -270,25 +271,48 @@ const onSubmit = handleSubmit((submittedValues) => {
   }
 });
 
-// Get all top-level properties from schema, respecting x-field-order if present
+/**
+ * Get all top-level properties from schema, respecting x-field-order:
+ * - If x-field-order is an array at schema root level, use that explicit order
+ * - If x-field-order is a number on individual field schemas, sort numerically
+ * - Fall back to alphabetical order by key
+ */
 const properties = computed(() => {
   if (props.schema.type !== "object" || !props.schema.properties) {
     return [];
   }
 
-  // Get field order from x-field-order or fall back to Object.keys order
-  const fieldOrder = (props.schema as any)['x-field-order'] as string[] | undefined;
-  const keys = fieldOrder && Array.isArray(fieldOrder) && fieldOrder.length > 0
-    ? fieldOrder
-    : Object.keys(props.schema.properties);
+  // Check for explicit field order array at schema root level
+  const fieldOrderArray = (props.schema as any)['x-field-order'] as string[] | undefined;
+  if (fieldOrderArray && Array.isArray(fieldOrderArray) && fieldOrderArray.length > 0) {
+    // Use explicit ordering from root-level x-field-order array
+    return fieldOrderArray
+      .filter(key => key in props.schema.properties!)
+      .map((key) => ({
+        key,
+        schema: props.schema.properties![key],
+        path: key,
+      }));
+  }
 
-  return keys
-    .filter(key => key in props.schema.properties!)
-    .map((key) => ({
-      key,
-      schema: props.schema.properties![key],
-      path: key,
-    }));
+  // Otherwise, sort by numeric x-field-order on individual field schemas
+  const entries = Object.entries(props.schema.properties);
+  entries.sort(([keyA, schemaA], [keyB, schemaB]) => {
+    const orderA = (schemaA as any)?.['x-field-order'] ?? 999;
+    const orderB = (schemaB as any)?.['x-field-order'] ?? 999;
+
+    if (orderA !== orderB) {
+      return orderA - orderB;
+    }
+    // Fall back to alphabetical by key
+    return keyA.localeCompare(keyB);
+  });
+
+  return entries.map(([key, schema]) => ({
+    key,
+    schema,
+    path: key,
+  }));
 });
 
 // Compute field gap - convert Quasar sizes to CSS values

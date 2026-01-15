@@ -80,23 +80,46 @@ const quasarProps = computed(() => {
   return { ...xComponentProps, ...xQuasarProps };
 });
 
-// Get properties to render, respecting x-field-order if present
+/**
+ * Sort properties by x-field-order:
+ * - If x-field-order is an array at schema root level, use that explicit order
+ * - If x-field-order is a number on individual field schemas, sort numerically
+ * - Fall back to alphabetical order by key
+ */
 const properties = computed(() => {
   if (!props.schema.properties) return [];
 
-  // Get field order from x-field-order or fall back to Object.keys order
-  const fieldOrder = (props.schema as any)['x-field-order'] as string[] | undefined;
-  const keys = fieldOrder && Array.isArray(fieldOrder) && fieldOrder.length > 0
-    ? fieldOrder
-    : Object.keys(props.schema.properties);
+  // Check for explicit field order array at schema root level
+  const fieldOrderArray = (props.schema as any)['x-field-order'] as string[] | undefined;
+  if (fieldOrderArray && Array.isArray(fieldOrderArray) && fieldOrderArray.length > 0) {
+    // Use explicit ordering from root-level x-field-order array
+    return fieldOrderArray
+      .filter(key => key in props.schema.properties!)
+      .map((key) => ({
+        key,
+        schema: props.schema.properties![key],
+        path: props.path ? `${props.path}.${key}` : key,
+      }));
+  }
 
-  return keys
-    .filter(key => key in props.schema.properties!)
-    .map((key) => ({
-      key,
-      schema: props.schema.properties![key],
-      path: props.path ? `${props.path}.${key}` : key,
-    }));
+  // Otherwise, sort by numeric x-field-order on individual field schemas
+  const entries = Object.entries(props.schema.properties);
+  entries.sort(([keyA, schemaA], [keyB, schemaB]) => {
+    const orderA = (schemaA as any)?.['x-field-order'] ?? 999;
+    const orderB = (schemaB as any)?.['x-field-order'] ?? 999;
+
+    if (orderA !== orderB) {
+      return orderA - orderB;
+    }
+    // Fall back to alphabetical by key
+    return keyA.localeCompare(keyB);
+  });
+
+  return entries.map(([key, schema]) => ({
+    key,
+    schema,
+    path: props.path ? `${props.path}.${key}` : key,
+  }));
 });
 
 </script>
