@@ -103,19 +103,22 @@ const properties = computed(() => {
   }
 
   // Otherwise, sort by numeric x-field-order on individual field schemas
-  const entries = Object.entries(props.schema.properties);
-  entries.sort(([keyA, schemaA], [keyB, schemaB]) => {
-    const orderA = (schemaA as any)?.['x-field-order'] ?? 999;
-    const orderB = (schemaB as any)?.['x-field-order'] ?? 999;
+  // Preserve original index for stable sorting when x-field-order values are equal
+  const entries = Object.entries(props.schema.properties).map(
+    ([key, schema], index) => ({ key, schema, originalIndex: index })
+  );
+  entries.sort((a, b) => {
+    const orderA = (a.schema as any)?.['x-field-order'] ?? 999;
+    const orderB = (b.schema as any)?.['x-field-order'] ?? 999;
 
     if (orderA !== orderB) {
       return orderA - orderB;
     }
-    // Fall back to alphabetical by key
-    return keyA.localeCompare(keyB);
+    // Fall back to original declaration order (stable sort)
+    return a.originalIndex - b.originalIndex;
   });
 
-  return entries.map(([key, schema]) => ({
+  return entries.map(({ key, schema }) => ({
     key,
     schema,
     path: props.path ? `${props.path}.${key}` : key,
