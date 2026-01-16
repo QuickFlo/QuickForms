@@ -22,6 +22,7 @@ const {
   label,
   hint,
   errorMessage,
+  required,
   fieldId,
   quasarProps,
   fieldGap,
@@ -29,6 +30,13 @@ const {
 } = useQuasarFormField(props.path, props.schema, {
   label: props.label,
   componentType: 'card',
+});
+
+// Show "(optional)" indicator - check array defaults, fall back to object defaults
+const showOptionalIndicator = computed(() => {
+  const arrayDefaults = formContext?.quickformsDefaults?.array;
+  const objectDefaults = formContext?.quickformsDefaults?.object;
+  return arrayDefaults?.showOptionalIndicator ?? objectDefaults?.showOptionalIndicator ?? true;
 });
 
 // Section border style - matches QuasarObjectField pattern
@@ -205,7 +213,10 @@ const getItemLabel = (index: number) => {
       >
         <div class="quickform-array-label">
           {{ label }}
-          <span v-if="schema.required" class="quickform-required-indicator">*</span>
+          <span v-if="required" class="quickform-required-indicator">*</span>
+          <span v-if="!required && showOptionalIndicator" class="quickform-optional-indicator">
+            (optional)
+          </span>
         </div>
         <div class="quickform-array-header-actions">
           <!-- Slot for additional header actions (e.g., template toggle buttons) -->
@@ -352,6 +363,13 @@ const getItemLabel = (index: number) => {
 .quickform-required-indicator {
   color: #c10015;
   margin-left: 0.125rem;
+}
+
+.quickform-optional-indicator {
+  color: #888;
+  font-size: 0.75rem;
+  font-weight: 400;
+  margin-left: 0.5rem;
 }
 
 .quickform-array-hint {
