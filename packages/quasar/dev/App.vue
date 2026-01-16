@@ -820,6 +820,50 @@ const schema: JSONSchema = {
       },
     },
 
+    // === NESTED OBJECT WITH HINT (x-hint) ===
+    reportCriteria: {
+      type: "object",
+      title: "Report Criteria",
+      description: "Time range and filters for the report",
+      properties: {
+        reportObjects: {
+          type: "object",
+          title: "Report Object Criteria",
+          description: "Filter report results to specific objects",
+          "x-hint": 'Include report objects to filter results. See <a href="https://example.com/docs">this article</a> for more information.',
+          properties: {
+            objectNames: {
+              type: "array",
+              title: "Object Names",
+              items: { type: "string" },
+            },
+            objectType: {
+              type: "string",
+              title: "Object Type",
+              enum: ["Agent Group", "Campaign", "Skill"],
+            },
+          },
+        },
+        time: {
+          type: "object",
+          title: "Time Range",
+          "x-hint": "Specify the date/time range for the report data",
+          properties: {
+            start: {
+              type: "string",
+              title: "Start Time",
+              description: "Report start time (ISO format)",
+            },
+            end: {
+              type: "string",
+              title: "End Time",
+              description: "Report end time (ISO format)",
+            },
+          },
+        },
+      },
+    },
+
     // === ONEOF WITH SHARED FIELD NAMES (Discriminated Union) ===
     // This tests that switching tabs properly re-renders fields with the same key
     // but different labels. Without proper key handling, Vue reuses components

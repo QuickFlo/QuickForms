@@ -140,14 +140,17 @@ const properties = computed(() => {
     >
       <template #header>
         <div class="quickform-object-header-content">
-          <div class="quickform-object-header-label">
-            <template v-if="!hideLabel">
-              {{ label }}
-              <span v-if="required" class="quickform-required-indicator">*</span>
-              <span v-if="!required && showOptionalIndicator" class="quickform-optional-indicator">
-                (optional)
-              </span>
-            </template>
+          <div class="quickform-object-header-left">
+            <div class="quickform-object-header-label">
+              <template v-if="!hideLabel">
+                {{ label }}
+                <span v-if="required" class="quickform-required-indicator">*</span>
+                <span v-if="!required && showOptionalIndicator" class="quickform-optional-indicator">
+                  (optional)
+                </span>
+              </template>
+            </div>
+            <div v-if="hint" class="quickform-object-header-hint" v-html="hint"></div>
           </div>
           <!-- Slot for additional header actions (e.g., template toggle buttons) -->
           <slot name="header-actions"></slot>
@@ -207,15 +210,28 @@ const properties = computed(() => {
   font-weight: 500;
   color: #333;
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
   flex: 1;
+}
+
+.quickform-object-header-left {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
 }
 
 .quickform-object-header-label {
   display: flex;
   align-items: center;
   gap: 0.25rem;
+}
+
+.quickform-object-header-hint {
+  font-size: 0.75rem;
+  font-weight: 400;
+  color: #666;
+  line-height: 1.3;
 }
 
 .quickform-required-indicator {
