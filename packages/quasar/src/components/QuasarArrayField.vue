@@ -232,9 +232,7 @@ const getItemLabel = (index: number) => {
         />
       </div>
 
-      <div v-if="hint" class="quickform-array-hint">
-        {{ hint }}
-      </div>
+      <div v-if="hint" class="quickform-array-hint" v-html="hint"></div>
     </div>
 
     <!-- Array content area -->

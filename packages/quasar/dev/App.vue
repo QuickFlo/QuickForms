@@ -820,27 +820,32 @@ const schema: JSONSchema = {
       },
     },
 
-    // === NESTED OBJECT WITH HINT (x-hint) ===
+    // === NESTED OBJECT AND ARRAY WITH HINT (x-hint) ===
     reportCriteria: {
       type: "object",
       title: "Report Criteria",
       description: "Time range and filters for the report",
       properties: {
         reportObjects: {
-          type: "object",
-          title: "Report Object Criteria",
+          type: "array",
+          title: "Report Objects",
           description: "Filter report results to specific objects",
           "x-hint": 'Include report objects to filter results. See <a href="https://example.com/docs">this article</a> for more information.',
-          properties: {
-            objectNames: {
-              type: "array",
-              title: "Object Names",
-              items: { type: "string" },
-            },
-            objectType: {
-              type: "string",
-              title: "Object Type",
-              enum: ["Agent Group", "Campaign", "Skill"],
+          items: {
+            type: "object",
+            title: "Report Object Criteria",
+            "x-hint": "Each item defines filter criteria for a specific object type",
+            properties: {
+              objectNames: {
+                type: "array",
+                title: "Object Names",
+                items: { type: "string" },
+              },
+              objectType: {
+                type: "string",
+                title: "Object Type",
+                enum: ["Agent Group", "Campaign", "Skill"],
+              },
             },
           },
         },
