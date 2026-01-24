@@ -8,6 +8,7 @@ import {
   ref,
   nextTick,
   onMounted,
+  type WatchStopHandle,
 } from "vue";
 import { useForm } from "vee-validate";
 import type { JSONSchema } from "@quickflo/quickforms";
@@ -116,6 +117,20 @@ const defaultComponentDefaults = {
   },
 };
 
+/**
+ * Get a nested value from an object using dot notation path.
+ * @example getNestedValue({ a: { b: 1 } }, 'a.b') => 1
+ */
+function getNestedValue(obj: Record<string, any>, path: string): any {
+  if (!path) return obj;
+  return path.split('.').reduce((current, key) => {
+    if (current && typeof current === 'object' && key in current) {
+      return current[key];
+    }
+    return undefined;
+  }, obj as any);
+}
+
 // Provide form context to children
 // Use reactive to ensure updates propagate
 const formContext = reactive({
@@ -135,6 +150,38 @@ const formContext = reactive({
     }
 
     return toRaw(values);
+  },
+  /**
+   * Get a reactive computed ref for a specific field value.
+   * Supports dot notation for nested paths.
+   */
+  useFieldValue: <T = unknown>(path: string) => {
+    return computed<T | undefined>(() => {
+      const formVals = isSingleField.value
+        ? (values[SINGLE_FIELD_PATH] as Record<string, any>)
+        : values;
+      return getNestedValue(formVals, path) as T | undefined;
+    });
+  },
+  /**
+   * Watch all form values and call callback when they change.
+   * Returns a stop function to unsubscribe.
+   */
+  watchFormValues: (callback: (values: Record<string, any>, oldValues: Record<string, any>) => void): WatchStopHandle => {
+    const watchSource = isSingleField.value
+      ? () => values[SINGLE_FIELD_PATH]
+      : () => values;
+
+    return watch(
+      watchSource,
+      (newValues, oldValues) => {
+        callback(
+          toRaw(newValues as Record<string, any>),
+          toRaw(oldValues as Record<string, any>)
+        );
+      },
+      { deep: true }
+    );
   },
   labels: { ...defaultLabels, ...props.options.labels },
   componentDefaults: {

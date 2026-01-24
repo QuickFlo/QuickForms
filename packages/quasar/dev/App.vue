@@ -3,6 +3,7 @@ import { ref } from "vue";
 import { DynamicForm, JSONSchema } from "@quickflo/quickforms-vue";
 import { createQuasarRegistry, QuasarFormOptions } from "../src/index";
 import Showcase from "./Showcase.vue";
+import DependentFieldsExample from "./DependentFieldsExample.vue";
 
 const showShowcase = ref(true);
 
@@ -1207,6 +1208,14 @@ const handleSubmit = () => {
                 }}</pre>
               </q-card-section>
             </q-card>
+          </div>
+        </div>
+
+        <!-- Dependent Fields Example -->
+        <div class="row justify-center q-mt-xl">
+          <div class="col-12">
+            <q-separator class="q-my-lg" />
+            <DependentFieldsExample />
           </div>
         </div>
       </q-page>

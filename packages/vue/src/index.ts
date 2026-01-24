@@ -23,10 +23,17 @@ export { default as HiddenField } from './components/HiddenField.vue';
 // Composables
 export { useFormField } from './composables/useFormField.js';
 export { useFormContext, provideFormContext } from './composables/useFormContext.js';
+export { useWatchFormValue, useWatchFormValues } from './composables/useWatchFormValue.js';
 export * from './composables/utils.js';
 
 // Types
-export type { VueFieldComponent, FieldProps, FormOptions, FormContext } from './types/index.js';
+export type {
+  VueFieldComponent,
+  FieldProps,
+  FormOptions,
+  FormContext,
+  FormValuesWatchCallback,
+} from './types/index.js';
 
 // Re-export core types and utilities
 export type { JSONSchema, UISchemaElement, TesterFunction } from '@quickflo/quickforms';

@@ -85,7 +85,15 @@ export type {
   FieldProps,
   FormOptions,
   FormContext,
+  FormValuesWatchCallback,
   VueFieldComponent,
+} from '@quickflo/quickforms-vue';
+
+// Re-export composables from Vue package for reactive field watching
+export {
+  useFormContext,
+  useWatchFormValue,
+  useWatchFormValues,
 } from '@quickflo/quickforms-vue';
 
 // Re-export core types and utilities for convenience
