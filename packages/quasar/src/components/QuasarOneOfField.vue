@@ -8,6 +8,8 @@ import {
   QTab,
   QTabPanels,
   QTabPanel,
+  QIcon,
+  QTooltip,
 } from "quasar";
 import { FieldRenderer } from "@quickflo/quickforms-vue";
 import type { FieldProps } from "@quickflo/quickforms-vue";
@@ -253,6 +255,76 @@ const activeOptionDescription = computed((): string | null => {
   return null;
 });
 
+// Get docs URL for the currently selected option
+const activeOptionDocsUrl = computed((): string | null => {
+  const xOneofDocsUrls = (props.schema as any)["x-oneof-docsUrls"];
+  if (!xOneofDocsUrls) return null;
+
+  const option = activeSchema.value;
+  if (!option) return null;
+
+  // Array format
+  if (Array.isArray(xOneofDocsUrls) && xOneofDocsUrls[selectedIndex.value]) {
+    return xOneofDocsUrls[selectedIndex.value];
+  }
+
+  // Object format keyed by discriminator value
+  if (typeof xOneofDocsUrls === 'object') {
+    const discValue = getDiscriminatorValue(option);
+    if (discValue && xOneofDocsUrls[discValue]) {
+      return xOneofDocsUrls[discValue];
+    }
+  }
+
+  return null;
+});
+
+// Get custom docs icon (default: 'description')
+// Supports: x-oneof-docsIcon as string (applies to all) or object keyed by discriminator
+const activeOptionDocsIcon = computed((): string => {
+  const xOneofDocsIcon = (props.schema as any)["x-oneof-docsIcon"];
+  if (!xOneofDocsIcon) return "description";
+
+  // String format: applies to all options
+  if (typeof xOneofDocsIcon === 'string') {
+    return xOneofDocsIcon;
+  }
+
+  // Object format keyed by discriminator value
+  const option = activeSchema.value;
+  if (option && typeof xOneofDocsIcon === 'object') {
+    const discValue = getDiscriminatorValue(option);
+    if (discValue && xOneofDocsIcon[discValue]) {
+      return xOneofDocsIcon[discValue];
+    }
+  }
+
+  return "description";
+});
+
+// Get custom docs tooltip (default: 'View documentation')
+// Supports: x-oneof-docsTooltip as string (applies to all) or object keyed by discriminator
+const activeOptionDocsTooltip = computed((): string => {
+  const xOneofDocsTooltip = (props.schema as any)["x-oneof-docsTooltip"];
+  if (!xOneofDocsTooltip) return "View documentation";
+
+  // String format: applies to all options
+  if (typeof xOneofDocsTooltip === 'string') {
+    return xOneofDocsTooltip;
+  }
+
+  // Object format keyed by discriminator value
+  const option = activeSchema.value;
+  if (option && typeof xOneofDocsTooltip === 'object') {
+    const discValue = getDiscriminatorValue(option);
+    if (discValue && xOneofDocsTooltip[discValue]) {
+      return xOneofDocsTooltip[discValue];
+    }
+  }
+
+  return "View documentation";
+});
+
 // Compute display labels for the dropdown/tabs
 const allSelectOptions = computed(() => {
   return options.value.map((option, index) => ({
@@ -389,12 +461,23 @@ const handleOptionChange = (newIndex: number) => {
             />
           </QTabs>
 
-          <!-- Option description hint -->
+          <!-- Option description hint with optional docs link -->
           <div
-            v-if="activeOptionDescription"
-            style="font-size: 0.875rem; color: #666; margin-top: 0.5rem"
+            v-if="activeOptionDescription || activeOptionDocsUrl"
+            style="font-size: 0.875rem; color: #666; margin-top: 0.5rem; display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;"
           >
-            {{ activeOptionDescription }}
+            <span v-if="activeOptionDescription">{{ activeOptionDescription }}</span>
+            <a
+              v-if="activeOptionDocsUrl"
+              :href="activeOptionDocsUrl"
+              target="_blank"
+              rel="noopener noreferrer"
+              style="display: inline-flex; align-items: center; color: var(--q-primary, #1976d2); text-decoration: none;"
+              @click.stop
+            >
+              <QIcon :name="activeOptionDocsIcon" size="16px" />
+              <QTooltip>{{ activeOptionDocsTooltip }}</QTooltip>
+            </a>
           </div>
 
           <div
@@ -446,12 +529,23 @@ const handleOptionChange = (newIndex: number) => {
             v-bind="quasarProps"
           />
 
-          <!-- Option description hint -->
+          <!-- Option description hint with optional docs link -->
           <div
-            v-if="activeOptionDescription"
-            style="font-size: 0.875rem; color: #666; margin-top: 0.75rem"
+            v-if="activeOptionDescription || activeOptionDocsUrl"
+            style="font-size: 0.875rem; color: #666; margin-top: 0.75rem; display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;"
           >
-            {{ activeOptionDescription }}
+            <span v-if="activeOptionDescription">{{ activeOptionDescription }}</span>
+            <a
+              v-if="activeOptionDocsUrl"
+              :href="activeOptionDocsUrl"
+              target="_blank"
+              rel="noopener noreferrer"
+              style="display: inline-flex; align-items: center; color: var(--q-primary, #1976d2); text-decoration: none;"
+              @click.stop
+            >
+              <QIcon :name="activeOptionDocsIcon" size="16px" />
+              <QTooltip>{{ activeOptionDocsTooltip }}</QTooltip>
+            </a>
           </div>
 
           <div
