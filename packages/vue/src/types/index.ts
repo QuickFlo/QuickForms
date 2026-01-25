@@ -1,4 +1,4 @@
-import type { Component } from 'vue';
+import type { Component, ComputedRef, WatchStopHandle } from 'vue';
 import type { JSONSchema, UISchemaElement, TesterFunction, ComponentRegistry } from '@quickflo/quickforms';
 
 /**
@@ -161,6 +161,14 @@ export interface FormOptions<TDefaults = ComponentDefaults> {
 }
 
 /**
+ * Callback type for watching form value changes
+ */
+export type FormValuesWatchCallback = (
+  values: Record<string, any>,
+  oldValues: Record<string, any>
+) => void;
+
+/**
  * Form context provided to child components
  */
 export interface FormContext {
@@ -174,7 +182,38 @@ export interface FormContext {
   errorMessages?: Record<string, Record<string, string>>;
   validators?: Record<string, ValidatorFunction>;
   validatorDebounce?: number | Record<string, number>;
+  /**
+   * Get a snapshot of current form values (non-reactive).
+   * Use this for one-time reads or in validators.
+   */
   formValues: () => Record<string, any>;
+  /**
+   * Get a reactive computed ref for a specific field value by path.
+   * Supports dot notation for nested paths (e.g., 'provider.connection').
+   * Use this when you need to reactively watch a specific field's value.
+   *
+   * @example
+   * ```ts
+   * const providerValue = formContext.useFieldValue('provider.provider');
+   * watch(providerValue, (newValue) => {
+   *   console.log('Provider changed:', newValue);
+   * });
+   * ```
+   */
+  useFieldValue: <T = unknown>(path: string) => ComputedRef<T | undefined>;
+  /**
+   * Watch form values and call callback when they change.
+   * Returns a stop function to unsubscribe.
+   *
+   * @example
+   * ```ts
+   * const stop = formContext.watchFormValues((values, oldValues) => {
+   *   console.log('Form changed:', values);
+   * });
+   * // Later: stop();
+   * ```
+   */
+  watchFormValues: (callback: FormValuesWatchCallback) => WatchStopHandle;
   labels: FormLabels;
   componentDefaults: ComponentDefaults;
   hintRenderer?: HintRendererFunction;

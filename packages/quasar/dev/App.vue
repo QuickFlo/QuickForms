@@ -3,6 +3,7 @@ import { ref } from "vue";
 import { DynamicForm, JSONSchema } from "@quickflo/quickforms-vue";
 import { createQuasarRegistry, QuasarFormOptions } from "../src/index";
 import Showcase from "./Showcase.vue";
+import DependentFieldsExample from "./DependentFieldsExample.vue";
 
 const showShowcase = ref(true);
 
@@ -1007,7 +1008,7 @@ const schema: JSONSchema = {
       "x-render": "jsonlogic-builder",
     },
 
-    // === ONEOF WITH DESCRIPTIONS (Discriminated Union style) ===
+    // === ONEOF WITH DESCRIPTIONS AND DOCS URLS (Discriminated Union style) ===
     dateOperation: {
       title: "",
       description: "",
@@ -1023,6 +1024,12 @@ const schema: JSONSchema = {
         format:
           "Convert a date/time value to a formatted string (e.g., 'Jan 1, 2025')",
         add: "Add a duration to a date (e.g., +5 days, +2 hours)",
+      },
+      // NEW: Documentation URLs shown as clickable icon next to description
+      "x-oneof-docsUrls": {
+        now: "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date/now",
+        format: "https://date-fns.org/docs/format",
+        add: "https://date-fns.org/docs/add",
       },
       anyOf: [
         {
@@ -1059,6 +1066,72 @@ const schema: JSONSchema = {
             },
           },
           required: ["operation"],
+        },
+      ],
+    },
+
+    // === ONEOF WITH DOCS URLS (Tabs mode) ===
+    // Demonstrates x-oneof-docsUrls with tabs display and custom icon/tooltip
+    speechProvider: {
+      title: "Speech Provider (with Docs Links)",
+      description: "Select a TTS provider - note the docs icon next to the description",
+      "x-oneof-style": "tabs",
+      "x-oneof-labels": {
+        openai: "OpenAI",
+        elevenlabs: "ElevenLabs",
+        "google-cloud": "Google Cloud",
+      },
+      "x-oneof-descriptions": {
+        openai: "High-quality TTS with multiple voices. Best for general use.",
+        elevenlabs: "Premium voice synthesis with 29 languages.",
+        "google-cloud": "Enterprise TTS with 200+ voices.",
+      },
+      "x-oneof-docsUrls": {
+        openai: "https://platform.openai.com/docs/guides/text-to-speech",
+        elevenlabs: "https://elevenlabs.io/docs/api-reference/text-to-speech",
+        "google-cloud": "https://cloud.google.com/text-to-speech/docs",
+      },
+      // Custom icon per provider (optional - defaults to 'description')
+      // Can also be a string to apply same icon to all: "x-oneof-docsIcon": "open_in_new"
+      "x-oneof-docsIcon": {
+        openai: "smart_toy",
+        elevenlabs: "graphic_eq",
+        "google-cloud": "cloud",
+      },
+      // Custom tooltip per provider (optional - defaults to 'View documentation')
+      // Can also be a string to apply same tooltip to all: "x-oneof-docsTooltip": "Learn more"
+      "x-oneof-docsTooltip": {
+        openai: "OpenAI TTS API docs",
+        elevenlabs: "ElevenLabs API reference",
+        "google-cloud": "Google Cloud TTS docs",
+      },
+      oneOf: [
+        {
+          type: "object",
+          properties: {
+            provider: { type: "string", const: "openai" },
+            apiKey: { type: "string", title: "API Key", format: "password" },
+            voice: { type: "string", title: "Voice", enum: ["alloy", "echo", "fable", "nova", "onyx", "shimmer"] },
+          },
+          required: ["provider"],
+        },
+        {
+          type: "object",
+          properties: {
+            provider: { type: "string", const: "elevenlabs" },
+            apiKey: { type: "string", title: "API Key", format: "password" },
+            voiceId: { type: "string", title: "Voice ID" },
+          },
+          required: ["provider"],
+        },
+        {
+          type: "object",
+          properties: {
+            provider: { type: "string", const: "google-cloud" },
+            credentials: { type: "string", title: "Service Account JSON", format: "textarea" },
+            languageCode: { type: "string", title: "Language", default: "en-US" },
+          },
+          required: ["provider"],
         },
       ],
     },
@@ -1207,6 +1280,14 @@ const handleSubmit = () => {
                 }}</pre>
               </q-card-section>
             </q-card>
+          </div>
+        </div>
+
+        <!-- Dependent Fields Example -->
+        <div class="row justify-center q-mt-xl">
+          <div class="col-12">
+            <q-separator class="q-my-lg" />
+            <DependentFieldsExample />
           </div>
         </div>
       </q-page>

@@ -1,10 +1,14 @@
 <script setup lang="ts">
-import { computed } from "vue";
+import { computed, ref, watch } from "vue";
 import { QCard, QCardSection, QBtn } from "quasar";
 import { FieldRenderer } from "@quickflo/quickforms-vue";
 import type { FieldProps } from "@quickflo/quickforms-vue";
 import { useQuasarFormField } from "../composables/useQuasarFormField";
 import { schemaUtils } from "../schema-utils-singleton.js";
+
+// Counter for generating unique stable IDs
+let stableIdCounter = 0;
+const generateStableId = () => `item-${++stableIdCounter}`;
 
 interface Props extends FieldProps {
   /** Hide the label (used when parent component already shows it) */
@@ -121,6 +125,39 @@ const arrayValue = computed({
   set: (val) => (value.value = val),
 });
 
+/**
+ * Stable keys for array items - assigned once when items are first seen.
+ * This ensures Vue doesn't recreate components when item properties change.
+ * We use a WeakMap to track object identity and assign stable IDs.
+ */
+const objectKeyMap = new WeakMap<object, string>();
+const stableKeys = ref<string[]>([]);
+
+// Sync stable keys whenever array value changes
+watch(
+  arrayValue,
+  (newArray) => {
+    const newKeys: string[] = [];
+    for (let i = 0; i < newArray.length; i++) {
+      const item = newArray[i];
+      if (item !== null && typeof item === 'object') {
+        // For objects, use WeakMap to maintain identity
+        let key = objectKeyMap.get(item);
+        if (!key) {
+          key = generateStableId();
+          objectKeyMap.set(item, key);
+        }
+        newKeys.push(key);
+      } else {
+        // For primitives, generate a new key each time (they're not reorderable meaningfully)
+        newKeys.push(generateStableId());
+      }
+    }
+    stableKeys.value = newKeys;
+  },
+  { immediate: true, deep: false } // deep: false - only react to array structure changes, not property changes
+);
+
 const itemsSchema = computed(() => {
   if (Array.isArray(props.schema.items)) {
     return props.schema.items[0];
@@ -201,6 +238,14 @@ const getItemLabel = (index: number) => {
   return `${title} ${index + 1}`;
 };
 
+/**
+ * Get stable key for array item at given index.
+ * Uses pre-computed stable keys that track object identity.
+ */
+const getItemKey = (item: any, index: number): string => {
+  return stableKeys.value[index] || `fallback-${index}`;
+};
+
 </script>
 
 <template>
@@ -251,7 +296,7 @@ const getItemLabel = (index: number) => {
       <div class="quickform-array-items">
         <QCard
           v-for="(item, index) in arrayValue"
-          :key="index"
+          :key="getItemKey(item, index)"
           flat
           bordered
           v-bind="quasarProps"
