@@ -84,7 +84,55 @@ All `x-*` attributes are optional. QuickForms works perfectly with standard JSON
 - User-friendly labels for technical values
 - Internationalization of enum options
 - Adding icons/emojis to options
-- Verbose descriptions for enum values
+
+---
+
+## `x-enum-descriptions`
+
+**Purpose:** Add descriptive help text below each enum option in the dropdown
+
+**Type:** `Record<string, string>`
+
+**Example:**
+```typescript
+{
+  outputDetail: {
+    type: 'string',
+    enum: ['text', 'segments', 'full'],
+    title: 'Output Detail',
+    'x-enum-labels': {
+      text: 'Text',
+      segments: 'Segments',
+      full: 'Full'
+    },
+    'x-enum-descriptions': {
+      text: 'Only return speech text.',
+      segments: 'Speech segments with their start and end times.',
+      full: 'Includes text, speech segments, and VTT file.'
+    }
+  }
+}
+```
+
+**Visual representation:**
+```
+[Output Detail ▼]
+  Text
+  Only return speech text.
+
+  Segments
+  Speech segments with their start and end times.
+
+  Full
+  Includes text, speech segments, and VTT file.
+```
+
+**Use Cases:**
+- Explain what each option does
+- Help users make informed choices
+- Provide context for technical options
+
+**Note:** Works best when combined with `x-enum-labels` for clear label/description separation. Descriptions are rendered as caption text below each option.
 
 ---
 
