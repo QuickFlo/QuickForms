@@ -461,10 +461,11 @@ const handleOptionChange = (newIndex: number) => {
             />
           </QTabs>
 
-          <!-- Option description hint with optional docs link -->
+          <!-- Option description hint with optional docs link (tabs mode) -->
           <div
             v-if="activeOptionDescription || activeOptionDocsUrl"
-            style="font-size: 0.875rem; color: #666; margin-top: 0.5rem; display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;"
+            class="text-caption text-grey-7"
+            style="margin-top: 0.25rem;"
           >
             <span v-if="activeOptionDescription">{{ activeOptionDescription }}</span>
             <a
@@ -472,10 +473,10 @@ const handleOptionChange = (newIndex: number) => {
               :href="activeOptionDocsUrl"
               target="_blank"
               rel="noopener noreferrer"
-              style="display: inline-flex; align-items: center; color: var(--q-primary, #1976d2); text-decoration: none;"
+              style="margin-left: 0.5rem; display: inline-flex; align-items: center; color: var(--q-primary, #1976d2); text-decoration: none; vertical-align: middle;"
               @click.stop
             >
-              <QIcon :name="activeOptionDocsIcon" size="16px" />
+              <QIcon :name="activeOptionDocsIcon" size="14px" />
               <QTooltip>{{ activeOptionDocsTooltip }}</QTooltip>
             </a>
           </div>
@@ -529,10 +530,11 @@ const handleOptionChange = (newIndex: number) => {
             v-bind="quasarProps"
           />
 
-          <!-- Option description hint with optional docs link -->
+          <!-- Option description hint (always visible, outside QSelect) -->
           <div
             v-if="activeOptionDescription || activeOptionDocsUrl"
-            style="font-size: 0.875rem; color: #666; margin-top: 0.75rem; display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;"
+            class="text-caption text-grey-7"
+            style="margin-top: 0.25rem; padding-left: 12px;"
           >
             <span v-if="activeOptionDescription">{{ activeOptionDescription }}</span>
             <a
@@ -540,10 +542,10 @@ const handleOptionChange = (newIndex: number) => {
               :href="activeOptionDocsUrl"
               target="_blank"
               rel="noopener noreferrer"
-              style="display: inline-flex; align-items: center; color: var(--q-primary, #1976d2); text-decoration: none;"
+              style="margin-left: 0.5rem; display: inline-flex; align-items: center; color: var(--q-primary, #1976d2); text-decoration: none; vertical-align: middle;"
               @click.stop
             >
-              <QIcon :name="activeOptionDocsIcon" size="16px" />
+              <QIcon :name="activeOptionDocsIcon" size="14px" />
               <QTooltip>{{ activeOptionDocsTooltip }}</QTooltip>
             </a>
           </div>
