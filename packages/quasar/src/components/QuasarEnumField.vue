@@ -50,6 +50,11 @@ const allOptions = computed(() => {
     | Record<string, string>
     | undefined;
 
+  // Support x-enum-descriptions for option descriptions
+  const enumDescriptions = (props.schema as any)["x-enum-descriptions"] as
+    | Record<string, string>
+    | undefined;
+
   return props.schema.enum.map((enumValue) => {
     let displayLabel = String(enumValue);
 
@@ -58,15 +63,24 @@ const allOptions = computed(() => {
       displayLabel = enumLabels[enumValue];
     }
 
+    // Get description if provided
+    const description = enumDescriptions?.[enumValue] ?? undefined;
+
     return {
       label: displayLabel,
       value: enumValue,
+      description,
     };
   });
 });
 
+// Check if any options have descriptions
+const hasDescriptions = computed(() =>
+  allOptions.value.some((opt) => opt.description)
+);
+
 // Filtered options for autocomplete
-const filteredOptions = ref<Array<{ label: string; value: any }>>([]);
+const filteredOptions = ref<Array<{ label: string; value: any; description?: string }>>([]);
 
 // Initialize and update filteredOptions when allOptions changes
 watch(
@@ -138,6 +152,16 @@ const filterFn = (val: string, update: (fn: () => void) => void) => {
     >
       <template v-if="schema.required" #label>
         {{ label }} <span style="color: red">*</span>
+      </template>
+      <template v-if="hasDescriptions" #option="{ itemProps, opt }">
+        <q-item v-bind="itemProps">
+          <q-item-section>
+            <q-item-label>{{ opt.label }}</q-item-label>
+            <q-item-label v-if="opt.description" caption class="text-grey-7">
+              {{ opt.description }}
+            </q-item-label>
+          </q-item-section>
+        </q-item>
       </template>
     </QSelect>
   </div>

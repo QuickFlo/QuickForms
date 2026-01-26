@@ -76,7 +76,9 @@ const formOptions: QuasarFormOptions = {
   },
 };
 
-const formData = ref({connectionConfig: {provider: 'aws', connection: '', region: ''}});
+const formData = ref({
+  connectionConfig: { provider: "aws", connection: "", region: "" },
+});
 
 const schema: JSONSchema = {
   type: "object",
@@ -90,7 +92,8 @@ const schema: JSONSchema = {
     fieldOrderingDemo: {
       type: "object",
       title: "Field Ordering Demo (x-field-order)",
-      description: "Fields sorted by numeric x-field-order: booleans (100), strings (200), numbers (300), enums (400), string arrays (500), object arrays (600), objects (700)",
+      description:
+        "Fields sorted by numeric x-field-order: booleans (100), strings (200), numbers (300), enums (400), string arrays (500), object arrays (600), objects (700)",
       properties: {
         // These fields are intentionally out of order in the schema,
         // but will render sorted by x-field-order
@@ -122,7 +125,11 @@ const schema: JSONSchema = {
             type: "object",
             properties: {
               name: { type: "string", title: "Name" },
-              role: { type: "string", title: "Role", enum: ["Dev", "QA", "PM"] },
+              role: {
+                type: "string",
+                title: "Role",
+                enum: ["Dev", "QA", "PM"],
+              },
             },
           },
           "x-item-label": "{{name}} - {{role}}",
@@ -346,6 +353,23 @@ const schema: JSONSchema = {
       },
       "x-quasar-props": {
         dense: false,
+      },
+    },
+    // === ENUM WITH DESCRIPTIONS ===
+    outputDetail: {
+      type: "string",
+      enum: ["text", "segments", "full"],
+      title: "Output Detail",
+      description: "Level of detail in output",
+      "x-enum-labels": {
+        text: "Text",
+        segments: "Segments",
+        full: "Full",
+      },
+      "x-enum-descriptions": {
+        text: "Only return speech text.",
+        segments: "Speech segments with their start and end times.",
+        full: "Includes text, speech segments, and VTT file. Useful for getting back diarized response.",
       },
     },
     tags: {
@@ -831,11 +855,13 @@ const schema: JSONSchema = {
           type: "array",
           title: "Report Objects",
           description: "Filter report results to specific objects",
-          "x-hint": 'Include report objects to filter results. See <a href="https://example.com/docs">this article</a> for more information.',
+          "x-hint":
+            'Include report objects to filter results. See <a href="https://example.com/docs">this article</a> for more information.',
           items: {
             type: "object",
             title: "Report Object Criteria",
-            "x-hint": "Each item defines filter criteria for a specific object type",
+            "x-hint":
+              "Each item defines filter criteria for a specific object type",
             properties: {
               objectNames: {
                 type: "array",
@@ -1010,7 +1036,7 @@ const schema: JSONSchema = {
 
     // === ONEOF WITH DESCRIPTIONS AND DOCS URLS (Discriminated Union style) ===
     dateOperation: {
-      title: "",
+      title: "Date Operation",
       description: "",
       "x-oneof-style": "dropdown",
       "x-oneof-select-label": "Operation",
@@ -1074,7 +1100,8 @@ const schema: JSONSchema = {
     // Demonstrates x-oneof-docsUrls with tabs display and custom icon/tooltip
     speechProvider: {
       title: "Speech Provider (with Docs Links)",
-      description: "Select a TTS provider - note the docs icon next to the description",
+      description:
+        "Select a TTS provider - note the docs icon next to the description",
       "x-oneof-style": "tabs",
       "x-oneof-labels": {
         openai: "OpenAI",
@@ -1111,7 +1138,11 @@ const schema: JSONSchema = {
           properties: {
             provider: { type: "string", const: "openai" },
             apiKey: { type: "string", title: "API Key", format: "password" },
-            voice: { type: "string", title: "Voice", enum: ["alloy", "echo", "fable", "nova", "onyx", "shimmer"] },
+            voice: {
+              type: "string",
+              title: "Voice",
+              enum: ["alloy", "echo", "fable", "nova", "onyx", "shimmer"],
+            },
           },
           required: ["provider"],
         },
@@ -1128,8 +1159,16 @@ const schema: JSONSchema = {
           type: "object",
           properties: {
             provider: { type: "string", const: "google-cloud" },
-            credentials: { type: "string", title: "Service Account JSON", format: "textarea" },
-            languageCode: { type: "string", title: "Language", default: "en-US" },
+            credentials: {
+              type: "string",
+              title: "Service Account JSON",
+              format: "textarea",
+            },
+            languageCode: {
+              type: "string",
+              title: "Language",
+              default: "en-US",
+            },
           },
           required: ["provider"],
         },
