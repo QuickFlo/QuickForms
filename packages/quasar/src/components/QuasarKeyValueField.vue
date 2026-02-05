@@ -252,7 +252,7 @@ function removePair(id: number) {
           v-model="pair.key"
           outlined
           dense
-          placeholder="key"
+          :placeholder="quickformsFeatures.keyPlaceholder"
           class="col"
           :disable="disabled"
           :readonly="readonly"
@@ -262,7 +262,7 @@ function removePair(id: number) {
           v-model="pair.value"
           outlined
           dense
-          placeholder="value"
+          :placeholder="quickformsFeatures.valuePlaceholder"
           class="col"
           :disable="disabled"
           :readonly="readonly"
