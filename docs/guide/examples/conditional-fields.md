@@ -1,8 +1,154 @@
 # Conditional Fields Example
 
-Create dynamic forms where fields appear based on other field values using `oneOf`.
+Create dynamic forms where fields appear based on other field values.
 
-## Simple Conditional Example
+## Two Approaches
+
+QuickForms offers two approaches for conditional fields:
+
+| Approach | Best For |
+|----------|----------|
+| **`x-visible-when`** | Simple show/hide based on another field's value |
+| **`oneOf`/`anyOf`** | Complex scenarios with different validation rules per variant |
+
+## Using `x-visible-when` (Recommended for Simple Cases)
+
+For basic "show field X when field Y equals Z" scenarios, use `x-visible-when`:
+
+```vue
+<script setup lang="ts">
+import { ref } from 'vue'
+import { DynamicForm } from '@quickflo/quickforms-vue'
+import type { JSONSchema } from '@quickflo/quickforms'
+
+const schema: JSONSchema = {
+  type: 'object',
+  properties: {
+    provider: {
+      type: 'string',
+      title: 'Cloud Provider',
+      enum: ['aws', 'gcp', 'azure']
+    },
+    // Only visible when AWS is selected
+    awsRegion: {
+      type: 'string',
+      title: 'AWS Region',
+      enum: ['us-east-1', 'us-west-2', 'eu-west-1'],
+      'x-visible-when': {
+        field: 'provider',
+        operator: 'eq',
+        value: 'aws'
+      }
+    },
+    // Only visible when GCP is selected
+    gcpProject: {
+      type: 'string',
+      title: 'GCP Project ID',
+      'x-visible-when': {
+        field: 'provider',
+        operator: 'eq',
+        value: 'gcp'
+      }
+    },
+    // Visible for multiple providers (AWS or GCP)
+    enableEncryption: {
+      type: 'boolean',
+      title: 'Enable Encryption',
+      'x-visible-when': {
+        field: 'provider',
+        operator: 'in',
+        value: ['aws', 'gcp']
+      }
+    }
+  }
+}
+
+const formData = ref({ provider: 'aws' })
+</script>
+
+<template>
+  <DynamicForm :schema="schema" v-model="formData" />
+</template>
+```
+
+### Supported Operators
+
+| Operator | Aliases | Description | Example |
+|----------|---------|-------------|---------|
+| `eq` | `==`, `===` | Equals | `{ operator: 'eq', value: 'aws' }` |
+| `neq` | `!=`, `!==` | Not equals | `{ operator: 'neq', value: 'azure' }` |
+| `in` | | Value in array | `{ operator: 'in', value: ['aws', 'gcp'] }` |
+| `notIn` | `!in` | Value not in array | `{ operator: 'notIn', value: ['azure'] }` |
+| `truthy` | | Value is truthy | `{ operator: 'truthy' }` |
+| `falsy` | | Value is falsy | `{ operator: 'falsy' }` |
+| `gt` | `>` | Greater than | `{ operator: 'gt', value: 18 }` |
+| `gte` | `>=` | Greater than or equal | `{ operator: 'gte', value: 18 }` |
+| `lt` | `<` | Less than | `{ operator: 'lt', value: 100 }` |
+| `lte` | `<=` | Less than or equal | `{ operator: 'lte', value: 100 }` |
+| `like` | | Case-sensitive pattern | `{ operator: 'like', value: 'cloud-%' }` |
+| `ilike` | | Case-insensitive pattern | `{ operator: 'ilike', value: 'CLOUD-%' }` |
+
+### Nested Field References
+
+Reference fields in nested objects using dot notation:
+
+```typescript
+{
+  connectionConfig: {
+    type: 'object',
+    oneOf: [
+      { properties: { provider: { const: 'aws' } } },
+      { properties: { provider: { const: 'gcp' } } }
+    ]
+  },
+  // Reference nested field with dot notation
+  awsSpecificOption: {
+    type: 'string',
+    'x-visible-when': {
+      field: 'connectionConfig.provider',
+      operator: 'eq',
+      value: 'aws'
+    }
+  }
+}
+```
+
+### Also: `x-readonly-when`
+
+Make fields conditionally read-only using the same syntax:
+
+```typescript
+{
+  status: {
+    type: 'string',
+    enum: ['draft', 'published']
+  },
+  title: {
+    type: 'string',
+    // Readonly once published
+    'x-readonly-when': {
+      field: 'status',
+      operator: 'eq',
+      value: 'published'
+    }
+  }
+}
+```
+
+**See:** [Schema Extensions - x-visible-when](/guide/schema-extensions#x-visible-when) for full documentation.
+
+---
+
+## Using `oneOf` (Advanced Approach)
+
+For complex scenarios where you need:
+- Different validation rules per variant
+- Entirely different field sets with per-variant `required` arrays
+- Type-safe discriminated unions
+
+Use `oneOf`:
+
+## oneOf Example
 
 ```vue
 <script setup lang="ts">
@@ -362,8 +508,26 @@ const schema: JSONSchema = {
 }
 ```
 
+## Choosing the Right Approach
+
+| Scenario | Recommended Approach |
+|----------|---------------------|
+| Show/hide a few fields based on a selection | `x-visible-when` |
+| Different required fields per variant | `oneOf` |
+| Same fields, just conditional visibility | `x-visible-when` |
+| Completely different form sections | `oneOf` |
+| Make fields readonly based on status | `x-readonly-when` |
+| Need tabs/dropdown UI for variant selection | `oneOf` with `x-oneof-style` |
+
 ## Tips
 
+### For `x-visible-when`
+1. **Keep it simple**: Best for 1-3 conditional fields
+2. **Dot notation**: Reference nested fields with `parent.child` paths
+3. **Combine with `x-readonly-when`**: Show a field but make it readonly based on conditions
+4. **Values auto-clear**: When a field becomes hidden, its value is automatically cleared. Use `'x-clear-on-hide': false` to preserve values.
+
+### For `oneOf`
 1. **Clear Labels**: Use descriptive `title` in each `oneOf` schema
 2. **Default Values**: Set a default for the discriminator field
 3. **Enum Labels**: Use `x-enum-labels` for better UX
@@ -372,6 +536,6 @@ const schema: JSONSchema = {
 
 ## Next Steps
 
-- [Custom Validation](/guide/guide/examples/custom-validation) - Add custom validation logic
+- [Schema Extensions - x-visible-when](/guide/schema-extensions#x-visible-when) - Full operator reference
+- [Custom Validation](/guide/examples/custom-validation) - Add custom validation logic
 - [Complex Types](/guide/complex-types) - More about oneOf, anyOf, allOf
-- [Schema Extensions](/guide/schema-extensions) - Custom schema properties

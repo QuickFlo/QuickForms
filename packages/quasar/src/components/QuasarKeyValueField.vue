@@ -53,6 +53,19 @@ const quickformsFeatures = computed(() => {
     globalDefaults.inferTypes ??
     false;
 
+  // Custom placeholders (x-key-placeholder, x-value-placeholder)
+  const keyPlaceholder =
+    (props.schema as any)["x-key-placeholder"] ??
+    schemaFeatures.keyPlaceholder ??
+    globalDefaults.keyPlaceholder ??
+    "key";
+
+  const valuePlaceholder =
+    (props.schema as any)["x-value-placeholder"] ??
+    schemaFeatures.valuePlaceholder ??
+    globalDefaults.valuePlaceholder ??
+    "value";
+
   // Merge QBtn props: defaults -> global -> schema (schema has highest priority)
   const addButtonDefaults = {
     outline: true,
@@ -91,6 +104,8 @@ const quickformsFeatures = computed(() => {
     keyLabel,
     valueLabel,
     inferTypes,
+    keyPlaceholder,
+    valuePlaceholder,
   };
 });
 
@@ -237,7 +252,7 @@ function removePair(id: number) {
           v-model="pair.key"
           outlined
           dense
-          placeholder="key"
+          :placeholder="quickformsFeatures.keyPlaceholder"
           class="col"
           :disable="disabled"
           :readonly="readonly"
@@ -247,7 +262,7 @@ function removePair(id: number) {
           v-model="pair.value"
           outlined
           dense
-          placeholder="value"
+          :placeholder="quickformsFeatures.valuePlaceholder"
           class="col"
           :disable="disabled"
           :readonly="readonly"

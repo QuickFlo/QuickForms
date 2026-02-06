@@ -6,9 +6,204 @@ QuickForms extends JSON Schema with custom `x-*` attributes to provide escape ha
 All `x-*` attributes are optional. QuickForms works perfectly with standard JSON Schema—use extensions only when you need them.
 :::
 
+## `x-visible-when`
+
+**Purpose:** Conditionally show/hide a field based on another field's value
+
+**Type:** `{ field: string, operator: string, value?: any }`
+
+**Example:**
+```typescript
+{
+  provider: {
+    type: 'string',
+    enum: ['aws', 'gcp', 'azure']
+  },
+  // Only visible when AWS is selected
+  awsRegion: {
+    type: 'string',
+    title: 'AWS Region',
+    enum: ['us-east-1', 'us-west-2', 'eu-west-1'],
+    'x-visible-when': {
+      field: 'provider',
+      operator: 'eq',
+      value: 'aws'
+    }
+  },
+  // Visible for multiple providers
+  enableEncryption: {
+    type: 'boolean',
+    title: 'Enable Encryption',
+    'x-visible-when': {
+      field: 'provider',
+      operator: 'in',
+      value: ['aws', 'gcp']
+    }
+  }
+}
+```
+
+**Supported Operators:**
+
+| Operator | Aliases | Description |
+|----------|---------|-------------|
+| `eq` | `==`, `===` | Equals |
+| `neq` | `!=`, `!==` | Not equals |
+| `in` | | Value is in array |
+| `notIn` | `!in` | Value is not in array |
+| `gt` | `>` | Greater than (numbers) |
+| `gte` | `>=` | Greater than or equal (numbers) |
+| `lt` | `<` | Less than (numbers) |
+| `lte` | `<=` | Less than or equal (numbers) |
+| `truthy` | | Value is truthy (no `value` needed) |
+| `falsy` | | Value is falsy (no `value` needed) |
+| `like` | | Case-sensitive pattern match (`%` = any chars, `_` = single char) |
+| `ilike` | | Case-insensitive pattern match |
+
+**Nested Field Paths:**
+
+You can reference fields nested within objects using dot notation:
+
+```typescript
+{
+  connectionConfig: {
+    type: 'object',
+    oneOf: [
+      { properties: { provider: { const: 'aws' }, /* ... */ } },
+      { properties: { provider: { const: 'gcp' }, /* ... */ } }
+    ]
+  },
+  // Reference the nested discriminator field
+  cloudSpecificOption: {
+    type: 'string',
+    'x-visible-when': {
+      field: 'connectionConfig.provider',  // Dot notation for nested path
+      operator: 'eq',
+      value: 'aws'
+    }
+  }
+}
+```
+
+**Pattern Matching with `like`/`ilike`:**
+
+```typescript
+{
+  // Visible for providers starting with 'cloud-'
+  cloudFeature: {
+    type: 'boolean',
+    'x-visible-when': {
+      field: 'provider',
+      operator: 'ilike',
+      value: 'cloud-%'  // % matches any characters
+    }
+  }
+}
+```
+
+**Use Cases:**
+- Show provider-specific fields
+- Progressive disclosure based on user choices
+- Simpler alternative to `oneOf` for basic conditional visibility
+
+**Related:** [Conditional Fields Example](/guide/examples/conditional-fields), [`x-readonly-when`](#x-readonly-when)
+
+---
+
+## `x-readonly-when`
+
+**Purpose:** Conditionally make a field read-only based on another field's value
+
+**Type:** `{ field: string, operator: string, value?: any }`
+
+**Example:**
+```typescript
+{
+  status: {
+    type: 'string',
+    enum: ['draft', 'published', 'archived']
+  },
+  // Readonly once published or archived
+  title: {
+    type: 'string',
+    title: 'Title',
+    'x-readonly-when': {
+      field: 'status',
+      operator: 'in',
+      value: ['published', 'archived']
+    }
+  }
+}
+```
+
+**Operators:** Same as [`x-visible-when`](#x-visible-when)
+
+**Use Cases:**
+- Lock fields after a certain status is reached
+- Prevent editing based on user selections
+- Conditional form protection
+
+**Note:** `x-readonly-when` makes the field read-only when the condition is **TRUE**. This is the opposite of `x-visible-when` which shows the field when the condition is TRUE.
+
+---
+
+## `x-clear-on-hide`
+
+**Purpose:** Control whether a field's value is cleared when it becomes hidden via `x-visible-when`
+
+**Type:** `boolean`
+
+**Default Behavior:** Fields with `x-visible-when` automatically clear their values when hidden. Use `x-clear-on-hide: false` to preserve values.
+
+**Example:**
+```typescript
+{
+  accountType: {
+    type: 'string',
+    enum: ['personal', 'business']
+  },
+  // Value is cleared when accountType changes away from 'business'
+  taxId: {
+    type: 'string',
+    title: 'Tax ID',
+    'x-visible-when': {
+      field: 'accountType',
+      operator: 'eq',
+      value: 'business'
+    }
+    // x-clear-on-hide defaults to true when x-visible-when is present
+  },
+  // Value is preserved even when hidden
+  internalNotes: {
+    type: 'string',
+    'x-visible-when': {
+      field: 'accountType',
+      operator: 'eq',
+      value: 'business'
+    },
+    'x-clear-on-hide': false  // Preserve value when hidden
+  }
+}
+```
+
+**Use Cases:**
+- Clear provider-specific settings when switching providers
+- Preserve user input that shouldn't be lost on visibility changes
+- Ensure stale data isn't submitted for hidden fields
+
+**Why clear by default?**
+When fields become hidden, their values typically become irrelevant. Clearing them:
+- Prevents stale data from being submitted
+- Ensures the form model matches the visible UI
+- Avoids confusion when switching between options
+
+**Note:** This only affects fields hidden via `x-visible-when`. Fields hidden with `x-hidden` or `x-roles` are not affected.
+
+---
+
 ## `x-hidden`
 
-**Purpose:** Completely hide a field from rendering
+**Purpose:** Completely hide a field from rendering (unconditionally)
 
 **Type:** `boolean`
 
@@ -26,6 +221,8 @@ All `x-*` attributes are optional. QuickForms works perfectly with standard JSON
 - Hidden system fields
 - Internal tracking IDs
 - Fields set programmatically
+
+**See Also:** [`x-visible-when`](#x-visible-when) for conditional visibility
 
 ---
 

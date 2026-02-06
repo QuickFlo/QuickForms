@@ -9,3 +9,4 @@ coverage
 .idea
 *.tsbuildinfo
 WARP.MD
+.envrc

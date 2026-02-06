@@ -960,6 +960,104 @@ const schema: JSONSchema = {
       ],
     },
 
+    // === X-VISIBLE-WHEN DEMO (Conditional Visibility with Nested Path) ===
+    // This demonstrates the x-visible-when schema extension for conditionally
+    // showing/hiding fields based on the value of another field.
+    // Uses nested path "connectionConfig.provider" to reference the discriminator field above.
+    visibleWhenDemo: {
+      type: "object",
+      title: "Conditional Visibility Demo (x-visible-when)",
+      description:
+        "These fields show/hide based on the connectionConfig.provider selection above",
+      properties: {
+        // Only visible when GCP is selected
+        gcpBucketName: {
+          type: "string",
+          title: "GCP Bucket Name",
+          description: "Only visible when GCP provider is selected",
+          "x-visible-when": {
+            field: "connectionConfig.provider",
+            operator: "eq",
+            value: "gcp",
+          },
+        },
+        // Only visible when AWS is selected
+        awsS3Bucket: {
+          type: "string",
+          title: "AWS S3 Bucket",
+          description: "Only visible when AWS provider is selected",
+          "x-visible-when": {
+            field: "connectionConfig.provider",
+            operator: "eq",
+            value: "aws",
+          },
+        },
+        // Only visible when SFTP is selected
+        sftpPort: {
+          type: "number",
+          title: "SFTP Port",
+          description: "Only visible when SFTP provider is selected",
+          default: 22,
+          "x-visible-when": {
+            field: "connectionConfig.provider",
+            operator: "eq",
+            value: "sftp",
+          },
+        },
+        // Visible for multiple providers using 'in' operator
+        enableEncryption: {
+          type: "boolean",
+          title: "Enable Encryption",
+          description: "Visible for GCP and AWS (using 'in' operator)",
+          "x-visible-when": {
+            field: "connectionConfig.provider",
+            operator: "in",
+            value: ["gcp", "aws"],
+          },
+        },
+        // Visible when NOT sftp (using 'neq' operator)
+        cloudRegion: {
+          type: "string",
+          title: "Cloud Region",
+          description:
+            "Visible when provider is NOT SFTP (using 'neq' operator)",
+          enum: ["us-east-1", "us-west-2", "eu-west-1", "ap-southeast-1"],
+          "x-visible-when": {
+            field: "connectionConfig.provider",
+            operator: "neq",
+            value: "sftp",
+          },
+        },
+        // Test ilike operator - visible when provider matches pattern (case-insensitive)
+        cloudStorageType: {
+          type: "string",
+          title: "Cloud Storage Type",
+          description:
+            "Visible for providers starting with 'g' or 'a' (using 'ilike' with pattern)",
+          enum: ["blob", "object", "file"],
+          "x-visible-when": {
+            field: "connectionConfig.provider",
+            operator: "ilike",
+            value: "[ga]%",
+          },
+        },
+        // Test x-readonly-when - readonly when SFTP is selected
+        transferMode: {
+          type: "string",
+          title: "Transfer Mode",
+          description:
+            "Readonly when SFTP is selected (using 'x-readonly-when')",
+          enum: ["sync", "async", "streaming"],
+          default: "sync",
+          "x-readonly-when": {
+            field: "connectionConfig.provider",
+            operator: "eq",
+            value: "sftp",
+          },
+        },
+      },
+    },
+
     // === ONEOF (CONDITIONAL) WITH TABS AND CUSTOM LABELS ===
     paymentMethod: {
       type: "object",

@@ -202,6 +202,16 @@ export interface FormContext {
    */
   useFieldValue: <T = unknown>(path: string) => ComputedRef<T | undefined>;
   /**
+   * Set a field value by path. Used internally by FieldRenderer to clear
+   * values when fields become hidden via x-visible-when.
+   *
+   * @example
+   * ```ts
+   * formContext.setFieldValue('provider.model', undefined);
+   * ```
+   */
+  setFieldValue: (path: string, value: unknown) => void;
+  /**
    * Watch form values and call callback when they change.
    * Returns a stop function to unsubscribe.
    *
