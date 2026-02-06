@@ -147,6 +147,60 @@ You can reference fields nested within objects using dot notation:
 
 ---
 
+## `x-clear-on-hide`
+
+**Purpose:** Control whether a field's value is cleared when it becomes hidden via `x-visible-when`
+
+**Type:** `boolean`
+
+**Default Behavior:** Fields with `x-visible-when` automatically clear their values when hidden. Use `x-clear-on-hide: false` to preserve values.
+
+**Example:**
+```typescript
+{
+  accountType: {
+    type: 'string',
+    enum: ['personal', 'business']
+  },
+  // Value is cleared when accountType changes away from 'business'
+  taxId: {
+    type: 'string',
+    title: 'Tax ID',
+    'x-visible-when': {
+      field: 'accountType',
+      operator: 'eq',
+      value: 'business'
+    }
+    // x-clear-on-hide defaults to true when x-visible-when is present
+  },
+  // Value is preserved even when hidden
+  internalNotes: {
+    type: 'string',
+    'x-visible-when': {
+      field: 'accountType',
+      operator: 'eq',
+      value: 'business'
+    },
+    'x-clear-on-hide': false  // Preserve value when hidden
+  }
+}
+```
+
+**Use Cases:**
+- Clear provider-specific settings when switching providers
+- Preserve user input that shouldn't be lost on visibility changes
+- Ensure stale data isn't submitted for hidden fields
+
+**Why clear by default?**
+When fields become hidden, their values typically become irrelevant. Clearing them:
+- Prevents stale data from being submitted
+- Ensures the form model matches the visible UI
+- Avoids confusion when switching between options
+
+**Note:** This only affects fields hidden via `x-visible-when`. Fields hidden with `x-hidden` or `x-roles` are not affected.
+
+---
+
 ## `x-hidden`
 
 **Purpose:** Completely hide a field from rendering (unconditionally)

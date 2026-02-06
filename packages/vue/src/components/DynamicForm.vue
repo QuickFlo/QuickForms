@@ -164,6 +164,18 @@ const formContext = reactive({
     });
   },
   /**
+   * Set a field value by path.
+   * Supports dot notation for nested paths.
+   */
+  setFieldValue: (path: string, value: unknown) => {
+    if (isSingleField.value) {
+      // For single-field schemas, we need to update the nested path within the root field
+      setFieldValue(`${SINGLE_FIELD_PATH}.${path}`, value);
+    } else {
+      setFieldValue(path, value);
+    }
+  },
+  /**
    * Watch all form values and call callback when they change.
    * Returns a stop function to unsubscribe.
    */

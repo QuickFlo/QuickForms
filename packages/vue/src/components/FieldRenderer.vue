@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed } from 'vue';
+import { computed, watch } from 'vue';
 import type { JSONSchema, UISchemaElement } from '@quickflo/quickforms';
 import { useFormContext } from '../composables/useFormContext.js';
 
@@ -141,6 +141,27 @@ const visibleWhenResult = computed(() => {
   if (!condition) return true; // No condition = always visible
 
   return evaluateCondition(condition, visibleWhenFieldValue.value);
+});
+
+// Check if field should clear its value when hidden
+// Defaults to true for x-visible-when fields, but can be overridden with x-clear-on-hide: false
+const shouldClearOnHide = computed(() => {
+  const schema = props.schema as any;
+  // If explicitly set, use that value
+  if (schema['x-clear-on-hide'] !== undefined) {
+    return schema['x-clear-on-hide'] === true;
+  }
+  // Default: clear on hide only if x-visible-when is configured
+  return visibleWhenConfig.value !== undefined;
+});
+
+// Watch visibility changes and clear value when field becomes hidden
+watch(visibleWhenResult, (isNowVisible, wasVisible) => {
+  // Only clear when transitioning from visible to hidden
+  if (wasVisible === true && isNowVisible === false && shouldClearOnHide.value) {
+    // Clear the field value
+    context.setFieldValue(props.path, undefined);
+  }
 });
 
 // Get reactive field value for x-readonly-when condition

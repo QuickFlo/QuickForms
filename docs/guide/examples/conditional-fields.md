@@ -525,6 +525,7 @@ const schema: JSONSchema = {
 1. **Keep it simple**: Best for 1-3 conditional fields
 2. **Dot notation**: Reference nested fields with `parent.child` paths
 3. **Combine with `x-readonly-when`**: Show a field but make it readonly based on conditions
+4. **Values auto-clear**: When a field becomes hidden, its value is automatically cleared. Use `'x-clear-on-hide': false` to preserve values.
 
 ### For `oneOf`
 1. **Clear Labels**: Use descriptive `title` in each `oneOf` schema
