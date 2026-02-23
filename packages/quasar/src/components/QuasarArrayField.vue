@@ -246,6 +246,17 @@ const getItemKey = (item: any, index: number): string => {
   return stableKeys.value[index] || `fallback-${index}`;
 };
 
+/**
+ * Replace an array item's value at the given index.
+ * Exposed through the item-content slot so parent components
+ * can modify individual items through the same reactive ref.
+ */
+const updateItem = (index: number, newValue: any) => {
+  const newArray = [...arrayValue.value];
+  newArray[index] = newValue;
+  value.value = newArray;
+};
+
 </script>
 
 <template>
@@ -312,6 +323,7 @@ const getItemKey = (item: any, index: number): string => {
                 :label="getItemLabel(index)"
                 :disabled="disabled"
                 :readonly="readonly"
+                :update-item="(newValue: any) => updateItem(index, newValue)"
               >
                 <FieldRenderer
                   :schema="itemsSchema!"
