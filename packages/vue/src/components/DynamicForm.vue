@@ -118,13 +118,30 @@ const defaultComponentDefaults = {
 };
 
 /**
- * Get a nested value from an object using dot notation path.
+ * Get a nested value from an object using dot/bracket notation path.
+ * Supports array index access like "items[0].name" or "a.b[2].c".
  * @example getNestedValue({ a: { b: 1 } }, 'a.b') => 1
+ * @example getNestedValue({ items: [{ name: 'x' }] }, 'items[0].name') => 'x'
  */
 function getNestedValue(obj: Record<string, any>, path: string): any {
   if (!path) return obj;
-  return path.split('.').reduce((current, key) => {
-    if (current && typeof current === 'object' && key in current) {
+  // Split on dots, then further split bracket notation like "items[0]" into ["items", "0"]
+  const segments = path.split('.').flatMap((segment) => {
+    const parts: string[] = [];
+    const re = /([^[\]]+)|\[(\d+)\]/g;
+    let match;
+    while ((match = re.exec(segment)) !== null) {
+      parts.push(match[1] ?? match[2]);
+    }
+    return parts.length > 0 ? parts : [segment];
+  });
+
+  return segments.reduce((current, key) => {
+    if (current == null) return undefined;
+    if (Array.isArray(current) && /^\d+$/.test(key)) {
+      return current[parseInt(key, 10)];
+    }
+    if (typeof current === 'object' && key in current) {
       return current[key];
     }
     return undefined;
