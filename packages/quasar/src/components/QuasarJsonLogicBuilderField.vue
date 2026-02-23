@@ -832,6 +832,7 @@ function handleOperatorInput(condition: SimpleCondition, val: string | null) {
   border-radius: 6px;
   min-width: 0; /* Prevent flex item from overflowing */
   container-type: inline-size;
+  position: relative;
 }
 
 .condition-row--nested {
@@ -863,18 +864,23 @@ function handleOperatorInput(condition: SimpleCondition, val: string | null) {
 }
 
 /* When container is narrow, inputs stack vertically */
-@container (max-width: 360px) {
+@container (max-width: 600px) {
   .condition-inputs {
     flex-direction: column;
+    flex-wrap: nowrap;
+    align-items: stretch;
+    gap: 4px;
   }
 
   .condition-input {
-    flex-basis: auto;
+    flex: 0 0 auto;
     min-width: 0;
     width: 100%;
+    max-width: none;
   }
 
   .condition-operator {
+    flex: 0 0 auto;
     max-width: none;
     width: 100%;
   }
@@ -882,12 +888,11 @@ function handleOperatorInput(condition: SimpleCondition, val: string | null) {
   .condition-input-placeholder {
     display: none;
   }
-}
 
-/* Fallback for browsers without container queries */
-@media (max-width: 500px) {
-  .condition-operator {
-    max-width: none;
+  .condition-remove {
+    position: absolute;
+    top: 4px;
+    right: 4px;
   }
 }
 
