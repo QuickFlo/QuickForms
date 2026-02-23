@@ -312,29 +312,18 @@ const updateItem = (index: number, newValue: any) => {
           bordered
           v-bind="quasarProps"
         >
-          <QCardSection class="row items-start">
-            <div class="col">
+          <QCardSection class="quickform-array-item">
+            <div class="quickform-array-item-actions">
+              <!-- Slot for additional per-item actions (e.g., template toggle) -->
               <slot
-                name="item-content"
+                name="item-actions"
                 :item="item"
                 :index="index"
-                :schema="itemsSchema!"
                 :path="`${path}[${index}]`"
-                :label="getItemLabel(index)"
                 :disabled="disabled"
                 :readonly="readonly"
                 :update-item="(newValue: any) => updateItem(index, newValue)"
-              >
-                <FieldRenderer
-                  :schema="itemsSchema!"
-                  :path="`${path}[${index}]`"
-                  :label="getItemLabel(index)"
-                  :disabled="disabled"
-                  :readonly="readonly"
-                />
-              </slot>
-            </div>
-            <div class="col-auto q-ml-sm row q-gutter-xs items-center">
+              />
               <QBtn
                 flat
                 round
@@ -369,6 +358,27 @@ const updateItem = (index: number, newValue: any) => {
                   formContext?.labels?.removeItem || "Remove"
                 }}</q-tooltip>
               </QBtn>
+            </div>
+            <div class="quickform-array-item-content">
+              <slot
+                name="item-content"
+                :item="item"
+                :index="index"
+                :schema="itemsSchema!"
+                :path="`${path}[${index}]`"
+                :label="getItemLabel(index)"
+                :disabled="disabled"
+                :readonly="readonly"
+                :update-item="(newValue: any) => updateItem(index, newValue)"
+              >
+                <FieldRenderer
+                  :schema="itemsSchema!"
+                  :path="`${path}[${index}]`"
+                  :label="getItemLabel(index)"
+                  :disabled="disabled"
+                  :readonly="readonly"
+                />
+              </slot>
             </div>
           </QCardSection>
         </QCard>
@@ -454,6 +464,24 @@ const updateItem = (index: number, newValue: any) => {
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
+}
+
+.quickform-array-item {
+  position: relative;
+}
+
+.quickform-array-item-actions {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  display: flex;
+  gap: 2px;
+  align-items: center;
+  z-index: 2;
+}
+
+.quickform-array-item-content {
+  padding-right: 80px;
 }
 
 .quickform-array-empty {
