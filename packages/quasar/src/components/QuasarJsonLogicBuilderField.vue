@@ -805,10 +805,10 @@ function handleOperatorInput(condition: SimpleCondition, val: string | null) {
 }
 
 .builder-visual {
-  border: 1px solid rgba(0, 0, 0, 0.12);
-  border-radius: 8px;
-  padding: 12px;
-  background: rgba(0, 0, 0, 0.02);
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 6px;
+  padding: 8px;
+  background: rgba(0, 0, 0, 0.015);
 }
 
 .logic-toggle {
@@ -819,17 +819,17 @@ function handleOperatorInput(condition: SimpleCondition, val: string | null) {
 .conditions-container {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
 }
 
 .condition-row {
   display: flex;
   align-items: flex-start; /* Align to top when wrapped */
-  gap: 8px;
-  padding: 8px;
+  gap: 6px;
+  padding: 6px;
   background: white;
   border: 1px solid rgba(0, 0, 0, 0.08);
-  border-radius: 6px;
+  border-radius: 4px;
   min-width: 0; /* Prevent flex item from overflowing */
   container-type: inline-size;
   position: relative;
@@ -842,7 +842,7 @@ function handleOperatorInput(condition: SimpleCondition, val: string | null) {
 .condition-inputs {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
   flex: 1;
   min-width: 0; /* Allow flex children to shrink below content size */
   flex-wrap: wrap; /* Wrap to next row when tight */
@@ -911,38 +911,38 @@ function handleOperatorInput(condition: SimpleCondition, val: string | null) {
 }
 
 .condition-group {
-  border: 2px dashed rgba(0, 0, 0, 0.12);
-  border-radius: 8px;
-  padding: 8px;
-  background: rgba(0, 0, 0, 0.02);
+  border: 1px dashed rgba(0, 0, 0, 0.1);
+  border-radius: 6px;
+  padding: 6px;
+  background: rgba(0, 0, 0, 0.015);
 }
 
 .group-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 8px;
-  padding-bottom: 8px;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+  margin-bottom: 6px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
 }
 
 .group-conditions {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
 }
 
 .group-actions {
-  margin-top: 8px;
-  padding-top: 8px;
-  border-top: 1px dashed rgba(0, 0, 0, 0.08);
+  margin-top: 6px;
+  padding-top: 6px;
+  border-top: 1px dashed rgba(0, 0, 0, 0.06);
 }
 
 .logic-connector {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 4px 0;
+  padding: 2px 0;
 }
 
 .logic-connector-text {
