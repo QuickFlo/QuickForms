@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, ref, watch } from "vue";
-import { QCard, QCardSection, QBtn } from "quasar";
+import { QCard, QCardSection, QBtn, QInput } from "quasar";
 import { FieldRenderer } from "@quickflo/quickforms-vue";
 import type { FieldProps } from "@quickflo/quickforms-vue";
 import { useQuasarFormField } from "../composables/useQuasarFormField";
@@ -303,13 +303,24 @@ const getItemKey = (item: any, index: number): string => {
         >
           <QCardSection class="row items-start">
             <div class="col">
-              <FieldRenderer
+              <slot
+                name="item-content"
+                :item="item"
+                :index="index"
                 :schema="itemsSchema!"
                 :path="`${path}[${index}]`"
                 :label="getItemLabel(index)"
                 :disabled="disabled"
                 :readonly="readonly"
-              />
+              >
+                <FieldRenderer
+                  :schema="itemsSchema!"
+                  :path="`${path}[${index}]`"
+                  :label="getItemLabel(index)"
+                  :disabled="disabled"
+                  :readonly="readonly"
+                />
+              </slot>
             </div>
             <div class="col-auto q-ml-sm row q-gutter-xs items-center">
               <QBtn
