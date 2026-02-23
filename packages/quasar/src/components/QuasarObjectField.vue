@@ -190,13 +190,13 @@ const properties = computed(() => {
 /* Section style: solid (default) */
 .quickform-object-field.quickform-section-solid :deep(.q-expansion-item__content) {
   border-left: 3px solid #e0e0e0;
-  margin-left: 8px;
+  margin-left: 4px;
 }
 
 /* Section style: dashed */
 .quickform-object-field.quickform-section-dashed :deep(.q-expansion-item__content) {
   border-left: 2px dashed #ccc;
-  margin-left: 8px;
+  margin-left: 4px;
 }
 
 /* Section style: none */
@@ -247,8 +247,8 @@ const properties = computed(() => {
 }
 
 .quickform-object-content {
-  padding: 1rem;
-  padding-left: 1.25rem;
+  padding: 0.75rem;
+  padding-left: 0.75rem;
 }
 
 .quickform-error-message {

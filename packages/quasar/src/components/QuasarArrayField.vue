@@ -469,15 +469,15 @@ const updateItem = (index: number, newValue: any) => {
 /* Section style: solid (default) */
 .quickform-array-field.quickform-section-solid .quickform-array-content {
   border-left: 3px solid #e0e0e0;
-  padding-left: 1rem;
-  margin-left: 0.25rem;
+  padding-left: 0.5rem;
+  margin-left: 0.125rem;
 }
 
 /* Section style: dashed */
 .quickform-array-field.quickform-section-dashed .quickform-array-content {
   border-left: 2px dashed #ccc;
-  padding-left: 1rem;
-  margin-left: 0.25rem;
+  padding-left: 0.5rem;
+  margin-left: 0.125rem;
 }
 
 /* Section style: none */

@@ -831,6 +831,7 @@ function handleOperatorInput(condition: SimpleCondition, val: string | null) {
   border: 1px solid rgba(0, 0, 0, 0.08);
   border-radius: 6px;
   min-width: 0; /* Prevent flex item from overflowing */
+  container-type: inline-size;
 }
 
 .condition-row--nested {
@@ -861,14 +862,29 @@ function handleOperatorInput(condition: SimpleCondition, val: string | null) {
   max-width: 110px; /* Stay compact when inline with inputs */
 }
 
-/* When wrapped to own line, allow operator to grow fully */
-@container (max-width: 400px) {
+/* When container is narrow, inputs stack vertically */
+@container (max-width: 360px) {
+  .condition-inputs {
+    flex-direction: column;
+  }
+
+  .condition-input {
+    flex-basis: auto;
+    min-width: 0;
+    width: 100%;
+  }
+
   .condition-operator {
     max-width: none;
+    width: 100%;
+  }
+
+  .condition-input-placeholder {
+    display: none;
   }
 }
 
-/* Fallback for browsers without container queries - use parent width */
+/* Fallback for browsers without container queries */
 @media (max-width: 500px) {
   .condition-operator {
     max-width: none;
