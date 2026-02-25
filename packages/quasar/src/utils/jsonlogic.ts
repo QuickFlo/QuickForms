@@ -295,8 +295,10 @@ function parseValue(value: string, useTemplateSyntax = false, options: ParseValu
   }
 
   // When treatAsVar is true (used for left side of conditions),
-  // convert remaining values to var references
-  if (options.treatAsVar) {
+  // convert remaining values to var references.
+  // In template syntax mode, keep values as strings — users use {{ }} for
+  // variable references, and bare strings are literal values resolved at runtime.
+  if (options.treatAsVar && !useTemplateSyntax) {
     return { var: value }
   }
 
@@ -360,6 +362,13 @@ export function fromJsonLogic(logic: JsonLogic, options: FromJsonLogicOptions = 
     return { logic: 'and', conditions: [] }
   }
 
+  // Check for special single-operator patterns (isEmpty/isNotEmpty) before
+  // treating them as root-level groups.
+  const rootSpecial = detectSpecialPattern(logic, options)
+  if (rootSpecial) {
+    return { logic: 'and', conditions: [rootSpecial] }
+  }
+
   // Check for top-level and/or
   if ('and' in logic && Array.isArray(logic.and)) {
     return {
@@ -401,6 +410,13 @@ function jsonLogicToConditionItem(logic: JsonLogic, options: FromJsonLogicOption
   if (typeof logic !== 'object' || logic === null) {
     // Can't parse, return empty condition
     return createEmptyCondition()
+  }
+
+  // Check for special patterns BEFORE group detection — isEmpty/isNotEmpty emit
+  // and/or structures that must be collapsed back to a single operator row.
+  const specialPattern = detectSpecialPattern(logic, options)
+  if (specialPattern) {
+    return specialPattern
   }
 
   // Check for nested and/or (group)
