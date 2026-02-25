@@ -158,11 +158,57 @@ watch(
   { immediate: true, deep: false } // deep: false - only react to array structure changes, not property changes
 );
 
+// Expand/collapse tracking by stable key (survives reorder)
+const expandedKeys = ref(new Set<string>());
+
+watch(stableKeys, (newKeys, oldKeys) => {
+  const next = new Set(expandedKeys.value);
+  const oldKeySet = new Set(oldKeys || []);
+  for (const key of newKeys) {
+    if (!oldKeySet.has(key)) {
+      next.add(key);
+    }
+  }
+  const newKeySet = new Set(newKeys);
+  for (const key of next) {
+    if (!newKeySet.has(key)) {
+      next.delete(key);
+    }
+  }
+  expandedKeys.value = next;
+}, { immediate: true });
+
+const toggleItem = (index: number) => {
+  const key = stableKeys.value[index];
+  if (!key) return;
+  const next = new Set(expandedKeys.value);
+  if (next.has(key)) {
+    next.delete(key);
+  } else {
+    next.add(key);
+  }
+  expandedKeys.value = next;
+};
+
+const isItemExpanded = (index: number): boolean => {
+  const key = stableKeys.value[index];
+  return key ? expandedKeys.value.has(key) : true;
+};
+
 const itemsSchema = computed(() => {
   if (Array.isArray(props.schema.items)) {
     return props.schema.items[0];
   }
   return props.schema.items;
+});
+
+/**
+ * Items schema with x-flat injected so inner object fields
+ * render without their expansion panel header (the toolbar handles it).
+ */
+const flatItemsSchema = computed(() => {
+  if (!itemsSchema.value) return undefined;
+  return { ...itemsSchema.value, 'x-flat': true };
 });
 
 const addItem = () => {
@@ -311,9 +357,19 @@ const updateItem = (index: number, newValue: any) => {
           flat
           bordered
           v-bind="quasarProps"
+          class="quickform-array-item-card"
         >
-          <QCardSection class="quickform-array-item">
-            <div class="quickform-array-item-actions">
+          <!-- Toolbar: item label + actions in a single flex row -->
+          <div class="quickform-array-item-toolbar" @click="toggleItem(index)">
+            <div class="quickform-array-item-toolbar-left">
+              <q-icon
+                :name="isItemExpanded(index) ? 'expand_more' : 'chevron_right'"
+                size="18px"
+                class="quickform-array-item-expand-icon"
+              />
+              <span class="quickform-array-item-label">{{ getItemLabel(index) }}</span>
+            </div>
+            <div class="quickform-array-item-actions" @click.stop>
               <!-- Slot for additional per-item actions (e.g., template toggle) -->
               <slot
                 name="item-actions"
@@ -359,27 +415,29 @@ const updateItem = (index: number, newValue: any) => {
                 }}</q-tooltip>
               </QBtn>
             </div>
-            <div class="quickform-array-item-content">
-              <slot
-                name="item-content"
-                :item="item"
-                :index="index"
-                :schema="itemsSchema!"
+          </div>
+          <!-- Expandable content section -->
+          <QCardSection v-show="isItemExpanded(index)">
+            <slot
+              name="item-content"
+              :item="item"
+              :index="index"
+              :schema="flatItemsSchema!"
+              :path="`${path}[${index}]`"
+              :label="getItemLabel(index)"
+              :hideLabel="true"
+              :disabled="disabled"
+              :readonly="readonly"
+              :update-item="(newValue: any) => updateItem(index, newValue)"
+            >
+              <FieldRenderer
+                :schema="flatItemsSchema!"
                 :path="`${path}[${index}]`"
-                :label="getItemLabel(index)"
+                :label="''"
                 :disabled="disabled"
                 :readonly="readonly"
-                :update-item="(newValue: any) => updateItem(index, newValue)"
-              >
-                <FieldRenderer
-                  :schema="itemsSchema!"
-                  :path="`${path}[${index}]`"
-                  :label="getItemLabel(index)"
-                  :disabled="disabled"
-                  :readonly="readonly"
-                />
-              </slot>
-            </div>
+              />
+            </slot>
           </QCardSection>
         </QCard>
 
@@ -466,22 +524,42 @@ const updateItem = (index: number, newValue: any) => {
   gap: 0.75rem;
 }
 
-.quickform-array-item {
-  position: relative;
+.quickform-array-item-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 4px 8px;
+  cursor: pointer;
+  user-select: none;
+  background: rgba(0, 0, 0, 0.02);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.04);
+}
+
+.quickform-array-item-toolbar:hover {
+  background: rgba(0, 0, 0, 0.04);
+}
+
+.quickform-array-item-toolbar-left {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.quickform-array-item-expand-icon {
+  color: #999;
+  transition: transform 0.15s ease;
+}
+
+.quickform-array-item-label {
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: #555;
 }
 
 .quickform-array-item-actions {
-  position: absolute;
-  top: 6px;
-  right: 6px;
   display: flex;
   gap: 2px;
   align-items: center;
-  z-index: 2;
-}
-
-.quickform-array-item-content {
-  padding-right: 80px;
 }
 
 .quickform-array-empty {

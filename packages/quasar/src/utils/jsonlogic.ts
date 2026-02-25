@@ -144,7 +144,7 @@ export interface ToJsonLogicOptions {
  */
 export function toJsonLogic(root: ConditionRoot, options: ToJsonLogicOptions = {}): JsonLogic {
   if (root.conditions.length === 0) {
-    return true // Empty condition = always true
+    return {} // Empty condition = always true (empty object signals no filter)
   }
 
   if (root.conditions.length === 1) {
@@ -235,9 +235,9 @@ function simpleConditionToJsonLogic(cond: SimpleCondition, options: ToJsonLogicO
     case 'isFalse':
       return { '==': [left, false] }
     case 'isEmpty':
-      return { or: [{ '==': [left, ''] }, { '==': [left, null] }, { '!': [left] }] }
+      return { or: [{ '==': [left, ''] }, { '==': [left, null] }] }
     case 'isNotEmpty':
-      return { and: [{ '!=': [left, ''] }, { '!=': [left, null] }, { '!!': [left] }] }
+      return { and: [{ '!=': [left, ''] }, { '!=': [left, null] }] }
     default:
       return { '==': [left, right] }
   }
@@ -355,6 +355,11 @@ export function fromJsonLogic(logic: JsonLogic, options: FromJsonLogicOptions = 
     return { logic: 'and', conditions: [] }
   }
 
+  // Empty object = no filter (treat same as no conditions)
+  if (typeof logic === 'object' && Object.keys(logic).length === 0) {
+    return { logic: 'and', conditions: [] }
+  }
+
   // Check for top-level and/or
   if ('and' in logic && Array.isArray(logic.and)) {
     return {
@@ -429,23 +434,19 @@ function detectSpecialPattern(logic: JsonLogic, options: FromJsonLogicOptions): 
     return null
   }
 
-  // Pattern: { "and": [{ "!=": [left, ""] }, { "!=": [left, null] }, { "!!": [left] }] }
+  // Pattern: { "and": [{ "!=": [left, ""] }, { "!=": [left, null] }] }
   // Collapses to: isNotEmpty
-  if ('and' in logic && Array.isArray(logic.and) && logic.and.length === 3) {
-    const [first, second, third] = logic.and as JsonLogic[]
+  if ('and' in logic && Array.isArray(logic.and) && logic.and.length === 2) {
+    const [first, second] = logic.and as JsonLogic[]
     if (
       first && typeof first === 'object' && '!=' in first &&
-      second && typeof second === 'object' && '!=' in second &&
-      third && typeof third === 'object' && '!!' in third
+      second && typeof second === 'object' && '!=' in second
     ) {
-      const firstArgs = (first as any)['!=']  
+      const firstArgs = (first as any)['!=']
       const secondArgs = (second as any)['!=']
-      const thirdArgs = (third as any)['!!']
-      
       if (
         Array.isArray(firstArgs) && firstArgs[1] === '' &&
-        Array.isArray(secondArgs) && secondArgs[1] === null &&
-        Array.isArray(thirdArgs) && thirdArgs.length === 1
+        Array.isArray(secondArgs) && secondArgs[1] === null
       ) {
         return {
           id: generateConditionId(),
@@ -458,23 +459,19 @@ function detectSpecialPattern(logic: JsonLogic, options: FromJsonLogicOptions): 
     }
   }
 
-  // Pattern: { "or": [{ "==": [left, ""] }, { "==": [left, null] }, { "!": [left] }] }
+  // Pattern: { "or": [{ "==": [left, ""] }, { "==": [left, null] }] }
   // Collapses to: isEmpty
-  if ('or' in logic && Array.isArray(logic.or) && logic.or.length === 3) {
-    const [first, second, third] = logic.or as JsonLogic[]
+  if ('or' in logic && Array.isArray(logic.or) && logic.or.length === 2) {
+    const [first, second] = logic.or as JsonLogic[]
     if (
       first && typeof first === 'object' && '==' in first &&
-      second && typeof second === 'object' && '==' in second &&
-      third && typeof third === 'object' && '!' in third
+      second && typeof second === 'object' && '==' in second
     ) {
       const firstArgs = (first as any)['==']
       const secondArgs = (second as any)['==']
-      const thirdArgs = (third as any)['!']
-      
       if (
         Array.isArray(firstArgs) && firstArgs[1] === '' &&
-        Array.isArray(secondArgs) && secondArgs[1] === null &&
-        Array.isArray(thirdArgs) && thirdArgs.length === 1
+        Array.isArray(secondArgs) && secondArgs[1] === null
       ) {
         return {
           id: generateConditionId(),

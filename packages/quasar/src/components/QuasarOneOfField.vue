@@ -36,6 +36,9 @@ const {
   componentType: 'card',
 });
 
+// Flat mode: skip card wrapper and label (parent handles them)
+const isFlat = computed(() => (props.schema as any)['x-flat'] === true);
+
 // Use mergeQuasarProps to get defaults from componentDefaults (including dense)
 const quasarProps = computed(() => {
   const merged = mergeQuasarProps(
@@ -424,10 +427,10 @@ const handleOptionChange = (newIndex: number) => {
 </script>
 
 <template>
-  <div :style="{ marginBottom: fieldGap }">
-    <QCard flat bordered>
+  <div :style="{ marginBottom: isFlat ? undefined : fieldGap }">
+    <QCard flat :bordered="!isFlat" :class="{ 'quickform-oneof-flat': isFlat }">
       <QCardSection>
-        <div v-if="label" style="font-weight: 500; margin-bottom: 0.5rem">
+        <div v-if="label && !isFlat" style="font-weight: 500; margin-bottom: 0.5rem">
           {{ label }}
           <span v-if="schema.required" style="color: red; margin-left: 0.125rem"
             >*</span
@@ -482,11 +485,11 @@ const handleOptionChange = (newIndex: number) => {
           </div>
 
           <div
-            style="
-              margin-top: 1rem;
-              padding-top: 1rem;
-              border-top: 1px solid #eee;
-            "
+            :style="isFlat ? { marginTop: '1rem' } : {
+              marginTop: '1rem',
+              paddingTop: '1rem',
+              borderTop: '1px solid #eee',
+            }"
           >
             <!-- Render object properties directly to avoid nested expansion panel -->
             <template v-if="shouldRenderPropertiesInline">
@@ -522,7 +525,6 @@ const handleOptionChange = (newIndex: number) => {
             :input-debounce="0"
             :fill-input="useFilter"
             :hide-selected="useFilter"
-            clearable
             emit-value
             map-options
             @update:model-value="handleOptionChange"
@@ -551,11 +553,11 @@ const handleOptionChange = (newIndex: number) => {
           </div>
 
           <div
-            style="
-              margin-top: 1rem;
-              padding-top: 1rem;
-              border-top: 1px dashed #ddd;
-            "
+            :style="isFlat ? { marginTop: '1rem' } : {
+              marginTop: '1rem',
+              paddingTop: '1rem',
+              borderTop: '1px dashed #ddd',
+            }"
           >
             <!-- Render object properties directly to avoid nested expansion panel -->
             <template v-if="shouldRenderPropertiesInline">
@@ -590,3 +592,15 @@ const handleOptionChange = (newIndex: number) => {
     </QCard>
   </div>
 </template>
+
+<style scoped>
+.quickform-oneof-flat {
+  border: none !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.quickform-oneof-flat > :deep(.q-card__section) {
+  padding: 0 !important;
+}
+</style>

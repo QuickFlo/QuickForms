@@ -317,29 +317,11 @@ function filterOperators(val: string, update: (fn: () => void) => void) {
   });
 }
 
-// Handle keyboard input for auto-selecting first option
+// Handle operator selection - only fires when user picks an option or clears
 function handleOperatorInput(condition: SimpleCondition, val: string | null) {
-  // If user typed something and pressed Enter, select first filtered option
-  if (
-    val &&
-    typeof val === "string" &&
-    filteredOperatorOptions.value.length > 0
-  ) {
-    // Check if val is not already a valid operator value
-    const isValidOperator = operatorOptions.value.some(
-      (opt) => opt.value === val
-    );
-    if (!isValidOperator) {
-      // Auto-select first filtered option
-      updateConditionOperator(
-        condition,
-        filteredOperatorOptions.value[0].value
-      );
-      return;
-    }
-  }
-  // Otherwise treat as normal update
-  if (val) {
+  if (!val) return;
+  const isValidOperator = operatorOptions.value.some((opt) => opt.value === val);
+  if (isValidOperator) {
     updateConditionOperator(condition, val as ComparisonOperator);
   }
 }
@@ -450,7 +432,6 @@ function handleOperatorInput(condition: SimpleCondition, val: string | null) {
                 hide-selected
                 clearable
                 hide-dropdown-icon
-                new-value-mode="add-unique"
                 class="condition-operator"
                 :disable="disabled"
                 :readonly="readonly"
