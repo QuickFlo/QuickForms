@@ -339,6 +339,13 @@ export function useFormField(
       ? debounce(validationRules, debounceDelay)
       : validationRules;
 
+  // Detect if this field is a direct array element (path ends with [N]).
+  // VeeValidate's default cleanup on unmount splices the parent array,
+  // causing items to disappear when a sub-component re-renders.
+  // Array item lifecycle is managed by the parent array field component,
+  // so individual element fields should preserve their values on unmount.
+  const isArrayElement = /\[\d+\]$/.test(path);
+
   const { value, errorMessage, errors, setValue, setTouched, meta } = useField(
     path,
     validationMode === "NoValidation" ? undefined : finalValidationRules,
@@ -346,6 +353,7 @@ export function useFormField(
       validateOnValueUpdate: true, // Always validate on update
       validateOnMount: false,
       // Note: VeeValidate will still validate, we just control when errors are displayed
+      ...(isArrayElement && { keepValueOnUnmount: true }),
     }
   );
 

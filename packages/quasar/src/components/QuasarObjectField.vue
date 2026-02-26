@@ -74,6 +74,10 @@ const sectionStyleClass = computed(() => {
   return `quickform-section-${sectionStyle.value}`;
 });
 
+// Flat mode: render fields directly without expansion panel wrapper.
+// Used when a parent component (e.g., QuasarArrayField toolbar) handles the label and expand/collapse.
+const isFlat = computed(() => (props.schema as any)['x-flat'] === true);
+
 const quasarProps = computed(() => {
   const xQuasarProps = (props.schema as any)["x-quasar-props"] || {};
   const xComponentProps = (props.schema as any)["x-component-props"] || {};
@@ -129,34 +133,8 @@ const properties = computed(() => {
 
 <template>
   <div :style="{ marginBottom: fieldGap }" class="quickform-object-field" :class="sectionStyleClass">
-    <QExpansionItem
-      :id="fieldId"
-      :label="label"
-      :caption="hint"
-      :default-opened="defaultOpened"
-      header-class="quickform-object-header"
-      expand-icon-class="text-grey-7"
-      v-bind="quasarProps"
-    >
-      <template #header>
-        <div class="quickform-object-header-content">
-          <div class="quickform-object-header-left">
-            <div class="quickform-object-header-label">
-              <template v-if="!hideLabel">
-                {{ label }}
-                <span v-if="required" class="quickform-required-indicator">*</span>
-                <span v-if="!required && showOptionalIndicator" class="quickform-optional-indicator">
-                  (optional)
-                </span>
-              </template>
-            </div>
-            <div v-if="hint" class="quickform-object-header-hint" v-html="hint"></div>
-          </div>
-          <!-- Slot for additional header actions (e.g., template toggle buttons) -->
-          <slot name="header-actions"></slot>
-        </div>
-      </template>
-
+    <!-- Flat mode: fields only, no expansion panel (parent handles label + expand/collapse) -->
+    <template v-if="isFlat">
       <div class="quickform-object-content">
         <FieldRenderer
           v-for="prop in properties"
@@ -171,7 +149,54 @@ const properties = computed(() => {
           {{ errorMessage }}
         </div>
       </div>
-    </QExpansionItem>
+    </template>
+
+    <!-- Normal mode: expansion panel with header -->
+    <template v-else>
+      <QExpansionItem
+        :id="fieldId"
+        :label="label"
+        :caption="hint"
+        :default-opened="defaultOpened"
+        header-class="quickform-object-header"
+        expand-icon-class="text-grey-7"
+        v-bind="quasarProps"
+      >
+        <template #header>
+          <div class="quickform-object-header-content">
+            <div class="quickform-object-header-left">
+              <div class="quickform-object-header-label">
+                <template v-if="!hideLabel">
+                  {{ label }}
+                  <span v-if="required" class="quickform-required-indicator">*</span>
+                  <span v-if="!required && showOptionalIndicator" class="quickform-optional-indicator">
+                    (optional)
+                  </span>
+                </template>
+              </div>
+              <div v-if="hint" class="quickform-object-header-hint" v-html="hint"></div>
+            </div>
+            <!-- Slot for additional header actions (e.g., template toggle buttons) -->
+            <slot name="header-actions"></slot>
+          </div>
+        </template>
+
+        <div class="quickform-object-content">
+          <FieldRenderer
+            v-for="prop in properties"
+            :key="prop.key"
+            :schema="prop.schema"
+            :path="prop.path"
+            :disabled="disabled"
+            :readonly="readonly"
+          />
+
+          <div v-if="errorMessage" class="quickform-error-message">
+            {{ errorMessage }}
+          </div>
+        </div>
+      </QExpansionItem>
+    </template>
   </div>
 </template>
 
@@ -190,13 +215,13 @@ const properties = computed(() => {
 /* Section style: solid (default) */
 .quickform-object-field.quickform-section-solid :deep(.q-expansion-item__content) {
   border-left: 3px solid #e0e0e0;
-  margin-left: 8px;
+  margin-left: 4px;
 }
 
 /* Section style: dashed */
 .quickform-object-field.quickform-section-dashed :deep(.q-expansion-item__content) {
   border-left: 2px dashed #ccc;
-  margin-left: 8px;
+  margin-left: 4px;
 }
 
 /* Section style: none */
@@ -247,8 +272,8 @@ const properties = computed(() => {
 }
 
 .quickform-object-content {
-  padding: 1rem;
-  padding-left: 1.25rem;
+  padding: 0.75rem;
+  padding-left: 0.75rem;
 }
 
 .quickform-error-message {

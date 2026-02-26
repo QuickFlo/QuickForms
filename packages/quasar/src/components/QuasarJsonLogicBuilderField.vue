@@ -317,29 +317,11 @@ function filterOperators(val: string, update: (fn: () => void) => void) {
   });
 }
 
-// Handle keyboard input for auto-selecting first option
+// Handle operator selection - only fires when user picks an option or clears
 function handleOperatorInput(condition: SimpleCondition, val: string | null) {
-  // If user typed something and pressed Enter, select first filtered option
-  if (
-    val &&
-    typeof val === "string" &&
-    filteredOperatorOptions.value.length > 0
-  ) {
-    // Check if val is not already a valid operator value
-    const isValidOperator = operatorOptions.value.some(
-      (opt) => opt.value === val
-    );
-    if (!isValidOperator) {
-      // Auto-select first filtered option
-      updateConditionOperator(
-        condition,
-        filteredOperatorOptions.value[0].value
-      );
-      return;
-    }
-  }
-  // Otherwise treat as normal update
-  if (val) {
+  if (!val) return;
+  const isValidOperator = operatorOptions.value.some((opt) => opt.value === val);
+  if (isValidOperator) {
     updateConditionOperator(condition, val as ComparisonOperator);
   }
 }
@@ -450,7 +432,6 @@ function handleOperatorInput(condition: SimpleCondition, val: string | null) {
                 hide-selected
                 clearable
                 hide-dropdown-icon
-                new-value-mode="add-unique"
                 class="condition-operator"
                 :disable="disabled"
                 :readonly="readonly"
@@ -805,10 +786,10 @@ function handleOperatorInput(condition: SimpleCondition, val: string | null) {
 }
 
 .builder-visual {
-  border: 1px solid rgba(0, 0, 0, 0.12);
-  border-radius: 8px;
-  padding: 12px;
-  background: rgba(0, 0, 0, 0.02);
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 6px;
+  padding: 8px;
+  background: rgba(0, 0, 0, 0.015);
 }
 
 .logic-toggle {
@@ -819,18 +800,20 @@ function handleOperatorInput(condition: SimpleCondition, val: string | null) {
 .conditions-container {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
 }
 
 .condition-row {
   display: flex;
   align-items: flex-start; /* Align to top when wrapped */
-  gap: 8px;
-  padding: 8px;
+  gap: 6px;
+  padding: 6px;
   background: white;
   border: 1px solid rgba(0, 0, 0, 0.08);
-  border-radius: 6px;
+  border-radius: 4px;
   min-width: 0; /* Prevent flex item from overflowing */
+  container-type: inline-size;
+  position: relative;
 }
 
 .condition-row--nested {
@@ -840,7 +823,7 @@ function handleOperatorInput(condition: SimpleCondition, val: string | null) {
 .condition-inputs {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
   flex: 1;
   min-width: 0; /* Allow flex children to shrink below content size */
   flex-wrap: wrap; /* Wrap to next row when tight */
@@ -861,17 +844,36 @@ function handleOperatorInput(condition: SimpleCondition, val: string | null) {
   max-width: 110px; /* Stay compact when inline with inputs */
 }
 
-/* When wrapped to own line, allow operator to grow fully */
-@container (max-width: 400px) {
-  .condition-operator {
+/* When container is narrow, inputs stack vertically */
+@container (max-width: 600px) {
+  .condition-inputs {
+    flex-direction: column;
+    flex-wrap: nowrap;
+    align-items: stretch;
+    gap: 4px;
+  }
+
+  .condition-input {
+    flex: 0 0 auto;
+    min-width: 0;
+    width: 100%;
     max-width: none;
   }
-}
 
-/* Fallback for browsers without container queries - use parent width */
-@media (max-width: 500px) {
   .condition-operator {
+    flex: 0 0 auto;
     max-width: none;
+    width: 100%;
+  }
+
+  .condition-input-placeholder {
+    display: none;
+  }
+
+  .condition-remove {
+    position: absolute;
+    top: 4px;
+    right: 4px;
   }
 }
 
@@ -890,38 +892,38 @@ function handleOperatorInput(condition: SimpleCondition, val: string | null) {
 }
 
 .condition-group {
-  border: 2px dashed rgba(0, 0, 0, 0.12);
-  border-radius: 8px;
-  padding: 8px;
-  background: rgba(0, 0, 0, 0.02);
+  border: 1px dashed rgba(0, 0, 0, 0.1);
+  border-radius: 6px;
+  padding: 6px;
+  background: rgba(0, 0, 0, 0.015);
 }
 
 .group-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 8px;
-  padding-bottom: 8px;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+  margin-bottom: 6px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
 }
 
 .group-conditions {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
 }
 
 .group-actions {
-  margin-top: 8px;
-  padding-top: 8px;
-  border-top: 1px dashed rgba(0, 0, 0, 0.08);
+  margin-top: 6px;
+  padding-top: 6px;
+  border-top: 1px dashed rgba(0, 0, 0, 0.06);
 }
 
 .logic-connector {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 4px 0;
+  padding: 2px 0;
 }
 
 .logic-connector-text {
