@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed } from "vue";
-import { QExpansionItem } from "quasar";
+import { QExpansionItem, QIcon, QTooltip } from "quasar";
 import { FieldRenderer } from "@quickflo/quickforms-vue";
 import type { FieldProps } from "@quickflo/quickforms-vue";
 import { useQuasarFormField } from "../composables/useQuasarFormField";
@@ -19,6 +19,7 @@ const props = withDefaults(defineProps<Props>(), {
 const {
   label,
   hint,
+  tooltip,
   errorMessage,
   required,
   fieldId,
@@ -172,6 +173,9 @@ const properties = computed(() => {
                   <span v-if="!required && showOptionalIndicator" class="quickform-optional-indicator">
                     (optional)
                   </span>
+                  <QIcon v-if="tooltip" name="info" size="xs" color="grey-6" class="cursor-help q-ml-xs">
+                    <QTooltip><span v-html="tooltip"></span></QTooltip>
+                  </QIcon>
                 </template>
               </div>
               <div v-if="hint" class="quickform-object-header-hint" v-html="hint"></div>

@@ -24,6 +24,7 @@ const {
   setValue,
   label,
   hint,
+  tooltip,
   errorMessage,
   required,
   fieldId,
@@ -265,6 +266,9 @@ function handleChange(newCode: string, update: ViewUpdate) {
         {{ label }}
         <span v-if="required" style="color: red; margin-left: 0.25rem">*</span>
       </span>
+      <q-icon v-if="tooltip" name="info" size="xs" color="grey-6" class="cursor-help q-ml-xs">
+        <q-tooltip><span v-html="tooltip"></span></q-tooltip>
+      </q-icon>
     </div>
 
     <div v-if="hint" class="quickform-hint">

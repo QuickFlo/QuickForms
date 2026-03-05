@@ -46,6 +46,9 @@ const formOptions: QuasarFormOptions = {
   },
   // QuickForms convenience features
   quickformsDefaults: {
+    tooltip: {
+      placement: "prepend",
+    },
     input: {
       iconColor: "grey-7",
       iconSize: "sm",
@@ -265,12 +268,14 @@ const schema: JSONSchema = {
       title: "Full Name",
       description: "Enter your full name",
       minLength: 2,
+      "x-tooltip": "This is your legal full name as it appears on official documents. Used for account identification and correspondence.",
       // dense and outlined come from global defaults
     },
     email: {
       type: "string",
       format: "email",
       title: "Email Address",
+      "x-tooltip": "We'll use this email for account recovery, notifications, and important updates. Must be a valid email you have access to.",
       "x-quasar-props": {
         outlined: true,
         color: "primary",
@@ -281,6 +286,7 @@ const schema: JSONSchema = {
       title: "Age",
       minimum: 0,
       maximum: 120,
+      "x-tooltip": "Your age in years. Must be between 0 and 120.",
       "x-quasar-props": {
         dense: false,
         outlined: true,

@@ -39,6 +39,7 @@ const {
   setValue,
   label,
   hint,
+  tooltip,
   errorMessage,
   required,
   fieldId,
@@ -334,6 +335,9 @@ function handleOperatorInput(condition: SimpleCondition, val: string | null) {
       <div v-if="label" class="builder-label">
         {{ label }}
         <span v-if="required" class="text-negative q-ml-xs">*</span>
+        <QIcon v-if="tooltip" name="info" size="xs" color="grey-6" class="cursor-help q-ml-xs">
+          <QTooltip><span v-html="tooltip"></span></QTooltip>
+        </QIcon>
       </div>
       <div class="builder-actions">
         <QBtn

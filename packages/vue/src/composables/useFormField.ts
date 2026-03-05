@@ -3,7 +3,7 @@ import { useField } from "vee-validate";
 import type { JSONSchema } from "@quickflo/quickforms";
 import type { FormContext } from "../types/index.js";
 import { useFormContext } from "./useFormContext.js";
-import { getHint } from "./utils.js";
+import { getHint, getTooltip } from "./utils.js";
 import { schemaUtils } from "../schema-utils-singleton.js";
 
 // Helper functions for validation
@@ -390,6 +390,9 @@ export function useFormField(
     return rawHint;
   });
 
+  // Computed tooltip from schema (x-tooltip)
+  const tooltip = computed(() => getTooltip(schema));
+
   // Get hint display mode (per-field override or global default)
   const hintMode = computed(() => {
     const xHintMode = (schema as any)['x-hint-mode'] as 'always' | 'focus' | 'hover' | undefined;
@@ -428,6 +431,7 @@ export function useFormField(
     label,
     hint,
     hintMode,
+    tooltip,
     required,
   };
 }

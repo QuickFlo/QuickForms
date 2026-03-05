@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, ref, watch } from "vue";
-import { QSelect } from "quasar";
+import { QSelect, QIcon, QTooltip } from "quasar";
 import type { FieldProps } from "@quickflo/quickforms-vue";
 import { useQuasarFormField } from "../composables/useQuasarFormField";
 import { mergeQuasarProps } from "../utils";
@@ -15,6 +15,8 @@ const {
   setValue,
   label,
   hint,
+  tooltip,
+  tooltipPlacement,
   errorMessage,
   fieldId,
   fieldGap,
@@ -150,6 +152,16 @@ const filterFn = (val: string, update: (fn: () => void) => void) => {
     >
       <template v-if="schema.required" #label>
         {{ label }} <span style="color: red">*</span>
+      </template>
+      <template v-if="tooltipPlacement === 'prepend' && tooltip" #prepend>
+        <QIcon name="info" size="xs" color="grey-6" class="cursor-help">
+          <QTooltip><span v-html="tooltip"></span></QTooltip>
+        </QIcon>
+      </template>
+      <template v-if="tooltipPlacement === 'append' && tooltip" #append>
+        <QIcon name="info" size="xs" color="grey-6" class="cursor-help">
+          <QTooltip><span v-html="tooltip"></span></QTooltip>
+        </QIcon>
       </template>
     </QSelect>
   </div>

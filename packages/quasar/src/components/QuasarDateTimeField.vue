@@ -8,6 +8,8 @@ import {
   QCard,
   QCardActions,
   QSeparator,
+  QIcon,
+  QTooltip,
 } from "quasar";
 import type { FieldProps } from "@quickflo/quickforms-vue";
 import { useQuasarFormField } from "../composables/useQuasarFormField";
@@ -21,6 +23,8 @@ const {
   value,
   label,
   hint,
+  tooltip,
+  tooltipPlacement,
   errorMessage,
   fieldId,
   quasarProps,
@@ -103,6 +107,9 @@ const setNow = () => {
       v-bind="quasarProps"
     >
       <template #prepend>
+        <QIcon v-if="tooltipPlacement === 'prepend' && tooltip" name="info" size="xs" color="grey-6" class="cursor-help q-mr-xs">
+          <QTooltip><span v-html="tooltip"></span></QTooltip>
+        </QIcon>
         <q-icon name="event" class="cursor-pointer">
           <QPopupProxy transition-show="scale" transition-hide="scale">
             <q-card flat class="datetime-picker-card">
@@ -140,6 +147,11 @@ const setNow = () => {
       </template>
       <template v-if="schema.required" #label>
         {{ label }} <span style="color: red">*</span>
+      </template>
+      <template v-if="tooltipPlacement === 'append' && tooltip" #append>
+        <QIcon name="info" size="xs" color="grey-6" class="cursor-help">
+          <QTooltip><span v-html="tooltip"></span></QTooltip>
+        </QIcon>
       </template>
     </QInput>
   </div>

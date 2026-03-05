@@ -717,6 +717,6 @@ export function createEmptyGroup(logic: 'and' | 'or' = 'and'): ConditionGroup {
 export function createEmptyRoot(): ConditionRoot {
   return {
     logic: 'and',
-    conditions: [createEmptyCondition()],
+    conditions: [],
   }
 }
