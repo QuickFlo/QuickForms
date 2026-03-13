@@ -185,7 +185,7 @@ const filterFn = (val: string, update: (fn: () => void) => void) => {
           <QTooltip><span v-html="tooltip"></span></QTooltip>
         </QIcon>
       </template>
-      <template v-if="hasDescriptions" #option="{ itemProps, opt }">
+      <template #option="{ itemProps, opt }">
         <QItem v-bind="itemProps" class="q-hoverable">
           <QItemSection side>
             <QCheckbox
@@ -195,7 +195,7 @@ const filterFn = (val: string, update: (fn: () => void) => void) => {
             />
           </QItemSection>
           <QItemSection>
-            <QItemLabel class="text-weight-bold text-primary">{{ opt.label }}</QItemLabel>
+            <QItemLabel :class="{ 'text-weight-bold text-primary': hasDescriptions }">{{ opt.label }}</QItemLabel>
             <QItemLabel v-if="opt.description" caption class="text-grey-7">
               {{ opt.description }}
             </QItemLabel>
