@@ -81,6 +81,17 @@ const formOptions: QuasarFormOptions = {
 
 const formData = ref({
   connectionConfig: { provider: "aws", connection: "", region: "" },
+  // Pre-populate with ! and !! JSONLogic to test parsing
+  bangNotCondition: { "!": { "var": "stepId.email" } },
+  bangBangCondition: { "!!": { "var": "stepId.success" } },
+  bangArrayForm: { "!": [{ "var": "csvData" }] },
+  bangMixed: {
+    and: [
+      { "!!": { "var": "stepId.enabled" } },
+      { "!": { "var": "stepId.error" } },
+      { "==": [{ "var": "stepId.status" }, "active"] },
+    ],
+  },
 });
 
 const schema: JSONSchema = {
@@ -1136,6 +1147,32 @@ const schema: JSONSchema = {
       description:
         "Complex filtering with multiple conditions. Try adding nested AND/OR groups!",
       "x-render": "jsonlogic-builder",
+    },
+
+    // === BANG (!) / DOUBLE-BANG (!!) JSONLOGIC PARSING ===
+    bangNotCondition: {
+      type: "object",
+      title: '! (NOT) → isEmpty',
+      description: 'Pre-loaded with { "!": { "var": "stepId.email" } } — should render as "stepId.email isEmpty"',
+      "x-render": "condition-builder",
+    },
+    bangBangCondition: {
+      type: "object",
+      title: '!! (truthy) → isNotEmpty',
+      description: 'Pre-loaded with { "!!": { "var": "stepId.success" } } — should render as "stepId.success isNotEmpty"',
+      "x-render": "condition-builder",
+    },
+    bangArrayForm: {
+      type: "object",
+      title: '! array form → isEmpty',
+      description: 'Pre-loaded with { "!": [{ "var": "csvData" }] } — array variant should also work',
+      "x-render": "condition-builder",
+    },
+    bangMixed: {
+      type: "object",
+      title: 'Mixed ! / !! with normal conditions',
+      description: 'AND group: !! enabled, ! error, == status "active"',
+      "x-render": "condition-builder",
     },
 
     // === ONEOF WITH DESCRIPTIONS AND DOCS URLS (Discriminated Union style) ===
