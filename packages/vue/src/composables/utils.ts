@@ -28,6 +28,14 @@ export function getHint(schema: JSONSchema): string | undefined {
 }
 
 /**
+ * Get tooltip from schema (x-tooltip extension)
+ * Renders as an info icon next to the field label
+ */
+export function getTooltip(schema: JSONSchema): string | undefined {
+  return (schema as any)['x-tooltip'];
+}
+
+/**
  * Check if a value is empty
  */
 export function isEmpty(value: any): boolean {

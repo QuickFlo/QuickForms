@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, watch, computed } from "vue";
-import { QInput, QBtn, QIcon } from "quasar";
+import { QInput, QBtn, QIcon, QTooltip } from "quasar";
 import type { FieldProps } from "@quickflo/quickforms-vue";
 import { useQuasarFormField } from "../composables/useQuasarFormField";
 import { inferType } from "../utils/type-inference";
@@ -15,6 +15,7 @@ const {
   setValue,
   label,
   hint,
+  tooltip,
   errorMessage,
   required,
   fieldId,
@@ -203,6 +204,9 @@ function removePair(id: number) {
       <div class="text-subtitle2">
         {{ label }}
         <span v-if="required" style="color: red; margin-left: 0.25rem">*</span>
+        <q-icon v-if="tooltip" name="info" size="xs" color="grey-6" class="cursor-help q-ml-xs">
+          <q-tooltip><span v-html="tooltip"></span></q-tooltip>
+        </q-icon>
       </div>
       <!-- Add button on same line only for top-right -->
       <QBtn

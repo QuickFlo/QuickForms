@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, ref, watch } from "vue";
-import { QCard, QCardSection, QBtn, QInput } from "quasar";
+import { QCard, QCardSection, QBtn, QInput, QIcon, QTooltip } from "quasar";
 import { FieldRenderer } from "@quickflo/quickforms-vue";
 import type { FieldProps } from "@quickflo/quickforms-vue";
 import { useQuasarFormField } from "../composables/useQuasarFormField";
@@ -25,6 +25,7 @@ const {
   value,
   label,
   hint,
+  tooltip,
   errorMessage,
   required,
   fieldId,
@@ -319,6 +320,9 @@ const updateItem = (index: number, newValue: any) => {
           <span v-if="!required && showOptionalIndicator" class="quickform-optional-indicator">
             (optional)
           </span>
+          <QIcon v-if="tooltip" name="info" size="xs" color="grey-6" class="cursor-help q-ml-xs">
+            <QTooltip><span v-html="tooltip"></span></QTooltip>
+          </QIcon>
         </div>
         <div class="quickform-array-header-actions">
           <!-- Slot for additional header actions (e.g., template toggle buttons) -->

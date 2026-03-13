@@ -3,7 +3,7 @@ import { useFormField, generateFieldId } from '@quickflo/quickforms-vue';
 import type { JSONSchema } from '@quickflo/quickforms';
 import { useQuasarFormContext } from './useQuasarFormContext';
 import { mergeQuasarProps, mergeQuickFormsQuasarFeatures, getFieldGapStyle } from '../utils';
-import type { QuickFormsQuasarFeatures } from '../types';
+import type { QuickFormsQuasarFeatures, TooltipPlacement } from '../types';
 
 /**
  * Component types that support native Quasar props merging
@@ -44,9 +44,11 @@ export interface UseQuasarFormFieldReturn<T = any> {
   setValue: (val: T, shouldValidate?: boolean) => void;
   label: ComputedRef<string>;
   hint: ComputedRef<string | undefined>;
+  tooltip: ComputedRef<string | undefined>;
+  tooltipPlacement: ComputedRef<TooltipPlacement>;
   errorMessage: ComputedRef<string | null | undefined>;
   required: ComputedRef<boolean>;
-  
+
   // Generated field ID
   fieldId: string;
   
@@ -95,7 +97,7 @@ export function useQuasarFormField<T = any>(
   const { label: labelOverride, componentType = 'input', featureType } = options;
   
   // Core field state from Vue package
-  const { value, setValue, label, hint, errorMessage, required } = useFormField(
+  const { value, setValue, label, hint, tooltip, errorMessage, required } = useFormField(
     path,
     schema,
     { label: labelOverride }
@@ -137,14 +139,29 @@ export function useQuasarFormField<T = any>(
     return {} as QuickFormsQuasarFeatures;
   });
   
+  // Tooltip placement for QInput/QSelect components
+  const tooltipPlacement = computed((): TooltipPlacement => {
+    // Per-field override via x-tooltip-placement
+    const xPlacement = (schema as any)['x-tooltip-placement'];
+    if (xPlacement === 'prepend' || xPlacement === 'append') return xPlacement;
+
+    // Global default from quickformsDefaults
+    const globalPlacement = formContext?.quickformsDefaults?.tooltip?.placement;
+    if (globalPlacement === 'prepend' || globalPlacement === 'append') return globalPlacement;
+
+    return 'append';
+  });
+
   // Field gap style
   const fieldGap = computed(() => getFieldGapStyle(formContext?.componentDefaults));
-  
+
   return {
     value: value as Ref<T>,
     setValue: setValue as (val: T) => void,
     label,
     hint,
+    tooltip,
+    tooltipPlacement,
     errorMessage,
     required,
     fieldId,

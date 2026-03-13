@@ -12,7 +12,7 @@ const props = withDefaults(defineProps<FieldProps>(), {
   readonly: false
 });
 
-const { value, label, hint, errorMessage } = useFormField(props.path, props.schema, { label: props.label });
+const { value, label, hint, errorMessage, tooltip } = useFormField(props.path, props.schema, { label: props.label });
 const fieldId = generateFieldId(props.path);
 const formContext = useFormContext();
 
@@ -79,6 +79,12 @@ const handleOptionChange = (event: Event) => {
       <legend v-if="label" class="quickform-legend">
         {{ label }}
         <span v-if="props.schema.required" class="quickform-required">*</span>
+        <span v-if="tooltip" class="quickform-tooltip-wrapper">
+          <svg class="quickform-tooltip-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a.75.75 0 000 1.5h.253a.25.25 0 01.244.304l-.459 2.066A1.75 1.75 0 0010.747 15H11a.75.75 0 000-1.5h-.253a.25.25 0 01-.244-.304l.459-2.066A1.75 1.75 0 009.253 9H9z" clip-rule="evenodd" />
+          </svg>
+          <span class="quickform-tooltip-content" v-html="tooltip"></span>
+        </span>
       </legend>
       
       <div v-if="hint" :id="`${fieldId}-hint`" class="quickform-hint quickform-oneof-hint">
@@ -175,6 +181,61 @@ const handleOptionChange = (event: Event) => {
 .quickform-required {
   color: var(--quickform-required-color);
   margin-left: var(--quickform-required-margin-left);
+}
+
+.quickform-tooltip-wrapper {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  margin-left: var(--quickform-spacing-sm);
+  vertical-align: middle;
+}
+
+.quickform-tooltip-icon {
+  width: var(--quickform-tooltip-icon-size, 1rem);
+  height: var(--quickform-tooltip-icon-size, 1rem);
+  color: var(--quickform-tooltip-icon-color, #6b7280);
+  cursor: help;
+  flex-shrink: 0;
+  transition: color 150ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.quickform-tooltip-wrapper:hover .quickform-tooltip-icon {
+  color: var(--quickform-tooltip-icon-hover-color, #3b82f6);
+}
+
+.quickform-tooltip-content {
+  display: none;
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--quickform-tooltip-bg, #1f2937);
+  color: var(--quickform-tooltip-color, #ffffff);
+  font-size: var(--quickform-tooltip-font-size, 0.875rem);
+  font-weight: var(--quickform-font-weight-normal, 400);
+  padding: var(--quickform-tooltip-padding, 0.5rem 0.75rem);
+  border-radius: var(--quickform-tooltip-radius, 0.375rem);
+  max-width: var(--quickform-tooltip-max-width, 300px);
+  width: max-content;
+  z-index: 1000;
+  line-height: 1.4;
+  box-shadow: var(--quickform-shadow-md, 0 4px 6px rgba(0, 0, 0, 0.1));
+  pointer-events: none;
+}
+
+.quickform-tooltip-content::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 6px solid transparent;
+  border-top-color: var(--quickform-tooltip-bg, #1f2937);
+}
+
+.quickform-tooltip-wrapper:hover .quickform-tooltip-content {
+  display: block;
 }
 
 .quickform-hint {

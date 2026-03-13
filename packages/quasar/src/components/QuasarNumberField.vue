@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed } from "vue";
-import { QInput } from "quasar";
+import { QInput, QIcon, QTooltip } from "quasar";
 import type { FieldProps } from "@quickflo/quickforms-vue";
 import { useQuasarFormField } from "../composables/useQuasarFormField";
 
@@ -13,6 +13,8 @@ const {
   value,
   label,
   hint,
+  tooltip,
+  tooltipPlacement,
   errorMessage,
   fieldId,
   quasarProps,
@@ -46,6 +48,16 @@ const step = computed(() => {
     >
       <template v-if="schema.required" #label>
         {{ label }} <span style="color: red">*</span>
+      </template>
+      <template v-if="tooltipPlacement === 'prepend' && tooltip" #prepend>
+        <QIcon name="info" size="xs" color="grey-6" class="cursor-help">
+          <QTooltip><span v-html="tooltip"></span></QTooltip>
+        </QIcon>
+      </template>
+      <template v-if="tooltipPlacement === 'append' && tooltip" #append>
+        <QIcon name="info" size="xs" color="grey-6" class="cursor-help">
+          <QTooltip><span v-html="tooltip"></span></QTooltip>
+        </QIcon>
       </template>
     </QInput>
   </div>

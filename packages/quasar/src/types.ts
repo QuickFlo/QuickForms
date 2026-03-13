@@ -250,7 +250,21 @@ export interface QuickFormsQuasarObjectFeatures {
   showOptionalIndicator?: boolean;
 }
 
+/** Placement for tooltip icon in QInput/QSelect-based fields */
+export type TooltipPlacement = 'prepend' | 'append';
+
 export interface QuickFormsQuasarDefaults {
+  /** Tooltip configuration */
+  tooltip?: {
+    /**
+     * Slot placement for tooltip icon in QInput/QSelect fields.
+     * - 'prepend': Left side of field (closer to label/eyes)
+     * - 'append': Right side of field
+     * Can be overridden per-field via x-tooltip-placement in schema.
+     * Default: 'append'
+     */
+    placement?: TooltipPlacement;
+  };
   /** Global QuickForms features for all components */
   global?: QuickFormsQuasarFeatures;
   /** Input-specific QuickForms features */

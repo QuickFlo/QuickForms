@@ -525,19 +525,47 @@ function parseSimpleCondition(logic: JsonLogic, options: FromJsonLogicOptions): 
   const operator = keys[0]!
   const args = (logic as Record<string, unknown>)[operator]
 
-  // Check for negated 'in' operator BEFORE array validation: { "!": { "in": [...] } }
-  // The "!" operator has an object value, not an array
-  if (operator === '!' && typeof args === 'object' && args !== null && 'in' in args) {
-    const inArgs = (args as Record<string, unknown>).in as unknown[]
-    if (Array.isArray(inArgs) && inArgs.length >= 2) {
-      const left = extractValue(inArgs[0], options.useTemplateSyntax)
-      const right = extractValue(inArgs[1], options.useTemplateSyntax)
+  // Handle "!" operator - can be negated "in" or standalone falsy check
+  if (operator === '!') {
+    // { "!": { "in": [...] } } → !in operator
+    if (typeof args === 'object' && args !== null && 'in' in args) {
+      const inArgs = (args as Record<string, unknown>).in as unknown[]
+      if (Array.isArray(inArgs) && inArgs.length >= 2) {
+        const left = extractValue(inArgs[0], options.useTemplateSyntax)
+        const right = extractValue(inArgs[1], options.useTemplateSyntax)
+        return {
+          id: generateConditionId(),
+          type: 'condition',
+          left,
+          operator: '!in',
+          right,
+        }
+      }
+    }
+
+    // { "!": { "var": "field" } } or { "!": [{ "var": "field" }] } → isEmpty
+    const inner = Array.isArray(args) ? args[0] : args
+    if (inner !== undefined) {
       return {
         id: generateConditionId(),
         type: 'condition',
-        left,
-        operator: '!in',
-        right,
+        left: extractValue(inner, options.useTemplateSyntax),
+        operator: 'isEmpty',
+        right: '',
+      }
+    }
+  }
+
+  // Handle "!!" operator - truthy check → isNotEmpty
+  if (operator === '!!') {
+    const inner = Array.isArray(args) ? args[0] : args
+    if (inner !== undefined) {
+      return {
+        id: generateConditionId(),
+        type: 'condition',
+        left: extractValue(inner, options.useTemplateSyntax),
+        operator: 'isNotEmpty',
+        right: '',
       }
     }
   }
@@ -717,6 +745,6 @@ export function createEmptyGroup(logic: 'and' | 'or' = 'and'): ConditionGroup {
 export function createEmptyRoot(): ConditionRoot {
   return {
     logic: 'and',
-    conditions: [createEmptyCondition()],
+    conditions: [],
   }
 }

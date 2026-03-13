@@ -9,7 +9,7 @@ const props = withDefaults(defineProps<FieldProps>(), {
   readonly: false
 });
 
-const { value, errorMessage, label, hint, hintMode } = useFormField(props.path, props.schema, { label: props.label });
+const { value, errorMessage, label, hint, hintMode, tooltip } = useFormField(props.path, props.schema, { label: props.label });
 const fieldId = generateFieldId(props.path);
 const isFocused = ref(false);
 const isHovered = ref(false);
@@ -34,6 +34,12 @@ const showHint = computed(() => {
     <label :for="fieldId" class="quickform-label">
       {{ label }}
       <span v-if="props.schema.required" class="quickform-required">*</span>
+      <span v-if="tooltip" class="quickform-tooltip-wrapper">
+        <svg class="quickform-tooltip-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+          <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a.75.75 0 000 1.5h.253a.25.25 0 01.244.304l-.459 2.066A1.75 1.75 0 0010.747 15H11a.75.75 0 000-1.5h-.253a.25.25 0 01-.244-.304l.459-2.066A1.75 1.75 0 009.253 9H9z" clip-rule="evenodd" />
+        </svg>
+        <span class="quickform-tooltip-content" v-html="tooltip"></span>
+      </span>
     </label>
 
     <input
@@ -79,6 +85,61 @@ const showHint = computed(() => {
 .quickform-required {
   color: var(--quickform-required-color);
   margin-left: var(--quickform-required-margin-left);
+}
+
+.quickform-tooltip-wrapper {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  margin-left: var(--quickform-spacing-sm);
+  vertical-align: middle;
+}
+
+.quickform-tooltip-icon {
+  width: var(--quickform-tooltip-icon-size);
+  height: var(--quickform-tooltip-icon-size);
+  color: var(--quickform-tooltip-icon-color);
+  cursor: help;
+  flex-shrink: 0;
+  transition: color var(--quickform-transition-fast) var(--quickform-transition-timing);
+}
+
+.quickform-tooltip-wrapper:hover .quickform-tooltip-icon {
+  color: var(--quickform-tooltip-icon-hover-color);
+}
+
+.quickform-tooltip-content {
+  display: none;
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--quickform-tooltip-bg);
+  color: var(--quickform-tooltip-color);
+  font-size: var(--quickform-tooltip-font-size);
+  font-weight: var(--quickform-font-weight-normal);
+  padding: var(--quickform-tooltip-padding);
+  border-radius: var(--quickform-tooltip-radius);
+  max-width: var(--quickform-tooltip-max-width);
+  width: max-content;
+  z-index: 1000;
+  line-height: 1.4;
+  box-shadow: var(--quickform-shadow-md);
+  pointer-events: none;
+}
+
+.quickform-tooltip-content::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 6px solid transparent;
+  border-top-color: var(--quickform-tooltip-bg);
+}
+
+.quickform-tooltip-wrapper:hover .quickform-tooltip-content {
+  display: block;
 }
 
 .quickform-input {

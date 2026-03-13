@@ -128,4 +128,15 @@
   /* Required Indicator */
   --quickform-required-color: var(--quickform-color-error);
   --quickform-required-margin-left: var(--quickform-spacing-xs);
+
+  /* Tooltips */
+  --quickform-tooltip-bg: #1f2937;
+  --quickform-tooltip-color: #ffffff;
+  --quickform-tooltip-font-size: var(--quickform-font-size-sm);
+  --quickform-tooltip-padding: 0.5rem 0.75rem;
+  --quickform-tooltip-radius: var(--quickform-radius-md);
+  --quickform-tooltip-max-width: 300px;
+  --quickform-tooltip-icon-size: 1rem;
+  --quickform-tooltip-icon-color: var(--quickform-color-text-secondary);
+  --quickform-tooltip-icon-hover-color: var(--quickform-color-primary);
 }

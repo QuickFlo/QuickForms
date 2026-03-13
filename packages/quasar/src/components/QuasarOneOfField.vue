@@ -27,6 +27,7 @@ const {
   setValue,
   label,
   hint,
+  tooltip,
   errorMessage,
   fieldId,
   fieldGap,
@@ -435,6 +436,9 @@ const handleOptionChange = (newIndex: number) => {
           <span v-if="schema.required" style="color: red; margin-left: 0.125rem"
             >*</span
           >
+          <QIcon v-if="tooltip" name="info" size="xs" color="grey-6" class="cursor-help q-ml-xs">
+            <QTooltip><span v-html="tooltip"></span></QTooltip>
+          </QIcon>
         </div>
 
         <div

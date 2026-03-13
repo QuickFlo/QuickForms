@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue';
-import { QInput, QIcon } from 'quasar';
+import { QInput, QIcon, QTooltip } from 'quasar';
 import type { FieldProps } from '@quickflo/quickforms-vue';
 import { useQuasarFormField } from '../composables/useQuasarFormField';
 
@@ -13,6 +13,8 @@ const {
   value,
   label,
   hint,
+  tooltip,
+  tooltipPlacement,
   errorMessage,
   fieldId,
   quasarProps,
@@ -79,30 +81,37 @@ const showAppendIcon = computed(() =>
       <template v-if="schema.required" #label>
         {{ label }} <span style="color: red">*</span>
       </template>
-      
-      <!-- Prepend icon slot -->
-      <template v-if="showPrependIcon" #prepend>
+
+      <!-- Prepend slot: custom icon and/or tooltip -->
+      <template v-if="showPrependIcon || (tooltipPlacement === 'prepend' && tooltip)" #prepend>
+        <QIcon v-if="tooltipPlacement === 'prepend' && tooltip" name="info" size="xs" color="grey-6" class="cursor-help q-mr-xs">
+          <QTooltip><span v-html="tooltip"></span></QTooltip>
+        </QIcon>
         <QIcon
+          v-if="showPrependIcon"
           :name="quickformsFeatures.prependIcon!"
           :color="iconConfig.color"
           :size="iconConfig.size"
         />
       </template>
-      
-      <!-- Append slot: password toggle takes precedence over custom icons -->
-      <template v-if="isPasswordField" #append>
+
+      <!-- Append slot: password toggle, custom icons, and/or tooltip -->
+      <template v-if="isPasswordField || showAppendIcon || (tooltipPlacement === 'append' && tooltip)" #append>
         <QIcon
+          v-if="isPasswordField"
           :name="isPasswordVisible ? 'visibility_off' : 'visibility'"
           class="cursor-pointer"
           @click="isPasswordVisible = !isPasswordVisible"
         />
-      </template>
-      <template v-else-if="showAppendIcon" #append>
         <QIcon
+          v-else-if="showAppendIcon"
           :name="quickformsFeatures.appendIcon!"
           :color="iconConfig.color"
           :size="iconConfig.size"
         />
+        <QIcon v-if="tooltipPlacement === 'append' && tooltip" name="info" size="xs" color="grey-6" class="cursor-help">
+          <QTooltip><span v-html="tooltip"></span></QTooltip>
+        </QIcon>
       </template>
     </QInput>
   </div>

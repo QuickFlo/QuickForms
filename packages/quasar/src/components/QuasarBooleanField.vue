@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { QCheckbox } from "quasar";
+import { QCheckbox, QIcon, QTooltip } from "quasar";
 import type { FieldProps } from "@quickflo/quickforms-vue";
 import { useQuasarFormField } from "../composables/useQuasarFormField";
 
@@ -11,6 +11,7 @@ const props = withDefaults(defineProps<FieldProps>(), {
 const {
   value,
   label,
+  tooltip,
   errorMessage,
   fieldId,
   quasarProps,
@@ -40,6 +41,9 @@ if (value.value === undefined || value.value === null) {
         <span v-if="schema.required" style="color: red; margin-left: 0.125rem"
           >*</span
         >
+        <QIcon v-if="tooltip" name="info" size="xs" color="grey-6" class="cursor-help q-ml-xs">
+          <QTooltip><span v-html="tooltip"></span></QTooltip>
+        </QIcon>
       </template>
     </QCheckbox>
     <div
