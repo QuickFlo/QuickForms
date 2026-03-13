@@ -1,9 +1,15 @@
 <script setup lang="ts">
 import { computed, ref, watch } from "vue";
-import { QSelect, QIcon, QTooltip } from "quasar";
+import { QSelect, QIcon, QTooltip, QItem, QItemSection, QItemLabel, QCheckbox } from "quasar";
 import type { FieldProps } from "@quickflo/quickforms-vue";
 import { useQuasarFormField } from "../composables/useQuasarFormField";
 import { mergeQuasarProps } from "../utils";
+
+interface EnumOption {
+  label: string;
+  value: string | number;
+  description?: string;
+}
 
 const props = withDefaults(defineProps<FieldProps>(), {
   disabled: false,
@@ -52,18 +58,23 @@ const quasarProps = computed(() => {
 });
 
 // Get enum values from items.enum
-const allOptions = computed(() => {
+const allOptions = computed<EnumOption[]>(() => {
   const itemsSchema = props.schema.items;
   if (!itemsSchema || typeof itemsSchema === "boolean") return [];
 
-  const enumValues = Array.isArray(itemsSchema)
-    ? itemsSchema[0]?.enum
-    : itemsSchema.enum;
+  const resolvedItems = Array.isArray(itemsSchema) ? itemsSchema[0] : itemsSchema;
+  if (!resolvedItems) return [];
 
+  const enumValues = resolvedItems.enum;
   if (!enumValues) return [];
 
   // Support x-enum-labels for custom display text
-  const enumLabels = (itemsSchema as any)["x-enum-labels"] as
+  const enumLabels = (resolvedItems as Record<string, unknown>)["x-enum-labels"] as
+    | Record<string, string>
+    | undefined;
+
+  // Support x-enum-descriptions for option descriptions
+  const enumDescriptions = (resolvedItems as Record<string, unknown>)["x-enum-descriptions"] as
     | Record<string, string>
     | undefined;
 
@@ -72,18 +83,27 @@ const allOptions = computed(() => {
 
     // Use custom label if provided
     if (enumLabels && enumValue in enumLabels) {
-      displayLabel = enumLabels[enumValue];
+      displayLabel = enumLabels[enumValue as string];
     }
+
+    // Get description if provided
+    const description = enumDescriptions?.[enumValue as string] ?? undefined;
 
     return {
       label: displayLabel,
-      value: enumValue,
+      value: enumValue as string | number,
+      description,
     };
   });
 });
 
+// Check if any options have descriptions
+const hasDescriptions = computed(() =>
+  allOptions.value.some((opt) => opt.description)
+);
+
 // Filtered options for autocomplete
-const filteredOptions = ref<Array<{ label: string; value: any }>>([]);
+const filteredOptions = ref<EnumOption[]>([]);
 
 // Initialize and update filteredOptions when allOptions changes
 watch(
@@ -95,16 +115,18 @@ watch(
 );
 
 // Check if autocomplete should be enabled (default: true)
-const useFilter = computed(() => {
+const useFilter = computed<boolean>(() => {
   // Check x-component-props
-  const xComponentProps = (props.schema as any)["x-component-props"];
+  const xComponentProps = (props.schema as Record<string, unknown>)["x-component-props"] as
+    | Record<string, unknown>
+    | undefined;
   if (xComponentProps?.autocomplete !== undefined) {
-    return xComponentProps.autocomplete;
+    return !!xComponentProps.autocomplete;
   }
 
   // Check quickformsDefaults for autocomplete
   if (formContext?.quickformsDefaults?.select?.autocomplete !== undefined) {
-    return (formContext as any).quickformsDefaults.select.autocomplete;
+    return !!formContext.quickformsDefaults.select.autocomplete;
   }
 
   // Default: enabled
@@ -162,6 +184,23 @@ const filterFn = (val: string, update: (fn: () => void) => void) => {
         <QIcon name="info" size="xs" color="grey-6" class="cursor-help">
           <QTooltip><span v-html="tooltip"></span></QTooltip>
         </QIcon>
+      </template>
+      <template v-if="hasDescriptions" #option="{ itemProps, opt }">
+        <QItem v-bind="itemProps" class="q-hoverable">
+          <QItemSection side>
+            <QCheckbox
+              :model-value="Array.isArray(value) && (value as unknown[]).includes(opt.value)"
+              dense
+              @click.stop.prevent
+            />
+          </QItemSection>
+          <QItemSection>
+            <QItemLabel class="text-weight-bold text-primary">{{ opt.label }}</QItemLabel>
+            <QItemLabel v-if="opt.description" caption class="text-grey-7">
+              {{ opt.description }}
+            </QItemLabel>
+          </QItemSection>
+        </QItem>
       </template>
     </QSelect>
   </div>

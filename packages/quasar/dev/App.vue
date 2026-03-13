@@ -389,6 +389,59 @@ const schema: JSONSchema = {
         full: "Includes text, speech segments, and VTT file. Useful for getting back diarized response.",
       },
     },
+    // === MULTI-SELECT WITH DESCRIPTIONS (x-enum-descriptions on multi-select) ===
+    businessGroups: {
+      type: "array",
+      title: "Business Groups",
+      description: "Multi-select with captions per option (x-enum-descriptions on items)",
+      items: {
+        type: "string",
+        enum: ["sales", "support", "engineering", "marketing", "finance"],
+        "x-enum-labels": {
+          sales: "Sales Team",
+          support: "Customer Support",
+          engineering: "Engineering",
+          marketing: "Marketing",
+          finance: "Finance & Accounting",
+        },
+        "x-enum-descriptions": {
+          sales: "Handles outbound sales, lead generation, and account management",
+          support: "Manages customer tickets, live chat, and issue resolution",
+          engineering: "Product development, infrastructure, and technical operations",
+          marketing: "Brand strategy, campaigns, content, and growth initiatives",
+          finance: "Budgets, invoicing, payroll, and financial reporting",
+        },
+      },
+      "x-enum-labels": {
+        sales: "Sales Team",
+        support: "Customer Support",
+        engineering: "Engineering",
+        marketing: "Marketing",
+        finance: "Finance & Accounting",
+      },
+    },
+    // === MULTI-SELECT WITHOUT DESCRIPTIONS (basic multi-select) ===
+    permissions: {
+      type: "array",
+      title: "Permissions",
+      description: "Basic multi-select without descriptions",
+      items: {
+        type: "string",
+        enum: ["read", "write", "delete", "admin"],
+        "x-enum-labels": {
+          read: "Read Access",
+          write: "Write Access",
+          delete: "Delete Access",
+          admin: "Admin Access",
+        },
+      },
+      "x-enum-labels": {
+        read: "Read Access",
+        write: "Write Access",
+        delete: "Delete Access",
+        admin: "Admin Access",
+      },
+    },
     tags: {
       type: "array",
       title: "Tags",
