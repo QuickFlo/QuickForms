@@ -1436,6 +1436,36 @@ const schema: JSONSchema = {
         },
       ],
     },
+    // === NATIVE DATE PICKER (browser-native input type="date") ===
+    nativeDate: {
+      type: "string",
+      format: "date",
+      title: "Native Date Picker",
+      description: "Lightweight browser-native date input (x-render: native-date)",
+      "x-render": "native-date",
+    },
+    // === NATIVE DATETIME PICKER (browser-native date + time inputs) ===
+    nativeDatetime: {
+      type: "string",
+      format: "date-time",
+      title: "Native Date & Time Picker",
+      description: "Side-by-side date and time inputs with auto-detected timezone hint",
+      "x-render": "native-datetime",
+    },
+    // === QUASAR DATE PICKER (original popup-based, for comparison) ===
+    quasarDate: {
+      type: "string",
+      format: "date",
+      title: "Quasar Date Picker (original)",
+      description: "The default Quasar QDate popup picker for comparison",
+    },
+    // === QUASAR DATETIME PICKER (original popup-based, for comparison) ===
+    quasarDatetime: {
+      type: "string",
+      format: "date-time",
+      title: "Quasar DateTime Picker (original)",
+      description: "The default Quasar QDate + QTime popup picker for comparison",
+    },
   },
   required: ["name", "email"],
 };
