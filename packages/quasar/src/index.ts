@@ -39,6 +39,8 @@ export { default as QuasarOneOfField } from './components/QuasarOneOfField.vue';
 export { default as QuasarAllOfField } from './components/QuasarAllOfField.vue';
 export { default as QuasarJsonLogicBuilderField } from './components/QuasarJsonLogicBuilderField.vue';
 export { default as QuasarTagsField } from './components/QuasarTagsField.vue';
+export { default as QuasarNativeDateField } from './components/QuasarNativeDateField.vue';
+export { default as QuasarNativeDateTimeField } from './components/QuasarNativeDateTimeField.vue';
 
 // JSONLogic utilities
 export {

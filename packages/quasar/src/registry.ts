@@ -35,6 +35,8 @@ import QuasarOneOfField from './components/QuasarOneOfField.vue';
 import QuasarAllOfField from './components/QuasarAllOfField.vue';
 import QuasarJsonLogicBuilderField from './components/QuasarJsonLogicBuilderField.vue';
 import QuasarTagsField from './components/QuasarTagsField.vue';
+import QuasarNativeDateField from './components/QuasarNativeDateField.vue';
+import QuasarNativeDateTimeField from './components/QuasarNativeDateTimeField.vue';
 import { HiddenField } from '@quickflo/quickforms-vue';
 
 /**
@@ -125,6 +127,15 @@ export function createQuasarRegistry(): ComponentRegistry<Component> {
   // Tags/chips input for arrays of strings
   registry.register('tags-override', QuasarTagsField, (schema) =>
     rankWith(50, hasXRender('tags')(schema))
+  );
+
+  // Native date/datetime pickers (lightweight browser-native inputs)
+  registry.register('native-date-override', QuasarNativeDateField, (schema) =>
+    rankWith(50, hasXRender('native-date')(schema))
+  );
+
+  registry.register('native-datetime-override', QuasarNativeDateTimeField, (schema) =>
+    rankWith(50, hasXRender('native-datetime')(schema))
   );
 
   // === NORMAL TYPE DETECTION (lower priorities) ===
