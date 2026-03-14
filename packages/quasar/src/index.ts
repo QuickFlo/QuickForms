@@ -42,6 +42,7 @@ export { default as QuasarTagsField } from './components/QuasarTagsField.vue';
 export { default as QuasarNativeDateField } from './components/QuasarNativeDateField.vue';
 export { default as QuasarNativeDateTimeField } from './components/QuasarNativeDateTimeField.vue';
 export { default as QuasarTableField } from './components/QuasarTableField.vue';
+export { default as QuasarWeeklyScheduleField } from './components/QuasarWeeklyScheduleField.vue';
 
 // JSONLogic utilities
 export {
@@ -84,6 +85,7 @@ export type {
   SectionStyle,
   XTableConfig,
   XTableRowAction,
+  XScheduleConfig,
 } from './types.js';
 
 // Re-export types from Vue package

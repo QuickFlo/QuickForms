@@ -335,6 +335,19 @@ export interface QuickFormsQuasarTableFeatures {
   addButton?: Partial<QBtnProps> & VueComponentAttributes;
 }
 
+/**
+ * Configuration for the weekly schedule field renderer.
+ * Applied via `x-schedule` on an array schema.
+ */
+export interface XScheduleConfig {
+  /** Day ordering. Default: 'mon-first' */
+  dayOrder?: 'mon-first' | 'sun-first';
+  /** Allow overnight shifts where endTime < startTime. Default: false */
+  allowOvernight?: boolean;
+  /** Hide the quick preset buttons (Mon-Fri 9-5, etc). Default: false */
+  hidePresets?: boolean;
+}
+
 /** Placement for tooltip icon in QInput/QSelect-based fields */
 export type TooltipPlacement = 'prepend' | 'append';
 
@@ -384,6 +397,11 @@ export interface QuickFormsQuasarDefaults {
   keyvalue?: QuickFormsQuasarKeyValueFeatures;
   /** Table field specific QuickForms features */
   table?: QuickFormsQuasarTableFeatures;
+  /** Weekly schedule field specific QuickForms features */
+  schedule?: {
+    /** Default x-schedule config applied to all schedule fields */
+    defaults?: Partial<XScheduleConfig>;
+  };
   /** Tags/chips input specific QuickForms features */
   tags?: QuickFormsQuasarTagsFeatures;
   /** JSON editor-specific QuickForms features */

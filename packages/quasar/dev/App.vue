@@ -80,6 +80,14 @@ const formOptions: QuasarFormOptions = {
 };
 
 const formData = ref({
+  businessHours: [
+    { dayOfWeek: "monday",    startTime: "08:00", endTime: "17:00" },
+    { dayOfWeek: "tuesday",   startTime: "08:00", endTime: "17:00" },
+    { dayOfWeek: "wednesday", startTime: "08:00", endTime: "12:00" },
+    { dayOfWeek: "wednesday", startTime: "13:00", endTime: "17:00" },
+    { dayOfWeek: "thursday",  startTime: "08:00", endTime: "17:00" },
+    { dayOfWeek: "friday",    startTime: "09:00", endTime: "15:00" },
+  ],
   schedules: [
     { businessUnit: "Sales East", openTime: "08:00", closeTime: "17:00", closed: false },
     { businessUnit: "Sales West", openTime: "09:00", closeTime: "18:00", closed: false },
@@ -1465,6 +1473,14 @@ const schema: JSONSchema = {
       title: "Native Date & Time Picker",
       description: "Side-by-side date and time inputs with auto-detected timezone hint",
       "x-render": "native-datetime",
+    },
+    // === WEEKLY SCHEDULE FIELD (business hours editor) ===
+    businessHours: {
+      type: "array",
+      title: "Business Hours",
+      description:
+        "Set hours of operation by day of week. Select multiple days to bulk-edit.",
+      "x-render": "weekly-schedule",
     },
     // === TABLE FIELD (editable data table for arrays of objects) ===
     schedules: {

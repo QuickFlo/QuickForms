@@ -38,6 +38,7 @@ import QuasarTagsField from './components/QuasarTagsField.vue';
 import QuasarNativeDateField from './components/QuasarNativeDateField.vue';
 import QuasarNativeDateTimeField from './components/QuasarNativeDateTimeField.vue';
 import QuasarTableField from './components/QuasarTableField.vue';
+import QuasarWeeklyScheduleField from './components/QuasarWeeklyScheduleField.vue';
 import { HiddenField } from '@quickflo/quickforms-vue';
 
 /**
@@ -143,6 +144,17 @@ export function createQuasarRegistry(): ComponentRegistry<Component> {
   registry.register('table-override', QuasarTableField, (schema) =>
     rankWith(50, hasXRender('table')(schema))
   );
+
+  // Weekly schedule renderer
+  registry.register('weekly-schedule', QuasarWeeklyScheduleField, (schema) =>
+    rankWith(50, hasXRender('weekly-schedule')(schema))
+  );
+
+  // Auto-detect schedule when x-schedule config is present
+  registry.register('weekly-schedule-auto', QuasarWeeklyScheduleField, (schema) => {
+    if (!isArrayType(schema)) return -1;
+    return rankWith(7, (schema as any)['x-schedule'] !== undefined);
+  });
 
   // Auto-detect table when x-table config is present on an object array
   registry.register('table', QuasarTableField, (schema) => {
