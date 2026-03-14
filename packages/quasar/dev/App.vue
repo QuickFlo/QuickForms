@@ -80,6 +80,20 @@ const formOptions: QuasarFormOptions = {
 };
 
 const formData = ref({
+  schedules: [
+    { businessUnit: "Sales East", openTime: "08:00", closeTime: "17:00", closed: false },
+    { businessUnit: "Sales West", openTime: "09:00", closeTime: "18:00", closed: false },
+    { businessUnit: "Support 24/7", openTime: "00:00", closeTime: "23:59", closed: false },
+    { businessUnit: "Engineering", openTime: "10:00", closeTime: "19:00", closed: false },
+    { businessUnit: "After Hours", openTime: "", closeTime: "", closed: true },
+    { businessUnit: "Marketing", openTime: "09:00", closeTime: "17:00", closed: false },
+    { businessUnit: "HR", openTime: "08:30", closeTime: "16:30", closed: false },
+  ],
+  employees: [
+    { name: "Alice Smith", department: "Engineering", startDate: "2023-01-15", active: true },
+    { name: "Bob Johnson", department: "Sales", startDate: "2022-06-01", active: true },
+    { name: "Charlie Brown", department: "Support", startDate: "2024-03-20", active: false },
+  ],
   connectionConfig: { provider: "aws", connection: "", region: "" },
   // Pre-populate with ! and !! JSONLogic to test parsing
   bangNotCondition: { "!": { "var": "stepId.email" } },
@@ -1451,6 +1465,87 @@ const schema: JSONSchema = {
       title: "Native Date & Time Picker",
       description: "Side-by-side date and time inputs with auto-detected timezone hint",
       "x-render": "native-datetime",
+    },
+    // === TABLE FIELD (editable data table for arrays of objects) ===
+    schedules: {
+      type: "array",
+      title: "Business Schedules",
+      description: "Editable table with selectable rows, bulk actions, and inline editing",
+      "x-render": "table",
+      "x-table": {
+        selectable: true,
+        bulkActions: ["openTime", "closeTime", "closed"],
+        dense: true,
+        bordered: true,
+        flat: true,
+        separator: "cell",
+        columnLabels: {
+          businessUnit: "Business Unit",
+          openTime: "Open",
+          closeTime: "Close",
+          closed: "Closed?",
+        },
+        columnWidths: {
+          businessUnit: "40%",
+          openTime: "20%",
+          closeTime: "20%",
+          closed: "10%",
+        },
+        rowActions: [
+          { action: "duplicate", icon: "content_copy", tooltip: "Duplicate" },
+          { action: "remove", icon: "delete", color: "negative", tooltip: "Remove" },
+        ],
+        noReorder: true,
+        pagination: { rowsPerPage: 5, rowsPerPageOptions: [5, 10, 25, 0] },
+      } as any,
+      items: {
+        type: "object",
+        properties: {
+          businessUnit: {
+            type: "string",
+            title: "Business Unit",
+            readOnly: true,
+          },
+          openTime: {
+            type: "string",
+            format: "time",
+            title: "Open Time",
+          },
+          closeTime: {
+            type: "string",
+            format: "time",
+            title: "Close Time",
+          },
+          closed: {
+            type: "boolean",
+            title: "Closed",
+          },
+        },
+      },
+    },
+    // === TABLE FIELD (minimal config — auto-detect via x-table) ===
+    employees: {
+      type: "array",
+      title: "Employee Directory",
+      description: "Minimal table config with auto-column detection",
+      "x-table": {
+        selectable: false,
+        dense: true,
+        pagination: { rowsPerPage: 10 },
+      } as any,
+      items: {
+        type: "object",
+        properties: {
+          name: { type: "string", title: "Name" },
+          department: {
+            type: "string",
+            title: "Department",
+            enum: ["Engineering", "Sales", "Support", "Marketing", "HR"],
+          },
+          startDate: { type: "string", format: "date", title: "Start Date" },
+          active: { type: "boolean", title: "Active" },
+        },
+      },
     },
     // === QUASAR DATE PICKER (original popup-based, for comparison) ===
     quasarDate: {

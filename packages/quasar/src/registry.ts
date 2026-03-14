@@ -37,6 +37,7 @@ import QuasarJsonLogicBuilderField from './components/QuasarJsonLogicBuilderFiel
 import QuasarTagsField from './components/QuasarTagsField.vue';
 import QuasarNativeDateField from './components/QuasarNativeDateField.vue';
 import QuasarNativeDateTimeField from './components/QuasarNativeDateTimeField.vue';
+import QuasarTableField from './components/QuasarTableField.vue';
 import { HiddenField } from '@quickflo/quickforms-vue';
 
 /**
@@ -137,6 +138,21 @@ export function createQuasarRegistry(): ComponentRegistry<Component> {
   registry.register('native-datetime-override', QuasarNativeDateTimeField, (schema) =>
     rankWith(50, hasXRender('native-datetime')(schema))
   );
+
+  // Table renderer for arrays of objects
+  registry.register('table-override', QuasarTableField, (schema) =>
+    rankWith(50, hasXRender('table')(schema))
+  );
+
+  // Auto-detect table when x-table config is present on an object array
+  registry.register('table', QuasarTableField, (schema) => {
+    if (!isArrayType(schema)) return -1;
+    const items = schema.items;
+    if (!items || typeof items === 'boolean' || Array.isArray(items)) return -1;
+    if ((items as any).type !== 'object' || !(items as any).properties) return -1;
+    const hasTableConfig = (schema as any)['x-table'] !== undefined;
+    return rankWith(7, hasTableConfig);
+  });
 
   // === NORMAL TYPE DETECTION (lower priorities) ===
 

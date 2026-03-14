@@ -41,6 +41,7 @@ export { default as QuasarJsonLogicBuilderField } from './components/QuasarJsonL
 export { default as QuasarTagsField } from './components/QuasarTagsField.vue';
 export { default as QuasarNativeDateField } from './components/QuasarNativeDateField.vue';
 export { default as QuasarNativeDateTimeField } from './components/QuasarNativeDateTimeField.vue';
+export { default as QuasarTableField } from './components/QuasarTableField.vue';
 
 // JSONLogic utilities
 export {
@@ -78,8 +79,11 @@ export type {
   QuickFormsQuasarObjectFeatures,
   QuickFormsQuasarKeyValueFeatures,
   QuickFormsQuasarTagsFeatures,
+  QuickFormsQuasarTableFeatures,
   QuickFormsQuasarDefaults,
   SectionStyle,
+  XTableConfig,
+  XTableRowAction,
 } from './types.js';
 
 // Re-export types from Vue package

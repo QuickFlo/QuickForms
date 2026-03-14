@@ -250,6 +250,91 @@ export interface QuickFormsQuasarObjectFeatures {
   showOptionalIndicator?: boolean;
 }
 
+/**
+ * Row action definition for table fields.
+ * Built-in actions ('remove', 'duplicate') are handled internally.
+ * Custom actions emit a 'row-action' event for the consuming app to handle.
+ */
+export interface XTableRowAction {
+  /** Action identifier. Built-in: 'remove', 'duplicate'. Any other string is a custom action. */
+  action: 'remove' | 'duplicate' | string;
+  /** Material icon name */
+  icon?: string;
+  /** Button label (shown if no icon, or alongside icon) */
+  label?: string;
+  /** Quasar color name */
+  color?: string;
+  /** Tooltip text */
+  tooltip?: string;
+  /** Only show this action when a condition field on the row is truthy */
+  showWhen?: string;
+}
+
+/**
+ * Configuration for the table field renderer.
+ * Applied via `x-table` on an array schema with object items.
+ */
+export interface XTableConfig {
+  // --- Selection ---
+  /** Enable row checkboxes for multi-selection. Default: false */
+  selectable?: boolean;
+  /** Property keys that support bulk editing when rows are selected */
+  bulkActions?: string[];
+
+  // --- Row actions ---
+  /** Action buttons per row. Default: [{ action: 'remove', icon: 'delete', color: 'negative' }] */
+  rowActions?: XTableRowAction[];
+
+  // --- Column control ---
+  /** Explicit column ordering (property keys). Unlisted properties appear after. */
+  columnOrder?: string[];
+  /** Property keys to hide from the table */
+  hiddenColumns?: string[];
+  /** Override column header labels. Key = property name, value = display label. */
+  columnLabels?: Record<string, string>;
+  /** Column widths. Key = property name, value = CSS width (e.g., '200px', '30%'). */
+  columnWidths?: Record<string, string>;
+
+  // --- Row control ---
+  /** Disable "Add Row" button. Default: false */
+  noAdd?: boolean;
+  /** Disable row removal. Default: false */
+  noRemove?: boolean;
+  /** Disable row reordering. Default: true */
+  noReorder?: boolean;
+
+  // --- QTable styling ---
+  /** Dense table mode. Default: true */
+  dense?: boolean;
+  /** Show table border. Default: true */
+  bordered?: boolean;
+  /** Flat style (no elevation). Default: true */
+  flat?: boolean;
+  /** Cell separator style. Default: 'horizontal' */
+  separator?: 'horizontal' | 'vertical' | 'cell' | 'none';
+
+  // --- Pagination ---
+  /** Pagination config. Default: { rowsPerPage: 0 } (show all, no pagination) */
+  pagination?: {
+    rowsPerPage?: number;
+    rowsPerPageOptions?: number[];
+  };
+}
+
+/**
+ * QuickForms features specific to table fields.
+ * Customize buttons and default table configuration.
+ */
+export interface QuickFormsQuasarTableFeatures {
+  /** Default x-table config applied to all table fields (schema overrides these) */
+  defaults?: Partial<XTableConfig>;
+  /**
+   * Native Quasar QBtn props for the "Add Row" button
+   * Defaults: { outline: true, color: 'primary', icon: 'add', label: 'Add row', size: 'sm' }
+   */
+  addButton?: Partial<QBtnProps> & VueComponentAttributes;
+}
+
 /** Placement for tooltip icon in QInput/QSelect-based fields */
 export type TooltipPlacement = 'prepend' | 'append';
 
@@ -297,6 +382,8 @@ export interface QuickFormsQuasarDefaults {
   };
   /** Key-value specific QuickForms features */
   keyvalue?: QuickFormsQuasarKeyValueFeatures;
+  /** Table field specific QuickForms features */
+  table?: QuickFormsQuasarTableFeatures;
   /** Tags/chips input specific QuickForms features */
   tags?: QuickFormsQuasarTagsFeatures;
   /** JSON editor-specific QuickForms features */
