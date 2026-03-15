@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { QInput, QPopupProxy, QTime, QIcon, QTooltip } from "quasar";
+import { QInput, QIcon, QTooltip } from "quasar";
 import type { FieldProps } from "@quickflo/quickforms-vue";
 import { useQuasarFormField } from "../composables/useQuasarFormField";
 
@@ -20,7 +20,7 @@ const {
   fieldGap,
 } = useQuasarFormField(props.path, props.schema, {
   label: props.label,
-  componentType: 'datetime',
+  componentType: "datetime",
 });
 
 // Initialize undefined to null for Quasar compatibility
@@ -34,6 +34,7 @@ if (value.value === undefined) {
     <QInput
       :id="fieldId"
       v-model="value"
+      type="time"
       :label="label"
       :hint="hint"
       :error="!!errorMessage"
@@ -43,19 +44,10 @@ if (value.value === undefined) {
       :required="schema.required"
       v-bind="quasarProps"
     >
-      <template #prepend>
-        <QIcon v-if="tooltipPlacement === 'prepend' && tooltip" name="info" size="xs" color="grey-6" class="cursor-help q-mr-xs">
+      <template v-if="tooltipPlacement === 'prepend' && tooltip" #prepend>
+        <QIcon name="info" size="xs" color="grey-6" class="cursor-help q-mr-xs">
           <QTooltip><span v-html="tooltip"></span></QTooltip>
         </QIcon>
-        <q-icon name="access_time" class="cursor-pointer">
-          <QPopupProxy cover transition-show="scale" transition-hide="scale">
-            <QTime v-model="value" mask="HH:mm:ss">
-              <div class="row items-center justify-end">
-                <q-btn v-close-popup label="Close" color="primary" flat />
-              </div>
-            </QTime>
-          </QPopupProxy>
-        </q-icon>
       </template>
       <template v-if="schema.required" #label>
         {{ label }} <span style="color: red">*</span>
