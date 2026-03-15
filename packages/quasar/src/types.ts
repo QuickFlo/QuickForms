@@ -371,6 +371,12 @@ export interface XScheduleConfig {
   allowOvernight?: boolean;
   /** Hide the quick preset buttons (Mon-Fri 9-5, etc). Default: false */
   hidePresets?: boolean;
+  /** Allow multiple shifts (time ranges) per day. Default: true */
+  allowMultipleShifts?: boolean;
+  /** Display-only timezone label shown inline after the field label */
+  timezoneLabel?: string;
+  /** Max height for the schedule grid before scrolling. e.g. '300px' */
+  maxHeight?: string;
 }
 
 /** Config for x-multi-group-schedule on array-of-objects schemas */
@@ -381,6 +387,12 @@ export interface XMultiGroupScheduleConfig {
   groupIdKey?: string;
   /** Key in each item that holds the schedule entries array. Default: 'schedule' */
   scheduleKey?: string;
+  /** Allow multiple shifts (time ranges) per day. Default: true */
+  allowMultipleShifts?: boolean;
+  /** Display-only timezone label shown inline after the field label */
+  timezoneLabel?: string;
+  /** Max height for the group list before scrolling. e.g. '400px' */
+  maxHeight?: string;
 }
 
 /** Placement for tooltip icon in QInput/QSelect-based fields */

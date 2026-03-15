@@ -71,6 +71,7 @@ const scheduleConfig = computed(() => {
     hidePresets: merged.hidePresets ?? false,
     allowMultipleShifts: merged.allowMultipleShifts ?? true,
     timezoneLabel: (merged.timezoneLabel as string) || "",
+    maxHeight: (merged.maxHeight as string) || "",
   };
 });
 
@@ -378,7 +379,10 @@ const selectedCount = computed(() => selectedDays.value.size);
     </div>
 
     <!-- ── Schedule grid ─────────────────────────────────────── -->
-    <div class="qws__grid">
+    <div
+      class="qws__grid"
+      :style="scheduleConfig.maxHeight ? { maxHeight: scheduleConfig.maxHeight, overflowY: 'auto' } : undefined"
+    >
       <!-- Select-all row -->
       <div v-if="!disabled && !readonly" class="qws__select-all-row">
         <QCheckbox
@@ -608,6 +612,7 @@ const selectedCount = computed(() => selectedDays.value.size);
 /* ── Container ──────────────────────────────────────────────── */
 .qws {
   font-family: inherit;
+  container-type: inline-size;
 }
 
 /* ── Header ─────────────────────────────────────────────────── */
@@ -892,7 +897,8 @@ const selectedCount = computed(() => selectedDays.value.size);
 /* Time input */
 .qws__time-input {
   width: 108px;
-  flex-shrink: 0;
+  flex-shrink: 1;
+  min-width: 80px;
 }
 
 .qws__time-input :deep(.q-field__control) {
@@ -1111,5 +1117,21 @@ const selectedCount = computed(() => selectedDays.value.size);
   color: #c10015;
   font-size: 12px;
   margin-top: 4px;
+}
+
+/* ── Responsive ────────────────────────────────────────────── */
+@container (max-width: 480px) {
+  .qws__row {
+    flex-wrap: wrap;
+  }
+
+  .qws__shifts {
+    flex-basis: 100%;
+    padding-left: 28px;
+  }
+
+  .qws__presets {
+    flex-wrap: wrap;
+  }
 }
 </style>

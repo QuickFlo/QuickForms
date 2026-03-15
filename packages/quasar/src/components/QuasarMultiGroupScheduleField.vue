@@ -74,6 +74,7 @@ const config = computed(() => {
     scheduleKey: (x.scheduleKey as string) || "schedule",
     allowMultipleShifts: (x.allowMultipleShifts ?? true) as boolean,
     timezoneLabel: (x.timezoneLabel as string) || "",
+    maxHeight: (x.maxHeight as string) || "",
   };
 });
 
@@ -595,7 +596,11 @@ const bulkHasSchedule = computed(() => bulkDays.value.some((d) => d.open));
     </div>
 
     <!-- ── Group grid ──────────────────────────────────────── -->
-    <div v-else class="qmgs__grid">
+    <div
+      v-else
+      class="qmgs__grid"
+      :style="config.maxHeight ? { maxHeight: config.maxHeight, overflowY: 'auto' } : undefined"
+    >
       <!-- Select-all row -->
       <div v-if="!disabled && !readonly" class="qmgs__select-all-row">
         <QCheckbox
@@ -1011,6 +1016,7 @@ const bulkHasSchedule = computed(() => bulkDays.value.some((d) => d.open));
 /* ── Container ───────────────────────────────────────────────── */
 .qmgs {
   font-family: inherit;
+  container-type: inline-size;
 }
 
 /* ── Header ──────────────────────────────────────────────────── */
@@ -1368,7 +1374,8 @@ const bulkHasSchedule = computed(() => bulkDays.value.some((d) => d.open));
 /* Time input */
 .qmgs__time-input {
   width: 108px;
-  flex-shrink: 0;
+  flex-shrink: 1;
+  min-width: 80px;
 }
 
 .qmgs__time-input :deep(.q-field__control) {
@@ -1690,6 +1697,25 @@ const bulkHasSchedule = computed(() => bulkDays.value.some((d) => d.open));
 }
 
 /* ── Responsive ──────────────────────────────────────────────── */
+@container (max-width: 480px) {
+  .qmgs__editor-row {
+    flex-wrap: wrap;
+  }
+
+  .qmgs__shifts {
+    flex-basis: 100%;
+    padding-left: 28px;
+  }
+
+  .qmgs__editor {
+    padding-left: 14px;
+  }
+
+  .qmgs__bulk-presets {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
 @media (max-width: 600px) {
   .qmgs__bulk-presets {
     grid-template-columns: repeat(2, 1fr);
