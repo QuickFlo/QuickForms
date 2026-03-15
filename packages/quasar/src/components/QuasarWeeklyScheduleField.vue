@@ -30,13 +30,13 @@ type Day = (typeof ALL_DAYS)[number];
 
 const DAY_META: Record<Day, { label: string; abbr: string; weekend: boolean }> =
   {
-    monday:    { label: "Monday",    abbr: "Mon", weekend: false },
-    tuesday:   { label: "Tuesday",   abbr: "Tue", weekend: false },
+    monday: { label: "Monday", abbr: "Mon", weekend: false },
+    tuesday: { label: "Tuesday", abbr: "Tue", weekend: false },
     wednesday: { label: "Wednesday", abbr: "Wed", weekend: false },
-    thursday:  { label: "Thursday",  abbr: "Thu", weekend: false },
-    friday:    { label: "Friday",    abbr: "Fri", weekend: false },
-    saturday:  { label: "Saturday",  abbr: "Sat", weekend: true  },
-    sunday:    { label: "Sunday",    abbr: "Sun", weekend: true  },
+    thursday: { label: "Thursday", abbr: "Thu", weekend: false },
+    friday: { label: "Friday", abbr: "Fri", weekend: false },
+    saturday: { label: "Saturday", abbr: "Sat", weekend: true },
+    sunday: { label: "Sunday", abbr: "Sun", weekend: true },
   };
 
 // ── Value types ───────────────────────────────────────────────
@@ -69,6 +69,8 @@ const scheduleConfig = computed(() => {
     dayOrder: (merged.dayOrder as string) || "mon-first",
     allowOvernight: merged.allowOvernight ?? false,
     hidePresets: merged.hidePresets ?? false,
+    allowMultipleShifts: merged.allowMultipleShifts ?? true,
+    timezoneLabel: (merged.timezoneLabel as string) || "",
   };
 });
 
@@ -156,7 +158,7 @@ watch(
     value.value = displayToValue(newDays);
     suppressWatch = false;
   },
-  { deep: true }
+  { deep: true },
 );
 
 // External value → internal (for prefill)
@@ -170,7 +172,7 @@ watch(
       days.value = valueToDisplay(newVal);
     }
   },
-  { deep: false }
+  { deep: false },
 );
 
 // ── Smart defaults ────────────────────────────────────────────
@@ -233,15 +235,12 @@ function isOvernight(shift: Shift): boolean {
 const selectedDays = ref<Set<number>>(new Set());
 
 const isAllSelected = computed(
-  () =>
-    days.value.length > 0 &&
-    selectedDays.value.size === days.value.length
+  () => days.value.length > 0 && selectedDays.value.size === days.value.length,
 );
 
 const isSomeSelected = computed(
   () =>
-    selectedDays.value.size > 0 &&
-    selectedDays.value.size < days.value.length
+    selectedDays.value.size > 0 && selectedDays.value.size < days.value.length,
 );
 
 function toggleSelectDay(index: number) {
@@ -334,11 +333,18 @@ const selectedCount = computed(() => selectedDays.value.size);
 <template>
   <div :id="fieldId" :style="{ marginBottom: fieldGap }" class="qws">
     <!-- ── Header ────────────────────────────────────────────── -->
-    <div class="qws__header" v-if="(label && !hideLabel) || !scheduleConfig.hidePresets">
+    <div
+      class="qws__header"
+      v-if="(label && !hideLabel) || !scheduleConfig.hidePresets || scheduleConfig.timezoneLabel"
+    >
       <div class="qws__header-left">
         <div v-if="label && !hideLabel" class="qws__label">
           {{ label }}
           <span v-if="required" class="qws__required">*</span>
+          <span v-if="scheduleConfig.timezoneLabel" class="qws__tz-badge">
+            <QIcon name="schedule" size="11px" />
+            {{ scheduleConfig.timezoneLabel }}
+          </span>
           <QIcon
             v-if="tooltip"
             name="info"
@@ -366,7 +372,7 @@ const selectedCount = computed(() => selectedDays.value.size);
           class="qws__preset-btn qws__preset-btn--danger"
           @click="applyPreset('clear-all')"
         >
-          Clear all
+          Close all
         </button>
       </div>
     </div>
@@ -374,10 +380,7 @@ const selectedCount = computed(() => selectedDays.value.size);
     <!-- ── Schedule grid ─────────────────────────────────────── -->
     <div class="qws__grid">
       <!-- Select-all row -->
-      <div
-        v-if="!disabled && !readonly"
-        class="qws__select-all-row"
-      >
+      <div v-if="!disabled && !readonly" class="qws__select-all-row">
         <QCheckbox
           :model-value="isAllSelected"
           :indeterminate-value="isSomeSelected ? true : undefined"
@@ -473,10 +476,7 @@ const selectedCount = computed(() => selectedDays.value.size);
                 :disable="disabled"
                 @update:model-value="(v: any) => (shift.endTime = v)"
               />
-              <span
-                v-if="isOvernight(shift)"
-                class="qws__overnight"
-              >
+              <span v-if="isOvernight(shift)" class="qws__overnight">
                 <QIcon name="brightness_3" size="11px" />
                 <QTooltip>Overnight — ends next day</QTooltip>
               </span>
@@ -497,7 +497,9 @@ const selectedCount = computed(() => selectedDays.value.size);
 
             <!-- Add shift -->
             <QBtn
-              v-if="!disabled && !readonly"
+              v-if="
+                !disabled && !readonly && scheduleConfig.allowMultipleShifts
+              "
               flat
               dense
               no-caps
@@ -525,17 +527,14 @@ const selectedCount = computed(() => selectedDays.value.size);
 
     <!-- ── Bulk toolbar ───────────────────────────────────────── -->
     <Transition name="qws-bulk">
-      <div
-        v-if="selectedCount > 0 && !disabled && !readonly"
-        class="qws__bulk"
-      >
+      <div v-if="selectedCount > 0 && !disabled && !readonly" class="qws__bulk">
         <div class="qws__bulk-left">
           <span class="qws__bulk-count">
             {{ selectedCount }}
             {{ selectedCount === 1 ? "day" : "days" }} selected
           </span>
 
-          <QSeparator vertical dark class="qws__bulk-sep" />
+          <QSeparator vertical class="qws__bulk-sep" />
 
           <div class="qws__bulk-shifts">
             <div
@@ -551,7 +550,7 @@ const selectedCount = computed(() => selectedDays.value.size);
                 class="qws__time-input qws__time-input--bulk"
               />
               <span class="qws__shift-sep">
-                <QIcon name="arrow_forward" size="14px" color="rgba(255,255,255,0.5)" />
+                <QIcon name="arrow_forward" size="14px" color="grey-5" />
               </span>
               <QInput
                 v-model="shift.endTime"
@@ -567,21 +566,20 @@ const selectedCount = computed(() => selectedDays.value.size);
                 dense
                 size="xs"
                 icon="close"
-                color="white"
-                style="opacity: 0.6"
+                color="grey-5"
                 @click="removeBulkShift(idx)"
               />
             </div>
 
             <QBtn
+              v-if="scheduleConfig.allowMultipleShifts"
               flat
               dense
               no-caps
               size="xs"
               icon="add"
               label="Add range"
-              text-color="white"
-              style="opacity: 0.8"
+              color="primary"
               @click="addBulkShift"
             />
           </div>
@@ -646,6 +644,22 @@ const selectedCount = computed(() => selectedDays.value.size);
   color: #757575;
 }
 
+/* Timezone badge */
+.qws__tz-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: #f0f4ff;
+  border: 1px solid #c7d2fe;
+  border-radius: 20px;
+  padding: 3px 9px;
+  font-size: 11px;
+  font-weight: 600;
+  color: #4338ca;
+  white-space: nowrap;
+  user-select: none;
+}
+
 /* Preset buttons */
 .qws__presets {
   display: flex;
@@ -671,7 +685,7 @@ const selectedCount = computed(() => selectedDays.value.size);
 .qws__preset-btn:hover {
   background: #f0f0f0;
   border-color: #bdbdbd;
-  color: #1a237e;
+  color: var(--qws-selection-accent, #4338ca);
 }
 
 .qws__preset-btn--danger {
@@ -741,7 +755,7 @@ const selectedCount = computed(() => selectedDays.value.size);
   top: 0;
   bottom: 0;
   width: 3px;
-  background: #3949ab;
+  background: var(--qws-selection-accent, #4338ca);
   border-radius: 0;
 }
 
@@ -798,7 +812,10 @@ const selectedCount = computed(() => selectedDays.value.size);
   font-size: 12px;
   font-weight: 600;
   font-family: inherit;
-  transition: background 0.2s ease, color 0.2s ease, box-shadow 0.15s ease;
+  transition:
+    background 0.2s ease,
+    color 0.2s ease,
+    box-shadow 0.15s ease;
   margin-top: 1px;
   outline: none;
 }
@@ -874,7 +891,7 @@ const selectedCount = computed(() => selectedDays.value.size);
 
 /* Time input */
 .qws__time-input {
-  width: 88px;
+  width: 108px;
   flex-shrink: 0;
 }
 
@@ -884,7 +901,9 @@ const selectedCount = computed(() => selectedDays.value.size);
   border: 1px solid #e5e7eb;
   min-height: 30px;
   height: 30px;
-  transition: border-color 0.15s, background 0.15s;
+  transition:
+    border-color 0.15s,
+    background 0.15s;
 }
 
 .qws__time-input :deep(.q-field__control:hover) {
@@ -907,19 +926,7 @@ const selectedCount = computed(() => selectedDays.value.size);
   height: 30px;
 }
 
-.qws__time-input--bulk :deep(.q-field__control) {
-  background: rgba(255, 255, 255, 0.12);
-  border-color: rgba(255, 255, 255, 0.2);
-}
-
-.qws__time-input--bulk :deep(.q-field__control:hover) {
-  background: rgba(255, 255, 255, 0.18);
-  border-color: rgba(255, 255, 255, 0.35);
-}
-
-.qws__time-input--bulk :deep(.q-field__native) {
-  color: #ffffff;
-}
+/* --bulk time inputs inherit the base light styles */
 
 /* Shift separator arrow */
 .qws__shift-sep {
@@ -981,14 +988,15 @@ const selectedCount = computed(() => selectedDays.value.size);
 /* ── Bulk toolbar ───────────────────────────────────────────── */
 .qws__bulk {
   margin-top: 8px;
-  background: linear-gradient(135deg, #1a237e 0%, #283593 100%);
+  background: #f7f8fc;
+  border: 1px solid #e4e2f8;
   border-radius: 10px;
   padding: 12px 16px;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 16px;
-  box-shadow: 0 4px 16px rgba(26, 35, 126, 0.28);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
   flex-wrap: wrap;
 }
 
@@ -1004,13 +1012,13 @@ const selectedCount = computed(() => selectedDays.value.size);
 .qws__bulk-count {
   font-size: 12.5px;
   font-weight: 700;
-  color: #ffffff;
+  color: #374151;
   white-space: nowrap;
   letter-spacing: 0.02em;
 }
 
 .qws__bulk-sep {
-  opacity: 0.3;
+  opacity: 0.2;
   height: 24px;
 }
 
@@ -1029,8 +1037,8 @@ const selectedCount = computed(() => selectedDays.value.size);
 }
 
 .qws__bulk-apply {
-  background: #ffffff;
-  color: #1a237e;
+  background: var(--qws-selection-accent, #4338ca);
+  color: #ffffff;
   border: none;
   border-radius: 6px;
   padding: 6px 14px;
@@ -1043,14 +1051,13 @@ const selectedCount = computed(() => selectedDays.value.size);
 }
 
 .qws__bulk-apply:hover {
-  background: #e8eaf6;
-  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.4);
+  background: #3730a3;
 }
 
 .qws__bulk-close-days {
-  background: rgba(255, 255, 255, 0.1);
-  color: #ffcdd2;
-  border: 1px solid rgba(255, 107, 107, 0.35);
+  background: #fff8f8;
+  color: #b91c1c;
+  border: 1px solid #fecaca;
   border-radius: 6px;
   padding: 5px 12px;
   font-size: 12px;
@@ -1062,13 +1069,13 @@ const selectedCount = computed(() => selectedDays.value.size);
 }
 
 .qws__bulk-close-days:hover {
-  background: rgba(255, 82, 82, 0.2);
-  border-color: rgba(255, 107, 107, 0.6);
+  background: #fee2e2;
+  border-color: #fca5a5;
 }
 
 .qws__bulk-deselect {
   background: transparent;
-  color: rgba(255, 255, 255, 0.6);
+  color: #9ca3af;
   border: none;
   border-radius: 6px;
   padding: 5px 10px;
@@ -1081,7 +1088,7 @@ const selectedCount = computed(() => selectedDays.value.size);
 }
 
 .qws__bulk-deselect:hover {
-  color: rgba(255, 255, 255, 0.9);
+  color: #374151;
 }
 
 /* ── Bulk toolbar transition ────────────────────────────────── */

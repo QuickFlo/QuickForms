@@ -80,13 +80,79 @@ const formOptions: QuasarFormOptions = {
 };
 
 const formData = ref({
-  businessHours: [
-    { dayOfWeek: "monday",    startTime: "08:00", endTime: "17:00" },
-    { dayOfWeek: "tuesday",   startTime: "08:00", endTime: "17:00" },
-    { dayOfWeek: "wednesday", startTime: "08:00", endTime: "12:00" },
-    { dayOfWeek: "wednesday", startTime: "13:00", endTime: "17:00" },
-    { dayOfWeek: "thursday",  startTime: "08:00", endTime: "17:00" },
-    { dayOfWeek: "friday",    startTime: "09:00", endTime: "15:00" },
+  // Multi-group schedule: prefilled UCCE business groups with real schedules
+  ucceBusinessGroups: [
+    {
+      id: "sales-east",
+      name: "Sales East",
+      schedule: [
+        { dayOfWeek: "monday",    startTime: "08:00", endTime: "17:00" },
+        { dayOfWeek: "tuesday",   startTime: "08:00", endTime: "17:00" },
+        { dayOfWeek: "wednesday", startTime: "08:00", endTime: "12:00" },
+        { dayOfWeek: "wednesday", startTime: "13:00", endTime: "17:00" },
+        { dayOfWeek: "thursday",  startTime: "08:00", endTime: "17:00" },
+        { dayOfWeek: "friday",    startTime: "09:00", endTime: "15:00" },
+      ],
+    },
+    {
+      id: "sales-west",
+      name: "Sales West",
+      schedule: [
+        { dayOfWeek: "monday",    startTime: "09:00", endTime: "18:00" },
+        { dayOfWeek: "tuesday",   startTime: "09:00", endTime: "18:00" },
+        { dayOfWeek: "wednesday", startTime: "09:00", endTime: "18:00" },
+        { dayOfWeek: "thursday",  startTime: "09:00", endTime: "18:00" },
+        { dayOfWeek: "friday",    startTime: "09:00", endTime: "17:00" },
+      ],
+    },
+    {
+      id: "support-24-7",
+      name: "Support 24/7",
+      schedule: [
+        { dayOfWeek: "monday",    startTime: "00:00", endTime: "23:59" },
+        { dayOfWeek: "tuesday",   startTime: "00:00", endTime: "23:59" },
+        { dayOfWeek: "wednesday", startTime: "00:00", endTime: "23:59" },
+        { dayOfWeek: "thursday",  startTime: "00:00", endTime: "23:59" },
+        { dayOfWeek: "friday",    startTime: "00:00", endTime: "23:59" },
+        { dayOfWeek: "saturday",  startTime: "00:00", endTime: "23:59" },
+        { dayOfWeek: "sunday",    startTime: "00:00", endTime: "23:59" },
+      ],
+    },
+    {
+      id: "vip-escalation",
+      name: "VIP Escalation",
+      schedule: [
+        { dayOfWeek: "tuesday",   startTime: "10:00", endTime: "16:00" },
+        { dayOfWeek: "wednesday", startTime: "10:00", endTime: "16:00" },
+        { dayOfWeek: "thursday",  startTime: "10:00", endTime: "16:00" },
+      ],
+    },
+    {
+      id: "after-hours",
+      name: "After Hours",
+      schedule: [
+        { dayOfWeek: "monday",    startTime: "17:00", endTime: "22:00" },
+        { dayOfWeek: "tuesday",   startTime: "17:00", endTime: "22:00" },
+        { dayOfWeek: "wednesday", startTime: "17:00", endTime: "22:00" },
+        { dayOfWeek: "thursday",  startTime: "17:00", endTime: "22:00" },
+        { dayOfWeek: "friday",    startTime: "17:00", endTime: "23:00" },
+        { dayOfWeek: "saturday",  startTime: "09:00", endTime: "21:00" },
+        { dayOfWeek: "sunday",    startTime: "10:00", endTime: "18:00" },
+      ],
+    },
+    {
+      id: "emergency-line",
+      name: "Emergency Line",
+      schedule: [
+        { dayOfWeek: "monday",    startTime: "00:00", endTime: "23:59" },
+        { dayOfWeek: "tuesday",   startTime: "00:00", endTime: "23:59" },
+        { dayOfWeek: "wednesday", startTime: "00:00", endTime: "23:59" },
+        { dayOfWeek: "thursday",  startTime: "00:00", endTime: "23:59" },
+        { dayOfWeek: "friday",    startTime: "00:00", endTime: "23:59" },
+        { dayOfWeek: "saturday",  startTime: "00:00", endTime: "23:59" },
+        { dayOfWeek: "sunday",    startTime: "00:00", endTime: "23:59" },
+      ],
+    },
   ],
   schedules: [
     { businessUnit: "Sales East", openTime: "08:00", closeTime: "17:00", closed: false },
@@ -1474,13 +1540,32 @@ const schema: JSONSchema = {
       description: "Side-by-side date and time inputs with auto-detected timezone hint",
       "x-render": "native-datetime",
     },
-    // === WEEKLY SCHEDULE FIELD (business hours editor) ===
-    businessHours: {
+    // === MULTI-GROUP SCHEDULE (UCCE business hours manager) ===
+    ucceBusinessGroups: {
       type: "array",
-      title: "Business Hours",
+      title: "Business Group Schedules",
       description:
-        "Set hours of operation by day of week. Select multiple days to bulk-edit.",
-      "x-render": "weekly-schedule",
+        "Hours of operation per group — prefilled from UCCE. Select groups to bulk-apply the same schedule in one click. Expand any row to edit individually.",
+      "x-render": "multi-group-schedule",
+      "x-multi-group-schedule": { "allowMultipleShifts": false, "timezoneLabel": "Central Time" },
+      items: {
+        type: "object",
+        properties: {
+          id:       { type: "string" },
+          name:     { type: "string" },
+          schedule: {
+            type: "array",
+            items: {
+              type: "object",
+              properties: {
+                dayOfWeek:  { type: "string" },
+                startTime:  { type: "string" },
+                endTime:    { type: "string" },
+              },
+            },
+          },
+        },
+      },
     },
     // === TABLE FIELD (editable data table for arrays of objects) ===
     schedules: {

@@ -280,6 +280,31 @@ export interface XTableConfig {
   selectable?: boolean;
   /** Property keys that support bulk editing when rows are selected */
   bulkActions?: string[];
+  /**
+   * Persist selection state into each row object as a boolean field.
+   * When true, checking a row sets `row[selectionKey] = true` in the form value,
+   * so the selected state survives re-renders and is available to the submit workflow.
+   * Default: false
+   */
+  persistSelection?: boolean;
+  /**
+   * The row property key used to store selection state when persistSelection is true.
+   * Default: '_selected'
+   */
+  selectionKey?: string;
+
+  // --- Filter / search ---
+  /**
+   * Show a search input above the table that filters all rows client-side.
+   * "Select all" respects the active filter — it selects all matching rows, not just the visible page.
+   * Default: false
+   */
+  filterable?: boolean;
+  /**
+   * Which property keys to include in the filter search.
+   * When omitted, all visible column values are searched.
+   */
+  filterKeys?: string[];
 
   // --- Row actions ---
   /** Action buttons per row. Default: [{ action: 'remove', icon: 'delete', color: 'negative' }] */
@@ -346,6 +371,16 @@ export interface XScheduleConfig {
   allowOvernight?: boolean;
   /** Hide the quick preset buttons (Mon-Fri 9-5, etc). Default: false */
   hidePresets?: boolean;
+}
+
+/** Config for x-multi-group-schedule on array-of-objects schemas */
+export interface XMultiGroupScheduleConfig {
+  /** Key in each item that holds the group display name. Default: 'name' */
+  groupNameKey?: string;
+  /** Key in each item that holds the group unique id. Default: 'id' */
+  groupIdKey?: string;
+  /** Key in each item that holds the schedule entries array. Default: 'schedule' */
+  scheduleKey?: string;
 }
 
 /** Placement for tooltip icon in QInput/QSelect-based fields */

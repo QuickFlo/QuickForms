@@ -39,6 +39,7 @@ import QuasarNativeDateField from './components/QuasarNativeDateField.vue';
 import QuasarNativeDateTimeField from './components/QuasarNativeDateTimeField.vue';
 import QuasarTableField from './components/QuasarTableField.vue';
 import QuasarWeeklyScheduleField from './components/QuasarWeeklyScheduleField.vue';
+import QuasarMultiGroupScheduleField from './components/QuasarMultiGroupScheduleField.vue';
 import { HiddenField } from '@quickflo/quickforms-vue';
 
 /**
@@ -148,6 +149,11 @@ export function createQuasarRegistry(): ComponentRegistry<Component> {
   // Weekly schedule renderer
   registry.register('weekly-schedule', QuasarWeeklyScheduleField, (schema) =>
     rankWith(50, hasXRender('weekly-schedule')(schema))
+  );
+
+  // Multi-group schedule renderer
+  registry.register('multi-group-schedule', QuasarMultiGroupScheduleField, (schema) =>
+    rankWith(50, hasXRender('multi-group-schedule')(schema))
   );
 
   // Auto-detect schedule when x-schedule config is present

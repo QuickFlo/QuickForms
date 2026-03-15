@@ -153,40 +153,107 @@ const addButtonProps = computed(() => {
   return { ...defaults, ...globalAdd };
 });
 
-// ── Selection ─────────────────────────────────────────────────
-const selectedIndices = ref<Set<number>>(new Set());
+// ── Filter / search ───────────────────────────────────────────
+const filterQuery = ref('');
 
+// Map row object reference → original array index for O(1) lookup
+// (needed because QTable bodyProps.rowIndex is the filtered-view index, not original)
+const rowRefToIndex = computed((): Map<unknown, number> => {
+  const m = new Map<unknown, number>();
+  arrayValue.value.forEach((row, i) => m.set(row, i));
+  return m;
+});
+
+function getOriginalIndex(row: unknown): number {
+  return rowRefToIndex.value.get(row) ?? -1;
+}
+
+// Indices (into original array) that match the current filter query
+const filteredOriginalIndices = computed((): number[] => {
+  const q = filterQuery.value.trim().toLowerCase();
+  if (!q) return arrayValue.value.map((_, i) => i);
+  const keys = tableConfig.value.filterKeys?.length
+    ? tableConfig.value.filterKeys
+    : Object.keys(itemProperties.value);
+  return arrayValue.value.reduce<number[]>((acc, row: any, i) => {
+    const matches = keys.some((k) =>
+      String(row[k] ?? '').toLowerCase().includes(q)
+    );
+    if (matches) acc.push(i);
+    return acc;
+  }, []);
+});
+
+// ── Selection ─────────────────────────────────────────────────
+const isPersistSelection = computed(
+  () => !!(tableConfig.value.selectable && tableConfig.value.persistSelection)
+);
+const selectionKey = computed(() => tableConfig.value.selectionKey || '_selected');
+
+// Internal ref used when NOT in persistSelection mode
+const _selectedIndicesRef = ref<Set<number>>(new Set());
+
+// Unified read accessor — returns Set of ORIGINAL array indices
+const selectedIndices = computed((): Set<number> => {
+  if (isPersistSelection.value) {
+    const result = new Set<number>();
+    (arrayValue.value as any[]).forEach((row, i) => {
+      if (row[selectionKey.value]) result.add(i);
+    });
+    return result;
+  }
+  return _selectedIndicesRef.value;
+});
+
+// Unified write — sets selection by original indices
+function setSelectedIndices(next: Set<number>) {
+  if (isPersistSelection.value) {
+    const newArray = (arrayValue.value as any[]).map((row, i) => {
+      const want = next.has(i);
+      const has = !!row[selectionKey.value];
+      return want === has ? row : { ...row, [selectionKey.value]: want };
+    });
+    value.value = newArray;
+  } else {
+    _selectedIndicesRef.value = next;
+  }
+}
+
+// isAllSelected / isSomeSelected relative to the filtered rows
 const isAllSelected = computed(() => {
-  return arrayValue.value.length > 0 && selectedIndices.value.size === arrayValue.value.length;
+  const f = filteredOriginalIndices.value;
+  return f.length > 0 && f.every((i) => selectedIndices.value.has(i));
 });
 
 const isSomeSelected = computed(() => {
-  return selectedIndices.value.size > 0 && selectedIndices.value.size < arrayValue.value.length;
+  const f = filteredOriginalIndices.value;
+  const n = f.filter((i) => selectedIndices.value.has(i)).length;
+  return n > 0 && n < f.length;
 });
 
 const toggleSelectAll = () => {
-  if (isAllSelected.value) {
-    selectedIndices.value = new Set();
-  } else {
-    selectedIndices.value = new Set(arrayValue.value.map((_, i) => i));
-  }
-};
-
-const toggleSelectRow = (index: number) => {
+  const filtered = filteredOriginalIndices.value;
   const next = new Set(selectedIndices.value);
-  if (next.has(index)) {
-    next.delete(index);
+  if (isAllSelected.value) {
+    filtered.forEach((i) => next.delete(i));
   } else {
-    next.add(index);
+    filtered.forEach((i) => next.add(i));
   }
-  selectedIndices.value = next;
+  setSelectedIndices(next);
 };
 
-// Clear selection when array changes structurally
+const toggleSelectRow = (origIndex: number) => {
+  const next = new Set(selectedIndices.value);
+  if (next.has(origIndex)) next.delete(origIndex);
+  else next.add(origIndex);
+  setSelectedIndices(next);
+};
+
+// Clear selection when array is replaced (non-persistSelection mode only)
 watch(
   () => arrayValue.value.length,
   () => {
-    selectedIndices.value = new Set();
+    if (!isPersistSelection.value) _selectedIndicesRef.value = new Set();
   }
 );
 
@@ -221,7 +288,7 @@ const applyBulkEdit = () => {
     newArray[idx] = { ...newArray[idx], [bulkField.value]: bulkValue.value };
   }
   value.value = newArray;
-  selectedIndices.value = new Set();
+  setSelectedIndices(new Set());
   bulkField.value = null;
   bulkValue.value = null;
 };
@@ -251,7 +318,7 @@ const removeRow = (index: number) => {
     else if (idx > index) next.add(idx - 1);
     // idx === index is removed
   }
-  selectedIndices.value = next;
+  setSelectedIndices(next);
 };
 
 const duplicateRow = (index: number) => {
@@ -383,6 +450,25 @@ function humanize(key: string): string {
       <div v-if="hint" class="quickform-table-hint" v-html="hint"></div>
     </div>
 
+    <!-- Filter / search input -->
+    <div v-if="tableConfig.filterable" class="quickform-table-filter">
+      <QInput
+        v-model="filterQuery"
+        dense
+        outlined
+        clearable
+        placeholder="Search..."
+        class="quickform-table-filter-input"
+      >
+        <template #prepend>
+          <QIcon name="search" size="xs" color="grey-5" />
+        </template>
+      </QInput>
+      <span v-if="filterQuery" class="quickform-table-filter-count">
+        {{ filteredOriginalIndices.length }} of {{ arrayValue.length }} shown
+      </span>
+    </div>
+
     <!-- Bulk actions toolbar -->
     <div
       v-if="tableConfig.selectable && selectedIndices.size > 0 && bulkFieldOptions.length > 0"
@@ -390,6 +476,9 @@ function humanize(key: string): string {
     >
       <span class="quickform-table-bulk-count">
         {{ selectedIndices.size }} of {{ arrayValue.length }} selected
+        <template v-if="filterQuery">
+          ({{ filteredOriginalIndices.filter(i => selectedIndices.has(i)).length }} in current filter)
+        </template>
       </span>
       <QSelect
         v-model="bulkField"
@@ -468,7 +557,7 @@ function humanize(key: string): string {
         dense
         flat
         label="Clear"
-        @click="selectedIndices = new Set(); bulkField = null; bulkValue = null"
+        @click="setSelectedIndices(new Set()); bulkField = null; bulkValue = null"
         size="sm"
       />
     </div>
@@ -478,6 +567,13 @@ function humanize(key: string): string {
       :rows="arrayValue"
       :columns="columns"
       row-key="__index"
+      :filter="filterQuery"
+      :filter-method="tableConfig.filterable ? ((rows: any[], terms: string) => {
+        if (!terms.trim()) return rows;
+        const q = terms.toLowerCase();
+        const keys = tableConfig.filterKeys?.length ? tableConfig.filterKeys : Object.keys(itemProperties);
+        return rows.filter((row: any) => keys.some((k: string) => String(row[k] ?? '').toLowerCase().includes(q)));
+      }) : undefined"
       :dense="tableConfig.dense ?? true"
       :bordered="tableConfig.bordered ?? true"
       :flat="tableConfig.flat ?? true"
@@ -517,9 +613,9 @@ function humanize(key: string): string {
           <!-- Selection checkbox -->
           <QTd v-if="tableConfig.selectable" auto-width class="quickform-table-checkbox-col">
             <QCheckbox
-              :model-value="selectedIndices.has(bodyProps.rowIndex)"
+              :model-value="selectedIndices.has(getOriginalIndex(bodyProps.row))"
               dense
-              @update:model-value="toggleSelectRow(bodyProps.rowIndex)"
+              @update:model-value="toggleSelectRow(getOriginalIndex(bodyProps.row))"
               :disable="disabled || readonly"
             />
           </QTd>
@@ -716,6 +812,24 @@ function humanize(key: string): string {
   display: flex;
   align-items: center;
   gap: 0.5rem;
+}
+
+/* Filter */
+.quickform-table-filter {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 6px;
+}
+
+.quickform-table-filter-input {
+  max-width: 320px;
+}
+
+.quickform-table-filter-count {
+  font-size: 0.75rem;
+  color: #9e9e9e;
+  white-space: nowrap;
 }
 
 /* Bulk toolbar */
