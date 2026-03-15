@@ -876,7 +876,6 @@ const selectedCount = computed(() => selectedDays.value.size);
 
 /* ── Shifts area ────────────────────────────────────────────── */
 .qws__shifts {
-  flex: 1;
   display: flex;
   flex-direction: column;
   gap: 4px;
